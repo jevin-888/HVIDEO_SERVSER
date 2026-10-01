@@ -13,6 +13,7 @@ logs/
 # Local runtime data and large media indexes
 data/
 song_db/
+license/
 *.db
 *.db-shm
 *.db-wal
@@ -45,4 +46,5 @@ song_db/
 *.mov
 !resources/**
 !static/**
+!src-tauri/icons/*.png
 static/singer-all/
