@@ -1,0 +1,3255 @@
+
+/* ==================== 全局基础 ==================== */
+/* -- 主题变量：集中定义配色，方便在不同模式或品牌主题之间切换 -- */
+:root {
+  --primary-color: #e53e3e;
+  --text-primary: #f3f4f6;
+  --text-secondary: #cbd5f5;
+  --text-muted: rgba(148, 163, 184, 0.85);
+  --bg-primary: #0b1120;
+  --bg-secondary: #111827;
+  --bg-elevated: rgba(30, 41, 59, 0.88);
+  --color-white: #fff;
+  
+  /* ==================== 统一颜色系统 ==================== */
+  /* 常用颜色值，避免硬编码重复 */
+  --color-red-500: #ef4444;
+  --color-blue-400: #60a5fa;
+  --color-blue-500: #3b82f6;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-green-600: #16a34a;
+  --color-green-700: #15803d;
+  --color-border-default: rgba(148, 163, 184, 0.25);
+  --color-shadow-light: rgba(0, 0, 0, 0.15);
+  --color-overlay-light: rgba(0, 0, 0, 0.05);
+  --color-overlay-medium: rgba(0, 0, 0, 0.1);
+  --color-overlay-dark: rgba(0, 0, 0, 0.2);
+  --color-overlay-darker: rgba(0, 0, 0, 0.28);
+  --color-overlay-shadow-1: rgba(0, 0, 0, 0.36);
+  --color-overlay-shadow-2: rgba(0, 0, 0, 0.38);
+  --color-overlay-very-dark: rgba(0, 0, 0, 0.7);
+  --color-overlay-black: rgba(0, 0, 0, 0.8);
+  --color-focus-outline: rgba(96, 165, 250, 0.4);
+  
+  --radius-full: 9999px;
+  --radius-circle: 50%;
+  --radius-pill: 999px;
+
+  /* ==================== 统一自适应参数配置系统 ==================== */
+  /* 所有尺寸统一在此管理，彻底消除重复定义，便于维护 */
+  /* 比例说明：xs=0.5vw, sm=1vw, md=2vw, lg=3vw, xl=4vw, xxl=6vw */
+  
+  /* ==================== 统一间距系统 ==================== */
+  --spacing-xs: clamp(0.3rem, 0.5vw, 0.5rem);
+  --spacing-sm: clamp(0.5rem, 1vw, 1rem);
+  --spacing-md: clamp(1rem, 2vw, 2rem);
+  --spacing-lg: clamp(1.5rem, 3vw, 3rem);
+  --spacing-xl: clamp(2rem, 4vw, 4rem);
+  --spacing-xxl: clamp(2.5rem, 6vw, 4rem);
+  
+  /* ==================== 统一内边距系统 ==================== */
+  --padding-xs: clamp(0.4rem, 0.5vw, 0.6rem);
+  --padding-sm: clamp(0.6rem, 1vw, 1rem);
+  --padding-md: clamp(1rem, 2vw, 1.5rem);
+  --padding-lg: clamp(1.5rem, 3vw, 2.5rem);
+  --padding-xl: clamp(2rem, 4vw, 3.5rem);
+  
+  /* ==================== 统一圆角系统 ==================== */
+  --radius-xs: clamp(0.3rem, 0.5vw, 0.5rem);
+  --radius-sm: clamp(0.5rem, 1vw, 0.75rem);
+  --radius-md: clamp(0.75rem, 2vw, 1.25rem);
+  --radius-lg: clamp(1rem, 3vw, 1.5rem);
+  --radius-xl: clamp(1.25rem, 4vw, 2rem);
+  
+  /* ==================== 统一尺寸系统 ==================== */
+  /* 按钮和图标尺寸 */
+  --size-icon-sm: clamp(1.4rem, 3vw, 2rem);
+  --size-icon-md: clamp(1.6rem, 3.5vw, 2.4rem);
+  --size-icon-lg: clamp(2rem, 4vw, 3rem);
+  --size-icon-xl: clamp(2.5rem, 5vw, 3.5rem);
+  
+  /* 按钮尺寸 */
+  --size-btn-xs: clamp(2.5rem, 6vw, 3.5rem);
+  --size-btn-sm: clamp(3rem, 7vw, 4.5rem);
+  --size-btn-md: clamp(3.5rem, 8vw, 5rem);
+  --size-btn-lg: clamp(5.5rem, 8vw, 7rem);
+  --size-btn-xl: clamp(8rem, 18vw, 10rem);
+  
+  /* 容器尺寸 */
+  --size-container-xs: clamp(6rem, 9.5vw, 8rem);
+  --size-container-sm: clamp(8rem, 12vw, 14rem);
+  --size-container-md: clamp(11rem, 22vw, 24rem);
+  --size-container-lg: clamp(15rem, 25vw, 25rem);
+  
+  /* 高度尺寸 */
+  --height-xs: clamp(99px, 13.5vh, 128px);
+  --height-sm: clamp(144px, 18vh, 156px);
+  --height-md: clamp(4.75rem, 15vh, 7.5rem);
+  --height-lg: clamp(7rem, 14vh, 10rem);
+  --height-xl: clamp(8rem, 16vh, 12rem);
+  
+  /* 字体尺寸（补充） */
+  --font-size-xs: clamp(0.8rem, 1.7vw, 1rem);
+  --font-size-sm: clamp(0.95rem, 1.9vw, 1.15rem);
+  --font-size-icon-xs: clamp(1.1rem, 1.8vw, 1.4rem);
+  --font-size-icon-sm: clamp(1.2rem, 2.8vw, 1.6rem);
+  --font-size-icon-md: clamp(1.3rem, 2.8vw, 1.9rem);
+  --font-size-icon-lg: clamp(1.4rem, 2.5vw, 2rem);
+  --font-size-icon-xl: clamp(1.55rem, 3.1vw, 2.4rem);
+  
+  /* 特殊间距 */
+  --gap-xs: clamp(0.15rem, 0.5vh, 0.3rem);
+  --gap-sm: clamp(0.35rem, 1vw, 0.6rem);
+  --gap-md: clamp(0.4rem, 1vw, 0.6rem);
+  --gap-lg: clamp(0.5rem, 2.5vw, 3rem);
+  
+  /* 特殊内边距 */
+  --padding-h-xs: clamp(0.35rem, 1vw, 0.6rem);
+  --padding-h-sm: clamp(0.45rem, 1.2vw, 0.8rem);
+  --padding-h-md: clamp(0.55rem, 1.2vw, 0.85rem);
+  --padding-h-lg: clamp(0.65rem, 1.4vw, 1.5rem);
+  --padding-v-xs: clamp(0.25rem, 0.8vh, 0.6rem);
+  --padding-v-sm: clamp(0.3rem, 0.8vh, 0.5rem);
+  --padding-v-md: clamp(0.4rem, 1vh, 0.6rem);
+  --padding-v-lg: clamp(0.5rem, 1.2vh, 0.8rem);
+  --padding-v-xl: clamp(0.6rem, 1.8vh, 1rem);
+  --padding-v-xxl: clamp(1rem, 2.5vh, 1.8rem);
+  
+  /* 位置偏移 */
+  --offset-xs: clamp(0.1rem, 0.5vw, 0.5rem);
+  --offset-sm: clamp(2.5rem, 6.5vw, 3.5rem);
+  
+  /* 布局尺寸 */
+  --layout-width-modal: 92vw;
+  --layout-height-offset: 7.5rem;
+  --layout-margin-bottom-large: 5rem;
+  --layout-gap-small: 0.5rem;
+  --layout-margin-top-base: 1rem;
+  
+  /* 特殊字体和尺寸 */
+  --font-size-root: clamp(18px, 1.6vw, 30px);
+  --font-size-party-btn: clamp(0.95rem, 1.4vw, 1.2rem);
+  --font-size-party-icon: clamp(1.8rem, 3.2vw, 3rem);
+  --size-img-overlay: clamp(8.75rem, 18vw, 13.125rem);
+  --size-volume-btn: clamp(5rem, 13vw, 7rem);
+  --size-mute-height: clamp(7rem, 15vw, 8.5rem);
+  --size-home-cta-flex: clamp(9rem, 24vw, 18rem);
+  --size-home-cta-min-h: clamp(11.5rem, 22vh, 18.5rem);
+  --size-home-cta-click-w: clamp(4rem, 12vw, 8rem);
+  --size-home-cta-click-h: clamp(4.5rem, 13vh, 8.5rem);
+  --size-volume-default-w: clamp(5.625rem, 21vw, 13.75rem);
+  --size-volume-default-h: clamp(4.375rem, 12.5vh, 10rem);
+  --size-btn-circle: clamp(4rem, 12vw, 10rem);
+  --size-selected-img: clamp(6.5rem, 10vw, 12rem);
+  --size-badge: clamp(2.5rem, 4vw, 4rem);
+  --font-size-badge: clamp(1rem, 1.8vw, 1.6rem);
+  --size-top-left: clamp(60px, 8vw, 100px);
+  --size-bottom-icon: clamp(5rem, 8vw, 10rem);
+  --size-button-text-lg: clamp(1.4rem, 2.5vw, 2rem);
+  --size-button-text-sm: clamp(0.95rem, 1.6vw, 1.4rem);
+  --size-singer-chevron: clamp(1.05rem, 2vw, 1.3rem);
+  --size-search-padding-l: clamp(2.8rem, 6.5vw, 4.2rem);
+  --size-search-padding-r: clamp(2rem, 4.5vw, 3rem);
+  --size-search-height: clamp(3.2rem, 8vw, 5.2rem);
+  --size-search-icon: clamp(1.1rem, 2.6vw, 1.8rem);
+  --size-search-icon-pos: clamp(1.2rem, 2.8vw, 1.9rem);
+  --size-close-btn: clamp(2rem, 4.5vw, 3.2rem);
+  --size-close-icon: clamp(1.2rem, 2.8vw, 1.9rem);
+  --size-filter-padding-v: clamp(0.12rem, 0.35vh, 0.22rem);
+  --size-filter-padding-h: clamp(0.6rem, 1.6vw, 1rem);
+  --size-filter-min-h: clamp(1.2rem, 2.8vh, 1.8rem);
+  --size-filter-radius: clamp(0.6rem, 1.8vw, 1rem);
+  --size-filter-sub-font: clamp(0.75rem, 1.7vw, 1rem);
+  --size-filter-sub-margin: clamp(0.1rem, 0.35vh, 0.18rem);
+  --size-volume-control-gap: clamp(0.4rem, 1.2vh, 0.7rem);
+  --size-volume-control-padding-v: clamp(0.6rem, 1.8vh, 1rem);
+  --size-volume-control-padding-h: clamp(1.1rem, 2.8vw, 1.7rem);
+  --size-volume-control-radius: clamp(0.9rem, 2.1vw, 1.4rem);
+  --size-volume-row-gap: clamp(0.75rem, 2vw, 1.35rem);
+  --size-progress-height: clamp(0.6rem, 1.45vh, 0.85rem);
+  --size-sound-btn-padding-v: clamp(0.9rem, 2.2vh, 1.3rem);
+  --size-sound-btn-padding-h: clamp(0.7rem, 1.8vw, 1rem);
+  --size-sound-btn-gap: clamp(0.3rem, 0.8vh, 0.5rem);
+  --size-scene-btn-padding-v: clamp(1.2rem, 3vh, 2rem);
+  --size-scene-btn-padding-h: clamp(1rem, 2.5vw, 1.8rem);
+  --size-more-btn-padding-v: clamp(0.8rem, 2vh, 1.2rem);
+  --size-more-btn-padding-h: clamp(1rem, 2.5vw, 1.5rem);
+  --size-control-btn-w: clamp(11rem, 22vw, 24rem);
+  --size-control-btn-h: clamp(5.5rem, 11vw, 12rem);
+  --size-selected-padding-v: clamp(0.45rem, 1vh, 0.6rem);
+  --size-selected-padding-h: clamp(0.7rem, 1.8vw, 0.95rem);
+  --size-selected-min-w: clamp(4.2rem, 11vw, 6.2rem);
+  --size-selected-radius: clamp(0.45rem, 1vw, 0.65rem);
+  --size-selected-action-gap: clamp(0.65rem, 1.8vw, 1.1rem);
+  --size-modal-padding-top: clamp(12px, 3vh, 48px);
+  --size-card-icon: clamp(27px, 3.6vw, 38px);
+  --size-card-content-gap: clamp(3px, 0.6vw, 6px);
+  --size-card-title-padding-right: clamp(20px, 3vw, 40px);
+  --size-card-singer-gap: clamp(5px, 1vw, 8px);
+  --size-card-singer-margin: clamp(2px, 0.5vw, 6px);
+  --size-card-singer-padding-v: clamp(4px, 0.4vw, 6px);
+  --size-card-singer-padding-h: clamp(10px, 0.9vw, 14px);
+  --size-card-actions-gap: clamp(14px, 1.6vw, 19px);
+  --size-card-icon-font: clamp(21px, 2.8vw, 32px);
+  --font-size-mute-value: clamp(0.95rem, 2vw, 1.25rem);
+  --size-party-category-margin: clamp(1.5rem, 6vh, 3rem);
+  --size-party-category-padding-v: clamp(0.7rem, 1.5vw, 1.1rem);
+  --size-home-cta-padding-v: clamp(0.65rem, 1.6vh, 1.3rem);
+  --size-btn-circle-padding: clamp(0.4rem, 1.5vw, 1rem);
+  --size-smartl-tabs-gap: clamp(0.1rem, 0.4vw, 0.35rem);
+  --size-filter-btn-gap: clamp(0.06rem, 0.2vh, 0.1rem);
+  --size-service-btn-padding-v: clamp(0.5rem, 1.4vh, 1rem);
+  --size-service-btn-padding-h: clamp(0.75rem, 2vw, 1.5rem);
+  --size-service-btn-icon-margin: clamp(0.4rem, 1vw, 0.6rem);
+  
+  /* ==================== 额外的 clamp() 值提取 ==================== */
+  --letter-spacing-title: clamp(0.015rem, 0.2vw, 0.05rem);
+  --letter-spacing-filter: clamp(0.01rem, 0.12vw, 0.035rem);
+  --radius-party-modal: clamp(0, 2vw, 1.25rem);
+  --height-party-category-btn: clamp(3.5rem, 12vh, 6rem);
+  --height-volume-center: clamp(144px, 18vh, 156px);
+  --height-more-materials-btn: clamp(5rem, 10vh, 7rem);
+  --height-control-button: clamp(5.5rem, 11vw, 12rem);
+  --height-sound-effect-btn: clamp(6.5rem, 13vh, 9rem);
+  --bottom-home-selected: clamp(8rem, 12vh, 12rem);
+  --font-size-loading-title: clamp(1.8rem, 3.5vw, 2.5rem);
+  --font-size-loading-text: clamp(0.75rem, 1.4vw, 0.9rem);
+  --margin-loading-container: clamp(2rem, 4vh, 3rem);
+  --width-loading-progress: clamp(10rem, 20vw, 14rem);
+  --font-size-loading-progress: clamp(0.75rem, 1.3vw, 0.8rem);
+  --margin-loading-progress: clamp(0.75rem, 1.5vh, 1rem);
+  --radius-mute-btn: 3.4rem;
+  --radius-close-panel: clamp(0.5rem, 1.2vw, 0.75rem);
+  --radius-category-tab: 0.5rem;
+  --min-width-service-btn: clamp(7.5rem, 24vw, 11.25rem);
+  --min-height-service-btn: clamp(3.25rem, 10vh, 5rem);
+  --font-size-service-icon: clamp(1.6rem, 2.6vh, 2.4rem);
+  --font-size-service-text: clamp(1.1rem, 2vh, 1.6rem);
+  --shadow-focus-ring: 0 0 0 clamp(0.1rem, 0.25vw, 0.15rem) rgba(96, 165, 250, 0.35);
+  
+  /* ==================== 卡片系统 ==================== */
+  --card-padding: clamp(16px, 2.3vw, 48px);
+  --card-gap: clamp(14px, 2.1vw, 42px);
+  --card-img-size: clamp(80px, 12vw, 192px);
+  --card-btn-size: clamp(44px, 6vw, 115px);
+  --card-min-height: max(clamp(80px, 10vh, 120px), calc(var(--card-img-size) + var(--card-padding) * 2));
+  --card-radius: clamp(12px, 1.6vw, 32px);
+  
+  /* ==================== 字体大小系统 ==================== */
+  /* 统一使用2.5vw作为基础字体缩放比例，其他字体基于此比例计算 */
+  /* 基础字体：2.5vw, 小字体：2vw, 大字体：3vw, 超大字体：4vw */
+  --font-size-base: clamp(22px, 2.5vw, 40px);
+  --font-size-lg: clamp(24px, 2.75vw, 42px);
+  --font-size-xl: clamp(26px, 3vw, 46px);
+  
+  /* 歌曲卡片字体 - 基于3vw */
+  --song-card-title-font-size: clamp(24px, 3vw, 58px);
+  --song-card-pinyin-font-size: clamp(19px, 2.4vw, 50px);
+  --song-card-singer-font-size: clamp(18px, 2.25vw, 46px);
+  
+  /* 模态框和页面字体 */
+  --modal-title-font-size: clamp(2.2rem, 4vw, 3.8rem);
+  --toast-font-size: clamp(0.95rem, 2vw, 1.5rem);
+  --filter-btn-font-size: clamp(1.15rem, 2.75vw, 1.85rem);
+  
+  /* 底部导航字体 */
+  --bottom-nav-icon-font-size: clamp(1.35rem, 2.75vw, 2.8rem);
+  --bottom-nav-span-font-size: clamp(0.9rem, 1.8vw, 1.9rem);
+  --bottom-nav-indonesian-font-size: clamp(0.9rem, 1.8vw, 1.75rem);
+  
+  /* 页面统一字体 */
+  --page-title-font-size: clamp(1.8rem, 3.8vw, 3rem);
+  --page-subtitle-font-size: clamp(1.1rem, 2.25vw, 1.8rem);
+  --page-toolbar-font-size: clamp(1.6rem, 3.25vw, 2.6rem);
+  --page-button-font-size: clamp(1.3rem, 2.625vw, 2rem);
+  --page-button-icon-font-size: clamp(1.6rem, 3.25vw, 2.6rem);
+  --page-label-font-size: clamp(0.9rem, 1.8vw, 1.3rem);
+  --page-empty-state-font-size: clamp(1.2rem, 2.625vw, 2rem);
+  --page-empty-state-icon-font-size: clamp(2rem, 4.2vw, 3.2rem);
+  
+  /* 视口高度 */
+  --viewport-height: calc(var(--app-vh, 100vh));
+}
+
+@supports (height: 100dvh) { 
+  :root { --viewport-height: 100dvh; } 
+}
+
+/* 印尼语翻译文本字母间距优化 - 替换所有内联样式 letter-spacing: -0.025em */
+.indonesian-translation-tighter {
+  letter-spacing: -0.025em;
+}
+
+.modal-title {
+  font-size: var(--modal-title-font-size);
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-title);
+}
+
+.filter-tags-prompt {
+  font-size: var(--modal-title-font-size);
+  font-weight: 600;
+  letter-spacing: var(--letter-spacing-filter);
+  line-height: 1.25;
+}
+
+/* ===== 全局背景：统一使用大图覆盖，保证多终端体验一致 ===== */
+html, body {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background-color: var(--bg-primary);
+  background-image: url('../images/bg_single.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+  overflow: hidden;
+  touch-action: none;
+}
+
+html {
+  /* 根元素字体大小 - 自动适配所有分辨率，覆盖小屏到大屏 */
+  font-size: var(--font-size-root);
+}
+
+/* ===== 基础排版：保持系统字体并启用硬件加速 ===== */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  line-height: 1.6;
+  /* 性能优化：移除全局will-change，只在需要动画的元素上使用 */
+}
+
+body, button, input, select, textarea {
+  font-size: var(--font-size-base);
+}
+
+
+/* 放动画 */
+@keyframes barAnimation {
+  0%, 100% {
+    transform: translateZ(0) scaleY(1);
+  }
+  50% {
+    transform: translateZ(0) scaleY(0.3);
+  }
+}
+
+/* 播放动画容器 */
+.playing-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  flex-shrink: 0;
+  --playing-base-size: clamp(18px, calc(var(--card-btn-size, 44px) * 0.58), 48px);
+  --playing-bar-width: clamp(3px, calc(var(--playing-base-size) * 0.16), 6px);
+  --playing-bar-radius: clamp(2px, calc(var(--playing-base-size) * 0.12), 6px);
+  --playing-gap: clamp(2px, calc(var(--playing-base-size) * 0.12), 6px);
+  --playing-padding: clamp(1px, calc(var(--playing-base-size) * 0.05), 4px);
+  width: var(--playing-base-size);
+  height: var(--playing-base-size);
+  max-width: 100%;
+  padding: var(--playing-padding) 0;
+  box-sizing: border-box;
+  will-change: transform;
+}
+
+#unified-modal .playing-indicator-inner,
+.playing-indicator-inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--playing-gap);
+  height: 100%;
+  width: 100%;
+  /* 性能优化：只在动画时添加will-change */
+}
+
+/* 动画条样式 */
+.animate-bar,
+.playing-bar {
+  display: inline-block;
+  width: var(--playing-bar-width);
+  margin: 0 calc(var(--playing-gap) * 0.5);
+  animation: barAnimation 1.2s infinite ease-in-out;
+  transform-origin: bottom;
+  transform: translateZ(0);
+  opacity: 1;
+  visibility: visible;
+  background-color: var(--text-primary, #f3f4f6);
+  border-radius: var(--playing-bar-radius);
+  height: 100%;
+  min-height: clamp(10px, calc(var(--playing-base-size) * 0.32), 22px);
+  /* 性能优化：只在动画时添加will-change */
+}
+
+.playing-bar.animate-bar {
+  will-change: transform, opacity;
+}
+
+/* 播放动画条延迟 */
+.playing-indicator-inner .playing-bar.animate-bar:nth-of-type(1) { 
+  animation-delay: 0s; 
+}
+.playing-indicator-inner .playing-bar.animate-bar:nth-of-type(2) { 
+  animation-delay: 0.25s; 
+}
+.playing-indicator-inner .playing-bar.animate-bar:nth-of-type(3) { 
+  animation-delay: 0.5s; 
+}
+
+/* === 按钮基础样式统一 === */
+:where(
+  .header-btn,
+  .party-category-btn,
+  .home-cta__btn,
+  .control-btn,
+  .close-btn,
+  #home-btn,
+  #selected-open,
+  #bottom-nav .volume-btn,
+  #bottom-nav .mute-btn
+) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  touch-action: manipulation;
+  transition: var(--btn-transition, background-color 0.3s ease, transform 0.2s ease);
+}
+
+/* === 统一关闭按钮样式 === */
+.close-btn {
+  --btn-transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.close-btn:active {
+  color: var(--color-blue-400);
+  opacity: 0.75;
+}
+
+.close-btn:focus-visible {
+  color: var(--color-blue-400);
+  opacity: 0.85;
+  outline: 2px solid var(--color-focus-outline);
+  outline-offset: 2px;
+}
+
+/* 模态框内的关闭按钮 - 继承基础样式，只添加特定定位 */
+#unified-modal .close-btn,
+#unified-modal #unified-close-btn {
+  position: absolute;
+  top: 50%;
+  right: var(--padding-md);
+  transform: translateY(-50%);
+  width: var(--size-close-btn);
+  height: var(--size-close-btn);
+  z-index: 10;
+  color: #e5e7eb;
+}
+
+#unified-modal .close-btn i,
+#unified-modal .close-btn .fa-times {
+  font-size: var(--size-close-icon);
+}
+
+/* ==================== 页面模组 ==================== */
+/* 弹窗模组样式优化 */
+/* -- 模态容器：默认全宽，内部再次进行自适应居中 -- */
+#party-modal {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  left: 0;
+  right: 0;
+}
+
+/* -- 内部相对容器：控制实际展示宽度及自适应圆角、高度 -- */
+#party-modal .relative {
+  width: var(--layout-width-modal);
+  margin: 0 auto;
+  border-radius: var(--radius-party-modal);
+  height: min(82vh, calc(var(--viewport-height) - clamp(3.75rem, 12vh, 8.75rem)));
+}
+
+/* 弹窗分类栅格布局优化 */
+/* -- 自适应栅格：使用 auto-fit + clamp，让卡片随屏幕自适应增长 -- */
+#party-categories-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(8.75rem, 22vw, 15rem), 1fr));
+  gap: var(--spacing-lg);
+  justify-items: center;
+  align-items: center;
+  justify-content: center;
+  padding: var(--padding-xl);
+  width: var(--layout-width-modal);
+  margin: var(--size-party-category-margin) auto;
+  min-height: clamp(26.25rem, 60vh, 32.5rem);
+  align-content: center;
+}
+
+/* === 按钮组：弹窗分类按钮 === */
+/* -- 分类按钮卡片：保持按钮居中、提升 icon + 文案的信息密度 -- */
+.party-category-btn {
+  --btn-transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  min-height: var(--height-party-category-btn);
+  flex-direction: column;
+  padding: var(--size-party-category-padding-v) var(--padding-sm);
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-party-btn);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0.375rem 0.75rem var(--color-shadow-light);
+  font-weight: 600;
+  text-align: center;
+  background: var(--party-btn-bg, linear-gradient(135deg, #5b21b6 0%, #9d174d 100%));
+  color: var(--party-btn-color, var(--color-white));
+  position: relative;
+  overflow: hidden;
+}
+
+.party-category-btn:hover {
+  transform: translateY(-0.35rem);
+  box-shadow: 0 0.625rem 1.25rem var(--color-overlay-dark);
+}
+
+.party-category-btn:focus-visible,
+.party-category-btn.active {
+  transform: translateY(-0.35rem);
+  box-shadow:
+    0 0.625rem 1.25rem var(--color-overlay-darker),
+    0 0 0 clamp(0.18rem, 0.4vw, 0.25rem) rgba(255, 255, 255, 0.92),
+    0 0 clamp(0.45rem, 0.9vw, 0.75rem) rgba(255, 255, 255, 0.72);
+}
+
+.party-category-btn i {
+  font-size: var(--font-size-icon-lg);
+  margin-bottom: var(--spacing-xs);
+}
+
+.party-category-btn .text-2xl {
+  font-size: var(--font-size-party-icon);
+  margin-bottom: var(--spacing-sm);
+}
+
+.party-category-btn span {
+  font-size: var(--font-size-icon-xs);
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* === 统一 party-category-btn 变体 - 使用数据属性替代多个类 === */
+/* 使用数据属性选择器，减少重复的类定义 */
+.party-category-btn[data-category="disco"] {
+  --party-btn-bg: linear-gradient(135deg, #ff6bcb 0%, #845ef7 100%);
+}
+
+.party-category-btn[data-category="dj"] {
+  --party-btn-bg: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.party-category-btn[data-category="relax"] {
+  --party-btn-bg: linear-gradient(135deg, #06b6d4 0%, #22c55e 100%);
+}
+
+.party-category-btn[data-category="rap"] {
+  --party-btn-bg: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.party-category-btn[data-category="top-dj"] {
+  --party-btn-bg: linear-gradient(135deg, #f97316 0%, #c026d3 100%);
+}
+
+.party-category-btn[data-category="bar"] {
+  --party-btn-bg: linear-gradient(135deg, #764ba2 0%, #312e81 100%);
+}
+
+.party-category-btn[data-category="live"] {
+  --party-btn-bg: linear-gradient(135deg, var(--color-red-500) 0%, #7c3aed 100%);
+}
+
+.party-category-btn[data-category="theme"] {
+  --party-btn-bg: linear-gradient(135deg, #0ea5e9 0%, #4338ca 100%);
+}
+
+.party-category-btn[data-category="default"],
+.party-category-btn:not([data-category]) {
+  --party-btn-bg: linear-gradient(135deg, #5b21b6 0%, #9d174d 100%);
+}
+
+/* 向后兼容：保留旧的类名支持 */
+.party-category-btn--disco { --party-btn-bg: linear-gradient(135deg, #ff6bcb 0%, #845ef7 100%); }
+.party-category-btn--dj { --party-btn-bg: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.party-category-btn--relax { --party-btn-bg: linear-gradient(135deg, #06b6d4 0%, #22c55e 100%); }
+.party-category-btn--rap { --party-btn-bg: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.party-category-btn--top-dj { --party-btn-bg: linear-gradient(135deg, #f97316 0%, #c026d3 100%); }
+.party-category-btn--bar { --party-btn-bg: linear-gradient(135deg, #764ba2 0%, #312e81 100%); }
+.party-category-btn--live { --party-btn-bg: linear-gradient(135deg, var(--color-red-500) 0%, #7c3aed 100%); }
+.party-category-btn--theme { --party-btn-bg: linear-gradient(135deg, #0ea5e9 0%, #4338ca 100%); }
+.party-category-btn--default { --party-btn-bg: linear-gradient(135deg, #5b21b6 0%, #9d174d 100%); }
+
+/* 顶部样式 */
+/* -- header 透明：让背景图层显露，同时保持内边距 -- */
+header {
+  background-color: transparent;
+  color: var(--color-white);
+  padding: var(--padding-md) var(--padding-sm);
+  box-shadow: none;
+}
+
+/* -- 顶部按钮容器：右对齐的操作组，方便快速访问 -- */
+.header-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--layout-gap-small);
+  margin-top: var(--layout-margin-top-base);
+}
+
+/* === 按钮组：页面顶部操作按钮 === */
+/* -- 顶部按钮：透明背景 + 自适应间距，兼容触控与鼠标操作 -- */
+.header-btn {
+  --btn-transition: background-color 0.3s ease;
+  color: var(--color-white);
+  padding: var(--padding-sm) var(--padding-md);
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-icon-xs);
+  gap: var(--gap-md);
+}
+
+.header-btn:hover {
+  background-color: var(--color-overlay-light);
+}
+
+.header-btn:active {
+  background-color: var(--color-overlay-medium);
+}
+
+.header-btn i {
+  font-size: var(--font-size-icon-xs);
+}
+
+/* 主要内容区域 */
+/* -- main 宽度：保证内容在大屏下不过宽，维护视觉聚焦 -- */
+main {
+  padding: var(--padding-md);
+  min-height: calc(var(--viewport-height) - var(--layout-height-offset));
+  display: flex;
+  flex-direction: column;
+  background-color: transparent;
+  width: var(--layout-width-modal);
+  margin: 0 auto;
+}
+
+/* -- 支持动态视窗单位：应对移动端地址栏高度变化 -- */
+@supports (height: 100dvh) {
+  main {
+    min-height: calc(100dvh - var(--layout-height-offset));
+  }
+}
+
+/* 图片容器样式 */
+/* -- 双组图片展示：居中排列并增加间距，突出高亮素材 -- */
+.image-container {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  margin-top: auto;
+  margin-bottom: var(--layout-margin-bottom-large);
+  padding: var(--padding-md) 0;
+}
+
+.image-item {
+  position: relative;
+}
+
+/* -- 顶部浮层：用于叠加 PNG 元素，保证与底图居中对齐 -- */
+.image-item.image-overlay .overlay-img {
+  position: absolute;
+  top: -13.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--size-container-lg);
+  height: auto;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.image-item img {
+  max-width: var(--size-img-overlay);
+  height: auto;
+  border-radius: var(--radius-sm);
+}
+
+/* 底部样式 */
+footer {
+  background-color: transparent;
+  color: var(--color-white);
+  text-align: center;
+  padding: var(--padding-md);
+  border-top: none;
+}
+
+/* 底部导航 */
+/* -- #bottom-nav 自定义布局：用于首页专属按钮区域，突出左侧/居中/右侧操作 -- */
+#bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: transparent;
+  border-top: none;
+  display: flex;
+  justify-content: center;
+  padding-top: var(--padding-v-xs);
+  padding-bottom: 0;
+  padding-left: var(--offset-xs);
+  padding-right: var(--offset-xs);
+  align-items: flex-end;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* 当搜索框获得焦点时隐藏底部导航栏，避免被键盘顶上去 */
+#bottom-nav.hidden-by-keyboard {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* -- 控制 画面 重唱在左边30%靠底部显示原唱 暂停 切歌右边30%靠底部显示，静音按钮居中显示，音量进度条中间40%靠底部显示，音量加减按钮在进度图左右显示-- */
+#bottom-nav > .bottom-nav-grid,
+#bottom-nav > .flex.bottom-nav-grid {
+  width: 96vw;
+  display: grid;
+  grid-template-columns: 3fr 4fr 3fr;
+  align-items: flex-end;
+  justify-content: stretch;
+  column-gap: 0;
+  margin: 0 auto;
+}
+
+.left-button-area,
+.right-button-area {
+  grid-row: 1;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-sm);
+  flex-wrap: nowrap;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.left-button-area {
+  grid-column: 1;
+  justify-content: flex-start;
+}
+
+.left-button-area .control-btn {
+  width: var(--size-container-xs);
+  min-width: 0;
+  max-width: 100%;
+  flex-shrink: 1;
+}
+
+.left-button-area .control-btn i {
+  font-size: var(--font-size-icon-xl);
+}
+
+.right-button-area {
+  grid-column: 3;
+  justify-content: flex-end;
+}
+
+.right-button-area .control-btn {
+  width: var(--size-container-xs);
+  min-width: 0;
+  max-width: 100%;
+  flex-shrink: 1;
+}
+
+.right-button-area .control-btn i {
+  font-size: var(--font-size-icon-xl);
+}
+
+/* 移除宽度断点，统一依赖 clamp/vw/vh 自适应 */
+
+/* -- 中央音量区域：宽度 40%，底部对齐 -- */
+/* 修复：使用px和vh单位，确保在所有分辨率下都能自适应 */
+#volume-center-area {
+  grid-column: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  padding-bottom: 0;
+  overflow: visible;
+  position: relative;
+  box-sizing: border-box;
+  height: var(--height-volume-center);
+}
+
+/* 移除宽度断点，统一依赖 clamp/vw/vh 自适应 */
+
+/* === 按钮组：底部导航主按钮 === */
+/* -- 底部导航按钮：纵向排列主语言 + 印尼语译文 -- */
+/* 修复：将min-height从rem改为px，确保在所有分辨率下都能自适应 */
+#bottom-nav .control-btn {
+  --btn-transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--gap-sm);
+  width: var(--size-btn-lg);
+  min-width: 0;
+  max-width: 100%;
+  min-height: var(--height-xs);
+  padding: var(--padding-h-md) var(--padding-h-sm) var(--padding-h-xs);
+  margin: 0;
+  border-radius: var(--radius-md);
+  box-shadow: none;
+  color: var(--color-white);
+  position: relative;
+  overflow: visible; /* 确保点击区域可见 */
+  pointer-events: none; /* 按钮本身不响应点击，只有图标区域可点击 */
+  flex-shrink: 1; /* 允许按钮适当缩小以适应容器 */
+  flex-basis: auto;
+}
+
+#bottom-nav .control-btn .rounded-full {
+  width: var(--size-icon-lg);
+  height: var(--size-icon-lg);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.06));
+  box-shadow: inset 0 0.25rem 0.5rem rgba(255, 255, 255, 0.12);
+  pointer-events: auto; /* 图标区域可点击 */
+  position: relative;
+  z-index: 1; /* 确保图标区域在最上层 */
+}
+
+#bottom-nav .left-button-area .control-btn .rounded-full,
+#bottom-nav .right-button-area .control-btn .rounded-full {
+  width: calc(var(--size-icon-lg) * 1.5);
+  height: calc(var(--size-icon-lg) * 1.5);
+}
+
+#bottom-nav .control-btn i {
+  font-size: var(--bottom-nav-icon-font-size);
+  pointer-events: auto; /* 图标可点击 */
+}
+
+#bottom-nav .control-btn span {
+  white-space: nowrap;
+  line-height: 1;
+  pointer-events: none; /* 文字部分不响应点击 */
+  user-select: none; /* 防止文字被选中 */
+  -webkit-user-select: none; /* Safari兼容 */
+}
+
+#bottom-nav .control-btn .indonesian-translation {
+  font-size: var(--bottom-nav-indonesian-font-size);
+  opacity: 0.75;
+}
+
+#bottom-nav .control-btn:active,
+#bottom-nav .control-btn.clicked {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+/* -- 中央音量控制容器 -- */
+/* 修复：使用px和vh单位，确保在所有分辨率下都能自适应 */
+#volume-control-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: var(--height-volume-center);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  margin-bottom: 0;
+  transform: translateY(0);
+  pointer-events: auto;
+  overflow: visible;
+}
+
+#volume-background-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: auto;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+  --volume-progress: 100%;
+  overflow: visible;
+}
+
+#volume-background-container .volume-bg-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: bottom;
+  transform: scaleY(1.7) translateY(0);
+  transform-origin: center bottom;
+  filter: drop-shadow(0 0.6rem 1.1rem var(--color-overlay-shadow-1));
+}
+
+#volume-background-container .volume-fg-img {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: auto;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: bottom;
+  transform: scaleY(1.7) translateY(0);
+  transform-origin: center bottom;
+  mask-image: linear-gradient(
+    90deg,
+    #000 var(--volume-progress, 100%),
+    rgba(0, 0, 0, 0) var(--volume-progress, 100%)
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    #000 var(--volume-progress, 100%),
+    rgba(0, 0, 0, 0) var(--volume-progress, 100%)
+  );
+}
+
+/* === 按钮组：底部导航音量按钮 === */
+#bottom-nav .volume-btn {
+  --btn-transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: absolute;
+  bottom: 0;
+  pointer-events: none; /* 按钮本身不响应点击，只有图片可点击 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#bottom-nav .volume-btn img {
+  width: var(--size-volume-btn);
+  height: var(--size-volume-btn);
+  object-fit: contain;
+  filter: drop-shadow(0 0.4rem 0.95rem var(--color-overlay-shadow-2));
+  pointer-events: none; /* 图片本身不响应点击，使用伪元素创建精确点击区域 */
+  position: relative;
+  z-index: 1;
+}
+
+/* 为音量按钮图片创建精确的点击区域（从中心向外扩展，只覆盖图片的不透明部分） */
+/* 注意：排除 .mute-btn，因为静音按钮使用不同的布局 */
+#bottom-nav .volume-btn:not(.mute-btn)::before {
+  content: '';
+  position: absolute;
+  /* 从图片中心位置向外扩展 */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* 创建一个从中心向外扩展的点击区域 */
+  /* 根据实际图片内容调整大小，这里设置为图片尺寸的 60-70% */
+  width: clamp(3rem, 8vw, 4.5rem); /* 约为图片宽度的 60-70% */
+  height: clamp(3rem, 8vw, 4.5rem); /* 约为图片高度的 60-70% */
+  border-radius: var(--radius-circle); /* 圆形点击区域，从中心向外 */
+  pointer-events: auto; /* 伪元素可点击 */
+  z-index: 0; /* 放在图片下方，不遮挡视觉 */
+  background: transparent; /* 确保完全透明 */
+  /* 可选：取消注释下面的行来查看点击区域（调试用） */
+  /* background: rgba(255, 0, 0, 0.2); */
+  /* border: 1px solid red; */
+}
+
+#bottom-nav .volume-down-btn {
+  left: var(--offset-sm);
+  transform: translate(-45%, 6%);
+  z-index: 10;
+}
+
+#bottom-nav .volume-up-btn {
+  right: var(--offset-sm);
+  transform: translate(45%, 6%);
+  z-index: 10;
+}
+
+#bottom-nav .mute-btn {
+  --btn-transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 6%);
+  width: var(--size-btn-xl);
+  height: var(--size-mute-height);
+  border-radius: var(--radius-mute-btn);
+  color: var(--color-white);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.08rem;
+  padding: 0.5rem 0.4rem 0.3rem;
+  box-shadow: none;
+  pointer-events: none; /* 按钮本身不响应点击，使用伪元素创建精确点击区域 */
+  z-index: 10;
+}
+
+/* 静音按钮的文字标签 - 显示在图标和音量值下方 */
+#bottom-nav .mute-btn::before {
+  content: attr(data-label-cn) "/" attr(data-label-id);
+  display: block;
+  order: 3;
+  position: static;
+  width: 100%;
+  height: auto;
+  background: transparent;
+  pointer-events: none;
+  z-index: auto;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-align: center;
+  margin: 0.08rem 0 0;
+  padding: 0 0.1rem;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* 静音按钮图标 - 显示在最上方 */
+#bottom-nav .mute-btn i {
+  order: 1;
+  font-size: var(--font-size-icon-md);
+  flex-shrink: 0;
+  margin-bottom: 0.12rem;
+}
+
+/* 静音按钮音量值 - 显示在图标下方，文字上方 */
+#bottom-nav .mute-volume-value {
+  order: 2;
+  font-size: var(--font-size-mute-value);
+  line-height: 1;
+  flex-shrink: 0;
+  margin-bottom: 0.1rem;
+}
+
+/* 为静音按钮创建精确的点击区域（圆形，覆盖图标和音量值区域） */
+#bottom-nav .mute-btn::after {
+  content: '';
+  position: absolute;
+  /* 从按钮中心位置向外扩展 */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* 创建一个从中心向外扩展的点击区域，覆盖图标和音量值 */
+  width: clamp(2.4rem, 5.4vw, 3rem); /* 约为按钮宽度的 30% */
+  height: clamp(2.4rem, 5.4vw, 3rem); /* 约为按钮高度的 30% */
+  border-radius: var(--radius-circle); /* 圆形点击区域 */
+  pointer-events: auto; /* 伪元素可点击 */
+  z-index: 0; /* 放在内容下方，不遮挡视觉 */
+  background: transparent; /* 确保完全透明 */
+  /* 可选：取消注释下面的行来查看点击区域（调试用） */
+  /* background: rgba(255, 0, 0, 0.2); */
+  /* border: 1px solid red; */
+}
+
+#bottom-nav .mute-btn[data-label-id=""]::before {
+  content: attr(data-label-cn);
+}
+
+/* 静音状态下的文字和图标颜色 - 显示为红色 */
+#bottom-nav .mute-btn.muted::before {
+  color: var(--color-red-500);
+}
+
+#bottom-nav .mute-btn.muted i {
+  color: var(--color-red-500);
+}
+
+
+/* Home CTA (Party / Song / Order) responsive layout */
+/* -- home-cta：固定在底部上方，确保按钮易于触达 -- */
+.home-cta {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: clamp(8vh, 12vh, 18vh);
+  z-index: 20;
+  pointer-events: auto;
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+/* -- home-cta__row：自适应宽度，保证按钮在大屏中也能居中排列 -- */
+.home-cta__row {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: var(--gap-lg);
+  flex-wrap: nowrap;
+  width: 94vw;
+  margin: 0 auto;
+}
+
+/* === 按钮组：首页 CTA 主按钮 === */
+/* -- home-cta__btn：超大圆角 pill 造型，强调主操作，强化触控体验 -- */
+.home-cta__btn {
+  --btn-transition: transform 0.25s ease;
+  padding: var(--size-home-cta-padding-v);
+  flex: 1 1 var(--size-home-cta-flex);
+  max-width: 32vw;
+  min-height: var(--size-home-cta-min-h);
+  border-radius: var(--radius-full);
+  will-change: transform;
+  overflow: visible; /* 改为 visible，确保伪元素可见 */
+  position: relative;
+  pointer-events: auto; /* 按钮本身响应点击 */
+}
+
+/* -- home-cta__img：确保图片完整展示以传达功能含义 -- */
+.home-cta__img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none; /* 图片本身不响应点击，使用伪元素创建精确点击区域 */
+  position: relative;
+  z-index: 1;
+}
+
+/* 为首页CTA按钮图片创建精确的点击区域（从中心向外扩展，只覆盖图片的不透明部分） */
+.home-cta__btn::before {
+  content: '';
+  position: absolute;
+  /* 从按钮中心位置向外扩展 */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* 创建一个从中心向外扩展的圆形点击区域 */
+  /* 缩小点击区域，只覆盖图片的中心部分（约为按钮尺寸的 40-50%） */
+  width: var(--size-home-cta-click-w);
+  height: var(--size-home-cta-click-h);
+  border-radius: var(--radius-circle); /* 圆形点击区域，从中心向外 */
+  pointer-events: auto; /* 伪元素可点击 */
+  z-index: 0; /* 放在图片下方，不遮挡视觉 */
+  background: transparent; /* 确保完全透明 */
+  /* 可选：取消注释下面的行来查看点击区域（调试用） */
+  /* background: rgba(255, 0, 0, 0.2); */
+  /* border: 1px solid red; */
+}
+
+/* 首页CTA按钮动画效果 */
+.home-cta__btn--animating {
+  animation: homeCtaButtonScale 0.26s ease;
+  /* 性能优化：动画期间自动添加will-change，无需手动设置 */
+}
+
+@keyframes homeCtaButtonScale {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+
+/* 默认音量按钮尺寸（随屏幕自适应） */
+/* -- 使用 clamp 控制最小/最大范围，兼顾小屏视角面积 -- */
+#bottom-nav button[data-volume="music-down"],
+#bottom-nav button[data-volume="music-up"] {
+  width: var(--size-volume-default-w);
+  height: var(--size-volume-default-h);
+}
+
+#bottom-nav button.active {
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+#bottom-nav button.active span {
+  color: var(--primary-color);
+}
+
+#bottom-nav button.active i {
+  color: var(--primary-color);
+}
+
+#bottom-nav button:active {
+  background-color: var(--color-overlay-light);
+}
+
+/* 首页按钮图片图标样式 - 简洁风格 */
+/* === 按钮组：通用 control-btn 样式 === */
+/* -- control-btn：所有主按钮通用的尺寸和交互反馈样式 -- */
+.btn-circle {
+  position: relative;
+  width: var(--size-btn-circle);
+  height: var(--size-btn-circle);
+  padding: var(--size-btn-circle-padding);
+  border-radius: var(--radius-full);
+}
+
+/* 左下角按钮样式 - 简洁风格 */
+/* -- selected-home-btn：固定在左下角展示当前选中状态 -- */
+#selected-home-btn {
+  position: fixed;
+  bottom: 6rem;
+  left: 2rem;
+  z-index: 30;
+}
+
+/* === 按钮组：左下角已选状态按钮 === */
+#selected-home-btn .control-btn {
+  position: relative;
+  width: var(--size-container-sm);
+  height: var(--size-container-sm);
+  padding: 0;
+}
+
+#selected-home-btn .control-btn img {
+  width: var(--size-selected-img);
+  height: var(--size-selected-img);
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* 主页和已选按钮文字统一样式 */
+.home-text,
+.selected-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  font-weight: bold;
+  text-shadow: 1px 1px 2px var(--color-overlay-black);
+  pointer-events: none;
+  z-index: 10; /* 提高层级，确保在伪元素上方 */
+}
+
+/* 特定位置的 selected-text 样式覆盖 */
+#selected-home-btn .selected-text,
+.bottom-selected-icon .selected-text {
+  font-size: 1.5rem;
+  text-shadow: 0.0625rem 0.0625rem 0.125rem var(--color-overlay-black);
+}
+
+/* 按钮文字样式 */
+.button-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  font-weight: bold;
+  text-shadow: 1px 1px 2px var(--color-overlay-black);
+  pointer-events: none;
+}
+
+.button-text > span:first-child {
+  font-size: var(--size-button-text-lg);
+  line-height: 1.2;
+}
+
+.button-text > span:last-child {
+  font-size: var(--size-button-text-sm);
+  line-height: 1.2;
+  margin-top: 0.25rem;
+  opacity: 0.9;
+}
+
+/* 快捷栏：Smartl 面板标签 */
+.smartl-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: var(--size-smartl-tabs-gap);
+  padding: var(--padding-xs);
+  border-radius: clamp(0.6rem, 1.4vw, 0.9rem);
+  background: rgba(31, 41, 55, 0.92);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
+  /* Removed backdrop-filter properties */
+}
+
+/* 标签按钮样式已移至下方统一管理区域，避免重复定义 */
+
+/* Smartl 面板：音量控制 */
+/* 使用精准选择器，基于实际DOM结构 */
+#smart-panel .volume-control,
+.panel-content-container .volume-control,
+.smartl-panel .volume-control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-volume-control-gap);
+  padding: var(--size-volume-control-padding-v) var(--size-volume-control-padding-h);
+  border-radius: var(--size-volume-control-radius);
+  background: rgba(15, 23, 42, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
+}
+
+#smart-panel .volume-control-row,
+.panel-content-container .volume-control-row,
+.smartl-panel .volume-control-row {
+  display: flex;
+  align-items: center;
+  gap: var(--size-volume-row-gap);
+}
+
+/* 音量控制按钮：使用精准选择器，基于实际DOM结构 */
+#smart-panel .volume-btn-control,
+.panel-content-container .volume-btn-control,
+.smartl-panel .volume-btn-control {
+  width: var(--size-btn-md);
+  height: var(--size-btn-md);
+  min-width: var(--size-btn-md);
+  min-height: var(--size-btn-md);
+  border-radius: var(--radius-full);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.24), rgba(15, 23, 42, 0.45));
+  box-shadow: inset 0 0.35rem 0.65rem rgba(255, 255, 255, 0.15), 0 0.45rem 0.9rem rgba(15, 23, 42, 0.35);
+  color: #1f2937;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+}
+
+#smart-panel .volume-btn-control i,
+.panel-content-container .volume-btn-control i,
+.smartl-panel .volume-btn-control i {
+  font-size: var(--page-button-icon-font-size);
+  color: inherit;
+}
+
+#smart-panel .volume-btn-control:active,
+.panel-content-container .volume-btn-control:active,
+.smartl-panel .volume-btn-control:active,
+#smart-panel .volume-btn-control.clicked,
+.panel-content-container .volume-btn-control.clicked,
+.smartl-panel .volume-btn-control.clicked {
+  transform: scale(0.95);
+  box-shadow: inset 0 0.25rem 0.55rem rgba(255, 255, 255, 0.12);
+}
+
+#smart-panel.dark .volume-btn-control,
+.panel-content-container.dark .volume-btn-control,
+.smartl-panel.dark .volume-btn-control,
+#smart-panel .volume-btn-control.is-dark-theme,
+.panel-content-container .volume-btn-control.is-dark-theme,
+.smartl-panel .volume-btn-control.is-dark-theme {
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.16), rgba(15, 23, 42, 0.75));
+  color: #e5e7eb;
+}
+
+.smartl-panel .smartl-progress-bar {
+  position: relative;
+  flex: 1;
+  height: var(--size-progress-height);
+  border-radius: var(--radius-full);
+  background: rgba(148, 163, 184, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.smartl-panel.dark .smartl-progress-bar {
+  background: rgba(55, 65, 81, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.45);
+}
+
+.smartl-panel .smartl-progress-bar > div {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.95), rgba(248, 113, 113, 0.95));
+  width: var(--progress-width, 0%);
+  transition: width 0.25s ease;
+}
+
+.smartl-panel.dark .smartl-progress-bar > div {
+  background: linear-gradient(90deg, rgba(248, 113, 113, 0.95), rgba(252, 165, 165, 0.95));
+}
+
+/* === Smartl 面板：控制按钮响应式高度 === */
+/* 使用精准的选择器，基于实际DOM结构：#smart-panel > .panel-content-container > #audio-buttons */
+#smart-panel #audio-buttons .control-btn,
+.panel-content-container #audio-buttons .control-btn {
+  min-height: var(--height-lg);
+  height: auto;
+  padding: var(--padding-v-xl) var(--padding-md);
+}
+
+#smart-panel #audio-buttons .control-btn .btn-content,
+.panel-content-container #audio-buttons .control-btn .btn-content {
+  gap: var(--padding-v-md);
+}
+
+#smart-panel #audio-buttons .control-btn i,
+.panel-content-container #audio-buttons .control-btn i {
+  font-size: var(--page-button-icon-font-size);
+}
+
+#smart-panel #audio-buttons .control-btn span,
+.panel-content-container #audio-buttons .control-btn span {
+  font-size: var(--page-button-font-size);
+}
+
+#smart-panel #ac-buttons .control-btn,
+.panel-content-container #ac-buttons .control-btn {
+  min-height: var(--height-xl);
+  height: auto;
+  padding: var(--padding-v-xxl) var(--padding-md);
+}
+
+#smart-panel #ac-buttons .control-btn .btn-content,
+.panel-content-container #ac-buttons .control-btn .btn-content {
+  gap: var(--padding-v-xl);
+}
+
+#smart-panel #ac-buttons .control-btn i,
+.panel-content-container #ac-buttons .control-btn i {
+  font-size: var(--page-button-icon-font-size);
+}
+
+#smart-panel #ac-buttons .control-btn span,
+.panel-content-container #ac-buttons .control-btn span {
+  font-size: var(--page-button-font-size);
+}
+
+#smart-panel #sound-effect-buttons .control-btn,
+.panel-content-container #sound-effect-buttons .control-btn {
+  min-height: var(--height-sound-effect-btn);
+  height: auto;
+  padding: var(--size-sound-btn-padding-v) var(--size-sound-btn-padding-h);
+}
+
+#smart-panel #sound-effect-buttons .control-btn .btn-content,
+.panel-content-container #sound-effect-buttons .control-btn .btn-content {
+  gap: var(--size-sound-btn-gap);
+}
+
+#smart-panel #sound-effect-buttons .control-btn i,
+.panel-content-container #sound-effect-buttons .control-btn i {
+  font-size: var(--page-button-icon-font-size);
+}
+
+#smart-panel #sound-effect-buttons .control-btn span,
+.panel-content-container #sound-effect-buttons .control-btn span {
+  font-size: var(--page-button-font-size);
+}
+
+/* -- 灯光控制按钮：使用响应式高度（统一缩小） -- */
+#smart-panel #light-buttons .control-btn,
+.panel-content-container #light-buttons .control-btn {
+  min-height: var(--height-xl);
+  height: auto;
+  padding: var(--padding-v-xxl) var(--padding-md);
+}
+
+#smart-panel #light-buttons .control-btn .btn-content,
+.panel-content-container #light-buttons .control-btn .btn-content {
+  gap: var(--padding-v-lg);
+}
+
+#smart-panel #light-buttons .control-btn i,
+.panel-content-container #light-buttons .control-btn i {
+  font-size: var(--page-button-icon-font-size);
+  margin-bottom: var(--padding-v-md);
+}
+
+#smart-panel #light-buttons .control-btn span,
+.panel-content-container #light-buttons .control-btn span {
+  font-size: var(--page-button-font-size);
+}
+
+/* -- 温度控制按钮（空调标签页中的加减按钮）：使用响应式尺寸 -- */
+#smart-panel button[data-command="consumer/clickButton/temMinusButton"],
+#smart-panel button[data-command="consumer/clickButton/temAddButton"],
+.panel-content-container button[data-command="consumer/clickButton/temMinusButton"],
+.panel-content-container button[data-command="consumer/clickButton/temAddButton"] {
+  width: var(--size-btn-sm);
+  height: var(--size-btn-sm);
+  min-width: var(--size-btn-sm);
+  min-height: var(--size-btn-sm);
+  padding: var(--padding-sm);
+}
+
+#smart-panel button[data-command="consumer/clickButton/temMinusButton"] i,
+#smart-panel button[data-command="consumer/clickButton/temAddButton"] i,
+.panel-content-container button[data-command="consumer/clickButton/temMinusButton"] i,
+.panel-content-container button[data-command="consumer/clickButton/temAddButton"] i {
+  font-size: var(--font-size-icon-sm);
+}
+
+/* -- 标签按钮（控制和画面面板共用）：统一管理 -- */
+/* 使用更通用的选择器，减少重复 */
+[id*="panel"] .smartl-tab-btn,
+[class*="panel"] .smartl-tab-btn,
+.smartl-tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--gap-xs);
+  padding: var(--padding-h-md) var(--padding-h-xs);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+[id*="panel"] .smartl-tab-btn .indonesian-translation,
+[class*="panel"] .smartl-tab-btn .indonesian-translation,
+.smartl-tab-btn .indonesian-translation {
+  font-size: var(--page-subtitle-font-size);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.68);
+  transition: color 0.25s ease;
+}
+
+[id*="panel"] .smartl-tab-btn:is(:hover, :focus-visible),
+[class*="panel"] .smartl-tab-btn:is(:hover, :focus-visible),
+.smartl-tab-btn:is(:hover, :focus-visible) {
+  color: rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+[id*="panel"] .smartl-tab-btn:is(:hover, :focus-visible) .indonesian-translation,
+[class*="panel"] .smartl-tab-btn:is(:hover, :focus-visible) .indonesian-translation,
+.smartl-tab-btn:is(:hover, :focus-visible) .indonesian-translation {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+[id*="panel"] .smartl-tab-btn:focus-visible,
+[class*="panel"] .smartl-tab-btn:focus-visible,
+.smartl-tab-btn:focus-visible {
+  outline: 2px solid rgba(239, 68, 68, 0.45);
+  outline-offset: 2px;
+}
+
+/* 统一使用属性选择器支持 .is-active 和 .active */
+[id*="panel"] .smartl-tab-btn[class*="active"],
+[class*="panel"] .smartl-tab-btn[class*="active"],
+.smartl-tab-btn[class*="active"] {
+  background: var(--primary-color);
+  color: var(--color-white);
+  box-shadow: 0 0.35rem 0.85rem rgba(229, 62, 62, 0.35);
+}
+
+[id*="panel"] .smartl-tab-btn[class*="active"] .indonesian-translation,
+[class*="panel"] .smartl-tab-btn[class*="active"] .indonesian-translation,
+.smartl-tab-btn[class*="active"] .indonesian-translation {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* -- 关闭按钮：统一管理（控制和画面面板共用） -- */
+/* 使用更通用的选择器，减少重复 */
+[id*="panel"] .close-panel-btn,
+[class*="panel"] .close-panel-btn,
+.close-panel-btn {
+  width: var(--size-btn-xs);
+  height: var(--size-btn-xs);
+  min-width: var(--size-btn-xs);
+  min-height: var(--size-btn-xs);
+  padding: var(--padding-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-close-panel);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+[id*="panel"] .close-panel-btn i,
+[class*="panel"] .close-panel-btn i,
+.close-panel-btn i {
+  font-size: var(--font-size-icon-sm);
+}
+
+[id*="panel"] .close-panel-btn:hover,
+[class*="panel"] .close-panel-btn:hover,
+.close-panel-btn:hover {
+  background-color: var(--color-overlay-medium);
+}
+
+[id*="panel"] .close-panel-btn:active,
+[class*="panel"] .close-panel-btn:active,
+.close-panel-btn:active {
+  transform: scale(0.95);
+}
+
+/* -- 画面面板：素材场景按钮（全屏、画中画、壁画等） -- */
+#scene-panel #material-scene-buttons .control-btn,
+#display-panel #material-scene-buttons .control-btn,
+.panel-content-container #material-scene-buttons .control-btn {
+  min-height: var(--height-xl);
+  height: auto;
+  padding: var(--padding-v-xxl) var(--padding-md);
+}
+
+#scene-panel #material-scene-buttons .control-btn .btn-content,
+#display-panel #material-scene-buttons .control-btn .btn-content,
+.panel-content-container #material-scene-buttons .control-btn .btn-content {
+  gap: var(--padding-v-xl);
+}
+
+#scene-panel #material-scene-buttons .control-btn i,
+#display-panel #material-scene-buttons .control-btn i,
+.panel-content-container #material-scene-buttons .control-btn i {
+  font-size: var(--page-button-icon-font-size);
+}
+
+#scene-panel #material-scene-buttons .control-btn span,
+#display-panel #material-scene-buttons .control-btn span,
+.panel-content-container #material-scene-buttons .control-btn span {
+  font-size: var(--page-button-font-size);
+}
+
+/* -- 画面面板：场景按钮（浪漫、派对、KTV等） -- */
+#scene-panel .scene-btn,
+#display-panel .scene-btn,
+.panel-content-container .scene-btn {
+  min-height: var(--height-lg);
+  height: auto;
+  padding: var(--size-scene-btn-padding-v) var(--size-scene-btn-padding-h);
+}
+
+#scene-panel .scene-btn i,
+#display-panel .scene-btn i,
+.panel-content-container .scene-btn i {
+  font-size: var(--page-button-icon-font-size);
+  margin-bottom: var(--padding-v-lg);
+}
+
+#scene-panel .scene-btn span,
+#display-panel .scene-btn span,
+.panel-content-container .scene-btn span {
+  font-size: var(--page-button-font-size);
+}
+
+/* -- 画面面板：更多素材按钮和解锁按钮 -- */
+#scene-panel .more-materials-btn,
+#display-panel .more-materials-btn,
+#scene-panel #newLockBtn,
+#display-panel #newLockBtn,
+.panel-content-container .more-materials-btn,
+.panel-content-container #newLockBtn {
+  min-height: var(--height-more-materials-btn);
+  height: auto;
+  padding: var(--size-more-btn-padding-v) var(--size-more-btn-padding-h);
+}
+
+#scene-panel .more-materials-btn i,
+#display-panel .more-materials-btn i,
+#scene-panel #newLockBtn i,
+#display-panel #newLockBtn i,
+.panel-content-container .more-materials-btn i,
+.panel-content-container #newLockBtn i {
+  font-size: var(--page-button-icon-font-size);
+  margin-bottom: var(--padding-v-sm);
+}
+
+#scene-panel .more-materials-btn span,
+#display-panel .more-materials-btn span,
+#scene-panel #newLockBtn span,
+#display-panel #newLockBtn span,
+.panel-content-container .more-materials-btn span,
+.panel-content-container #newLockBtn span {
+  font-size: var(--page-button-font-size);
+}
+
+/* 控制按钮统一样式 */
+.control-button {
+  width: var(--size-container-md);
+  height: var(--height-control-button);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  pointer-events: none; /* 按钮本身不响应点击，只有图片区域可点击 */
+  overflow: visible; /* 确保伪元素可见 */
+}
+
+.button-image {
+  width: 100%;
+  height: 70%;
+  object-fit: contain;
+  pointer-events: none; /* 图片本身不响应点击，使用伪元素创建精确点击区域 */
+  position: relative;
+  z-index: 10; /* 提高层级，确保在伪元素上方 */
+}
+
+/* 为主页和已选按钮图片创建精确的点击区域（从中心向外扩展，只覆盖图片的不透明部分） */
+.control-button::before {
+  content: '';
+  position: absolute;
+  /* 从按钮中心位置向外扩展 */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* 创建一个从中心向外扩展的点击区域 */
+  /* 根据实际图片内容调整大小，这里设置为按钮尺寸的 60% */
+  width: clamp(6.6rem, 13.2vw, 14.4rem); /* 约为按钮宽度的 60% */
+  height: clamp(3.3rem, 6.6vw, 7.2rem); /* 约为按钮高度的 60% */
+  border-radius: var(--radius-circle); /* 圆形点击区域，从中心向外 */
+  pointer-events: auto; /* 伪元素可点击 */
+  z-index: -1; /* 放在最底层，确保不遮挡任何内容 */
+  background: transparent; /* 确保完全透明 */
+  opacity: 1; /* 确保透明度正常 */
+  /* 可选：取消注释下面的行来查看点击区域（调试用） */
+  /* background: rgba(255, 0, 0, 0.2); */
+  /* border: 1px solid red; */
+  /* z-index: 999; */
+}
+
+/* 主页和已选按钮统一样式 */
+/* === 按钮组：主页与当前已选入口按钮 === */
+#home-btn,
+#selected-open {
+  width: var(--size-container-md);
+  height: var(--height-control-button);
+}
+
+/* 在小屏幕设备上隐藏主页按钮 */
+@media (max-width: 768px) {
+  #home-btn {
+    display: none;
+  }
+}
+
+/* 已选列表面板样式 */
+/* -- selected-panel：遮罩加弹窗，确保滑动时交互区域清晰 -- */
+#selected-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10004;
+  pointer-events: none;
+}
+
+#selected-panel:not(.hidden) {
+  pointer-events: auto;
+}
+
+/* 隐藏状态 */
+/* -- hidden：统一控制显隐，避免多处重复设置 display:none -- */
+.hidden {
+  display: none;
+}
+
+.selected-panel .shuffle-btn,
+.selected-panel .clear-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-md);
+  padding: var(--size-selected-padding-v) var(--size-selected-padding-h);
+  min-width: clamp(4.2rem, 11vw, 6.2rem);
+  border-radius: clamp(0.45rem, 1vw, 0.65rem);
+  background: var(--selected-action-bg, #16a34a);
+  color: var(--color-white);
+  font-weight: 600;
+}
+
+.selected-panel .shuffle-btn {
+  --selected-action-bg: #16a34a;
+}
+
+.selected-panel .clear-btn {
+  --selected-action-bg: #15803d;
+}
+
+
+.selected-panel .selected-action-subtitle {
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.selected-panel .selected-action-group {
+  display: flex;
+  align-items: center;
+  gap: var(--size-selected-action-gap);
+}
+
+.selected-panel .song-tabs button {
+  padding: var(--padding-h-md) var(--padding-h-xs);
+  gap: var(--gap-xs);
+  font-weight: 600;
+}
+
+.selected-panel .song-tabs button.text-base {
+  font-size: var(--page-toolbar-font-size);
+}
+
+.selected-panel .song-tabs i {
+  font-size: var(--page-button-icon-font-size);
+}
+
+.selected-panel .tab-active span:first-of-type,
+.selected-panel .tab-inactive span:first-of-type,
+.selected-panel .tab-active span.text-base,
+.selected-panel .tab-inactive span.text-base {
+  font-size: var(--page-toolbar-font-size);
+  font-weight: 600;
+}
+
+.selected-panel .tab-active .indonesian-translation,
+.selected-panel .tab-inactive .indonesian-translation {
+  font-size: var(--page-subtitle-font-size);
+  font-weight: 500;
+}
+
+.selected-panel .song-count {
+  font-size: var(--page-toolbar-font-size);
+}
+
+/* 底部面板统一底部定位（与 public 版本保持一致） */
+.selected-panel,
+.panel-content-container,
+.smartl-panel,
+.display-panel {
+  position: fixed;
+  top: auto;
+  bottom: var(--panel-bottom, 80px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  z-index: 10003;
+}
+
+/* 统一所有面板底部定位 - 使用语义化类名和ID选择器提高优先级 */
+/* 使用 CSS 变量动态计算位置，默认值为 85px（降级方案） */
+#smart-panel .smartl-panel.fixed,
+#scene-panel .display-panel.fixed,
+#display-panel .display-panel.fixed,
+#selected-panel .selected-panel.fixed {
+  /* bottom值由JavaScript通过DomUtils.setContentPosition()动态设置，不设置默认值避免冲突 */
+  top: auto;
+  left: 0;
+  right: 0;
+  position: fixed;
+}
+
+/* 确保translate-y-full时也从底部偏移 */
+#smart-panel .smartl-panel.fixed.translate-y-full,
+#scene-panel .display-panel.fixed.translate-y-full,
+#display-panel .display-panel.fixed.translate-y-full,
+#selected-panel .selected-panel.fixed.translate-y-full {
+  transform: translateY(100%);
+}
+
+/* 统一模态框样式 */
+#unified-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: var(--size-modal-padding-top);
+  overflow-y: auto;
+  pointer-events: none;
+  /* 模态框高度：完全由CSS控制，响应式自适应 */
+  /* 计算：视口高度减去顶部和底部区域，最小高度55vh */
+  --modal-height: max(calc(var(--viewport-height) - clamp(12vh, 18vh, 20vh) - clamp(5vh, 8vh, 10vh)), 55vh);
+  /* 容器底部padding：自适应计算，确保内容完整显示 */
+  --container-padding-bottom: clamp(15vh, 18vh, 20vh);
+}
+
+#unified-modal:not(.song-modal-visible) {
+  display: none;
+}
+
+#unified-modal .song-top-modal-container {
+  pointer-events: auto;
+  width: 100%;
+}
+
+.unified-modal-container {
+  position: relative;
+  top: 0;
+  width: 100%;
+  max-width: 95vw;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+  opacity: 1;
+  visibility: visible;
+  /* 启用硬件加速 */
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.unified-modal-container.unified-modal-no-transition {
+  transition: none;
+}
+
+.unified-modal-container.unified-modal-slide-transition {
+  transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+}
+
+.unified-modal-container.unified-modal-closing {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform-origin: center top;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease-out;
+}
+
+.unified-modal-container.unified-modal-closing-active {
+  transform: translate3d(-50%, calc(-1 * var(--modal-height)), 0);
+  opacity: 0;
+}
+
+#unified-modal > .song-top-modal-container {
+  height: var(--modal-height);
+  max-height: var(--modal-height);
+  min-height: var(--modal-height);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.song-modal-visible {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+/* 滚动容器基础样式 */
+[data-scrollable="true"],
+.unified-scroll-container {
+  overflow-y: auto;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 统一歌曲容器样式 - 合并所有属性 */
+#unified-songs-container {
+  overflow-y: auto;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  visibility: visible;
+  opacity: 1;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  padding-bottom: var(--container-padding-bottom);
+}
+
+.unified-scroll-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* === 订单模态框和已选商品模态框样式 === */
+/* 统一使用CSS calc()计算高度，显示在底部导航按钮上面（bottom-[65px]） */
+/* 与画面模态框统一容器样式 */
+#orderModalContent,
+#selectedProductsModalContent {
+  /* 使用CSS变量动态计算底部位置，由BottomPanelPositionManager设置 */
+  bottom: var(--panel-bottom, clamp(4.5rem, 10vh, 6rem));
+  /* 使用calc()计算高度：视口高度 - 底部位置 - 额外边距（使用视口高度的百分比） */
+  height: calc(var(--viewport-height) - var(--panel-bottom, clamp(4.5rem, 10vh, 6rem)) - clamp(1rem, 2.5vh, 1.5rem));
+  max-height: calc(var(--viewport-height) - var(--panel-bottom, clamp(4.5rem, 10vh, 6rem)) - clamp(1rem, 2.5vh, 1.5rem));
+  min-height: calc(var(--viewport-height) * 0.45);
+  /* 统一使用与画面模态框相同的容器类名 */
+  position: fixed;
+  width: 100%;
+  max-width: 95vw;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+/* === 歌曲 / 歌星卡片统一样式 === */
+.song-card,
+.singer-card {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: var(--card-padding);
+  gap: var(--card-gap);
+  min-height: var(--card-min-height);
+  border-radius: var(--card-radius);
+  background: var(--bg-elevated);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 clamp(7px, 0.7vw, 12px) clamp(22px, 2.1vw, 38px) rgba(8, 15, 26, 0.42);
+  color: var(--text-primary);
+  transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+  contain: layout paint;
+}
+
+.song-card:hover,
+.singer-card:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(148, 163, 184, 0.32);
+  transform: translateY(-1px);
+}
+
+.song-card-inner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--card-gap);
+  width: 100%;
+  min-width: 0;
+}
+
+.singer-card-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--card-gap);
+  width: 100%;
+  min-width: 0;
+}
+
+.song-card-img-container,
+.singer-card-img-container {
+  position: relative;
+  width: var(--card-img-size);
+  height: var(--card-img-size);
+  min-width: var(--card-img-size);
+  min-height: var(--card-img-size);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  flex-shrink: 0;
+  z-index: 1; /* 确保头像容器在正确层级 */
+  isolation: isolate; /* 创建新的层叠上下文 */
+  transform: translateZ(0); /* 启用硬件加速 */
+  will-change: transform; /* 提示浏览器优化 */
+}
+
+.song-card-icon-wrapper,
+.singer-card-icon-wrapper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.18s ease, visibility 0.18s ease;
+  z-index: 2;
+  isolation: isolate;
+  transform: translateZ(0);
+  will-change: transform;
+  background: rgba(229, 62, 62, 0.14);
+  color: var(--primary-color);
+  font-size: var(--size-card-icon);
+}
+
+.song-card-img,
+.singer-card-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.18s ease, visibility 0.18s ease;
+  z-index: 2;
+  isolation: isolate;
+  transform: translateZ(0);
+  will-change: transform;
+  object-fit: cover;
+  border-radius: var(--radius-full);
+}
+
+.song-card-icon-wrapper.hidden,
+.singer-card-icon-wrapper.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.song-card-img,
+.singer-card-img {
+  object-fit: cover;
+  border-radius: var(--radius-full);
+}
+
+.song-card-img.hidden,
+.singer-card-img.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.song-card-content,
+.singer-card-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-card-content-gap);
+  overflow: hidden;
+}
+
+.song-card-title,
+.singer-card-title {
+  margin: 0;
+  font-size: var(--song-card-title-font-size);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.song-card-title {
+  position: relative;
+}
+
+.song-card-title-text {
+  display: inline-block;
+  width: 100%;
+  max-width: 100%;
+  padding-right: var(--size-card-title-padding-right);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-card-title--marquee .song-card-title-text {
+  width: auto;
+  min-width: 100%;
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  animation: song-card-marquee 12s linear infinite;
+}
+
+.song-card-title--requested {
+  color: var(--primary-color);
+}
+
+.song-card-pinyin,
+.singer-card-pinyin {
+  font-size: var(--song-card-pinyin-font-size);
+  color: var(--text-muted);
+  line-height: 1.25;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.song-card-pinyin-text {
+  display: inline-block;
+  min-width: 100%;
+  padding-right: var(--size-card-title-padding-right);
+}
+
+.song-card-pinyin--marquee .song-card-pinyin-text {
+  animation: song-card-marquee 14s linear infinite;
+}
+
+.song-card-singer-container,
+.singer-card-tag-container {
+  display: flex;
+  align-items: center;
+  gap: var(--size-card-singer-gap);
+  margin-top: var(--size-card-singer-margin);
+}
+
+.song-card-singer,
+.singer-card-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--size-card-singer-padding-v) var(--size-card-singer-padding-h);
+  border-radius: var(--radius-pill);
+  background: rgba(59, 130, 246, 0.16);
+  color: rgba(191, 219, 254, 0.95);
+  font-size: var(--song-card-singer-font-size);
+  line-height: 1.1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: relative;
+  z-index: 3; /* 确保歌星名称在正确层级 */
+  isolation: isolate; /* 创建新的层叠上下文 */
+  transform: translateZ(0); /* 启用硬件加速 */
+  will-change: transform; /* 提示浏览器优化 */
+  pointer-events: none; /* 禁用歌星名称的点击事件，防止误触发 */
+}
+
+.song-card-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--size-card-actions-gap);
+  margin-left: auto;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  justify-self: end;
+}
+
+.song-card-actions .song-card-add-btn,
+.song-card-actions .priority-btn {
+  vertical-align: middle;
+  align-self: center;
+}
+
+.song-card-add-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--card-btn-size);
+  height: var(--card-btn-size);
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(229, 62, 62, 0.55);
+  background: linear-gradient(138deg, rgba(229, 62, 62, 0.88), rgba(236, 72, 153, 0.62));
+  color: var(--color-white);
+  box-shadow: 0 0.55rem 1.4rem rgba(229, 62, 62, 0.35);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+  flex-basis: auto;
+  white-space: nowrap;
+}
+
+.song-card-add-btn:hover:not([disabled]) {
+  transform: translateY(-1px);
+  box-shadow: 0 0.75rem 1.8rem rgba(229, 62, 62, 0.4);
+}
+
+.request-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--card-btn-size);
+  height: var(--card-btn-size);
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(249, 115, 22, 0.55);
+  background: linear-gradient(145deg, rgba(249, 115, 22, 0.88), rgba(245, 158, 11, 0.7));
+  color: #fff7ed;
+  box-shadow: 0 0.6rem 1.7rem rgba(249, 115, 22, 0.42);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+  flex-basis: auto;
+  white-space: nowrap;
+}
+
+.request-btn:hover:not([disabled]) {
+  transform: translateY(-1px);
+  box-shadow: 0 0.9rem 2rem rgba(249, 115, 22, 0.48);
+}
+
+.song-card-add-btn.play-pause-btn,
+.song-card-add-btn.has-playing-indicator {
+  background: linear-gradient(140deg, rgba(34, 197, 94, 0.9), rgba(74, 222, 128, 0.7));
+  border-color: rgba(34, 197, 94, 0.55);
+  color: #052e16;
+  box-shadow: 0 0.6rem 1.6rem rgba(74, 222, 128, 0.38);
+}
+
+.song-card-add-btn.next-btn {
+  background: linear-gradient(140deg, rgba(59, 130, 246, 0.92), rgba(14, 165, 233, 0.75));
+  color: #eff6ff;
+  border-color: rgba(59, 130, 246, 0.55);
+  box-shadow: 0 0.6rem 1.6rem rgba(59, 130, 246, 0.4);
+}
+
+.song-card-add-btn.next-btn:hover:not([disabled]) {
+  box-shadow: 0 0.85rem 2rem rgba(59, 130, 246, 0.46);
+}
+
+.song-card-add-btn[disabled],
+.request-btn[disabled],
+.song-card-add-btn.is-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.priority-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.song-card-add-btn.play-pause-btn.is-disabled {
+  opacity: 1;
+}
+
+.song-card-add-btn.priority-btn,
+.priority-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--card-btn-size);
+  height: var(--card-btn-size);
+  border-radius: var(--radius-pill);
+  background: linear-gradient(145deg, rgba(56, 189, 248, 0.9), rgba(37, 99, 235, 0.8));
+  color: #f8fafc;
+  border: 1px solid rgba(56, 189, 248, 0.55);
+  box-shadow: 0 0.6rem 1.6rem rgba(56, 189, 248, 0.4);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+  flex-basis: auto;
+  white-space: nowrap;
+}
+
+.song-card-add-btn.priority-btn:hover:not([disabled]),
+.priority-btn:hover:not([disabled]) {
+  box-shadow: 0 0.9rem 2.1rem rgba(56, 189, 248, 0.48);
+}
+
+.song-card-add-btn .song-card-add-icon,
+.song-card-add-btn .song-card-step-icon,
+.song-card-add-btn .song-card-priority-icon,
+.song-card-add-btn .song-card-arrow-icon,
+.song-card-add-btn .song-card-replay-icon,
+.priority-btn .song-card-priority-icon {
+  color: inherit;
+  /* 按钮图标字体大小 - 自动适配所有分辨率 */
+  font-size: var(--size-card-icon-font);
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.song-card-add-btn .playing-indicator {
+  width: calc(var(--card-btn-size) * 0.56);
+  height: calc(var(--card-btn-size) * 0.56);
+}
+
+.song-card-add-btn .playing-indicator-inner {
+  gap: calc(var(--card-btn-size) * 0.08);
+}
+
+.song-card-add-btn .playing-bar {
+  width: calc(var(--card-btn-size) * 0.12);
+  border-radius: calc(var(--card-btn-size) * 0.06);
+}
+
+@keyframes song-card-replay-bounce {
+  0% { transform: scale(1); }
+  35% { transform: scale(0.9); }
+  65% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+@keyframes song-card-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+#unified-songs-container .grid.virtual-grid {
+  width: 100%;
+  justify-items: stretch;
+}
+
+#unified-songs-container .grid.virtual-grid > .song-card,
+#unified-songs-container .grid.virtual-grid > .singer-card {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.song-card-replay-icon--animating {
+  animation: song-card-replay-bounce 0.35s ease;
+}
+
+.song-card-replay-icon--active {
+  color: #e11d48;
+}
+
+.song-card--current {
+  background: rgba(59, 130, 246, 0.24);
+  border-color: rgba(147, 197, 253, 0.55);
+}
+
+.song-card--current .song-card-title,
+.song-card--current .song-card-pinyin {
+  color: #f8fafc;
+}
+
+.song-card--current .song-card-singer {
+  background: rgba(255, 255, 255, 0.25);
+  color: #0f172a;
+}
+
+.song-card--next {
+  background: rgba(168, 85, 247, 0.22);
+  border-color: rgba(216, 180, 254, 0.5);
+}
+
+.song-card--next .song-card-title,
+.song-card--next .song-card-pinyin {
+  color: rgba(253, 244, 255, 0.98);
+}
+
+.song-card--next .song-card-singer {
+  background: rgba(236, 72, 255, 0.22);
+  color: rgba(253, 244, 255, 0.96);
+}
+
+.song-card--queued {
+  background: rgba(30, 41, 59, 0.88);
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+.song-card-selected {
+  background: rgba(16, 208, 217, 0.42);
+  border-color: rgba(16, 208, 217, 0.65);
+}
+
+.singer-card .fa-chevron-right {
+  font-size: var(--size-singer-chevron);
+  color: rgba(203, 213, 225, 0.7);
+}
+
+.virtual-grid,
+#unified-songs-container .grid.virtual-grid,
+#unified-songs-container > .grid {
+  visibility: visible;
+  opacity: 1;
+  grid-template-columns: 1fr;
+  min-height: 0;
+  height: auto;
+}
+
+/* 右下角已选图标样式 - 简洁风格 */
+/* -- bottom-selected-icon：展示已选数量，固定在右下角 -- */
+.bottom-selected-icon {
+  position: fixed;
+  bottom: 6rem;
+  right: 4.375rem;
+  z-index: 30;
+  width: var(--size-bottom-icon);
+  height: var(--size-bottom-icon);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.bottom-selected-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+
+/* -- selected-badge：圆徽用于展示数量，需要随屏幕缩放 -- */
+.selected-badge {
+  background-color: var(--color-red-500);
+  color: var(--color-white);
+  border-radius: var(--radius-circle);
+  min-width: var(--size-badge);
+  height: var(--size-badge);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: var(--font-size-badge);
+}
+
+#selected-badge {
+  min-width: var(--size-badge);
+  height: var(--size-badge);
+  font-size: var(--font-size-badge);
+}
+
+/* 主页和已选按钮容器位置 */
+#home-selected-buttons-container {
+  position: fixed;
+  bottom: calc(var(--panel-bottom, clamp(4.5rem, 10vh, 6rem)) + clamp(1.5rem, 4vh, 2rem) + env(safe-area-inset-bottom));
+  right: clamp(0.75rem, 2.5vw, 1.5rem);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* -- 服务与语种按钮：采用统一圆角，防止宽度过大 -- */
+#service-btn,
+#languageToggle {
+  min-width: var(--min-width-service-btn);
+  min-height: var(--min-height-service-btn);
+  padding: var(--size-service-btn-padding-v) var(--size-service-btn-padding-h);
+}
+
+#service-btn i,
+#languageToggle i {
+  font-size: var(--font-size-service-icon);
+  margin-right: var(--size-service-btn-icon-margin);
+}
+
+#service-btn span,
+#languageToggle span {
+  font-size: var(--font-size-service-text);
+}
+
+/* 统一搜索组件基础样式 */
+#unified-modal #unified-search-input {
+  display: block;
+  width: 100%;
+  padding: var(--padding-sm) var(--padding-md);
+  padding-left: var(--size-search-padding-l);
+  padding-right: var(--size-search-padding-r);
+  border: 1px solid hsl(215, 17%, 55%);
+  border-radius: var(--radius-xs);
+  background-color: var(--color-overlay-very-dark);
+  color: var(--color-white);
+  font-size: var(--font-size-icon-xs);
+  outline: none;
+  height: var(--size-search-height);
+  line-height: 1.4;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#unified-modal #unified-search-input:focus-visible {
+  border-color: var(--color-blue-400);
+  box-shadow: var(--shadow-focus-ring);
+}
+
+#unified-modal #unified-search-input:focus {
+  border-color: var(--color-blue-400);
+  box-shadow: var(--shadow-focus-ring);
+}
+
+#unified-modal .unified-search-icon {
+  position: absolute;
+  top: 50%;
+  left: var(--size-search-icon-pos);
+  transform: translateY(-50%);
+  z-index: 10;
+  pointer-events: none;
+  color: #e5e7eb;
+  font-size: var(--size-search-icon);
+  width: var(--size-search-icon);
+  height: var(--size-search-icon);
+}
+
+/* 点歌页面按钮样式 */
+.song-top-filter-btn {
+  padding: var(--size-filter-padding-v) var(--size-filter-padding-h);
+  border-radius: var(--size-filter-radius);
+  min-height: var(--size-filter-min-h);
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--size-filter-btn-gap);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-size: var(--filter-btn-font-size);
+}
+
+.song-top-filter-btn span:first-child {
+  font-size: inherit;
+  line-height: 1.15;
+  font-weight: 600;
+}
+
+/* 按钮选中状态时，中文文字显示为纯白色 */
+.song-top-filter-btn.bg-blue-500 span:first-child {
+  color: #ffffff;
+}
+
+.song-top-filter-btn .indonesian-translation {
+  font-size: var(--size-filter-sub-font);
+  line-height: 1.1;
+  margin-top: var(--size-filter-sub-margin);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.song-top-filter-btn--sub,
+.song-top-filter-btn--primary {
+  font-size: var(--filter-btn-font-size);
+}
+
+/* ==================== 响应式优化 ==================== */
+/* 使用自适应viewport后，clamp()函数会自动适配所有分辨率 */
+/* 以下只保留必要的特殊样式，其他由clamp()自动处理 */
+
+/* 确保底部导航栏左右完全对称 - 已合并到第455行的主定义中 */
+
+/* 横竖屏切换优化 - 保留必要的布局调整 */
+@media (orientation: landscape) {
+  /* 横屏特殊处理（如需要） */
+}
+
+@media (orientation: portrait) {
+  /* 竖屏特殊处理（如需要） */
+}
+
+
+/* 通过类触发：当检测为特定分辨率竖屏时上移按钮 */
+html.raise-home-selected .fixed.bottom-20,
+html.raise-home-selected #home-selected-buttons-container {
+  bottom: var(--bottom-home-selected);
+}
+
+/* ==================== 修复：替代 !important 和内联样式 ==================== */
+/* 注意：html, body 的 overflow、height、touch-action 样式已合并到上面的全局背景定义中 */
+
+/* === 模态框内容样式类 - 替代 JavaScript 中的 !important === */
+.modal-content-visible {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* === 统一显示/隐藏逻辑 - 替代内联样式 === */
+.modal-visible {
+  display: block !important;
+}
+
+.modal-hidden {
+  display: none !important;
+}
+
+.modal-container-scrollable {
+  overflow-y: auto !important;
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.modal-container-scrollable.flex-1 {
+  min-height: 0 !important;
+}
+
+.modal-container-flex-start {
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+}
+
+/* === 音量按钮强制尺寸控制 - 替代 SmartlUI.js 中的 !important === */
+/* 使用 CSS 变量动态设置尺寸，通过 JavaScript 设置变量值 */
+.volume-btn-control-fixed {
+  width: var(--volume-btn-size, 44px) !important;
+  height: var(--volume-btn-size, 44px) !important;
+  min-width: var(--volume-btn-size, 44px) !important;
+  min-height: var(--volume-btn-size, 44px) !important;
+  max-width: var(--volume-btn-size, 44px) !important;
+  max-height: var(--volume-btn-size, 44px) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  border-radius: 50% !important;
+  flex: 0 0 var(--volume-btn-size, 44px) !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  flex-basis: var(--volume-btn-size, 44px) !important;
+  overflow: hidden !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  position: relative !important;
+  vertical-align: middle !important;
+}
+
+.volume-btn-control-fixed i {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  display: block !important;
+  font-size: var(--volume-icon-size, 1rem) !important;
+}
+
+.volume-control-row-fixed {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--volume-control-gap, 0.45rem) !important;
+}
+
+/* === 容器滚动优化 - 替代 DomUtils.js 中的 !important === */
+.container-scrollable-optimized {
+  overflow-y: auto !important;
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
+  content-visibility: auto !important;
+  contain: layout paint size !important;
+  will-change: scroll-position !important;
+  box-sizing: border-box !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* === 图标闪烁效果 - 替代 BottomNavUI.js 中的 !important === */
+.icon-flash-color {
+  color: var(--flash-color, #00f6c5) !important;
+}
+
+/* === 文本颜色强制设置 - 替代 SmartlUI.js 中的 !important === */
+.text-white-important {
+  color: #ffffff !important;
+}
+
+/* 允许特定容器滚动 - GPU加速优化 */
+#top-songs-container, 
+#party-songs-container,
+.songs-scroll-area,
+[data-scrollable="true"] {
+  touch-action: pan-y;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transform: translateZ(0);
+  contain: layout style paint;
+}
+
+/* 主内容区样式 */
+main.main-content {
+  height: var(--viewport-height);
+  max-height: var(--viewport-height);
+  overflow: hidden;
+  touch-action: none;
+}
+
+/* 左上角可点击区域样式 */
+#top-left-click-area {
+  pointer-events: auto;
+  z-index: 10008;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--size-top-left);
+  height: var(--size-top-left);
+}
+
+/* 设置按钮样式 */
+#settings-btn {
+  pointer-events: auto;
+}
+
+/* 加载进度条初始样式 */
+#loading-progress {
+  width: 0%;
+  background-color: #E53E3E;
+  opacity: 1;
+}
+
+/* 按钮显示/隐藏控制类 */
+.button-visible {
+  display: block;
+}
+
+.button-hidden {
+  display: none;
+}
+
+/* 首页按钮区域显示控制 */
+.home-buttons-visible {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+.home-buttons-hidden {
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* 按钮指针事件控制 */
+.button-pointer-events-auto {
+  pointer-events: auto;
+}
+
+/* ==================== 设置弹窗样式（放在文件末尾，确保最高优先级） ==================== */
+/* 覆盖CSS变量，确保字体大小不受全局变量影响 */
+html body #settingsModal {
+  --font-size-base: 18px;
+}
+
+/* 设置弹窗字体大小 - 统一所有元素为18px（更大更易读） */
+/* 不依赖Tailwind类，直接通过CSS控制 */
+html body #settingsModal,
+html body #settingsModal * {
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+/* 标题稍大 */
+html body #settingsModal h3 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+html body #settingsModal .fa-times {
+  font-size: 20px;
+}
+
+/* 自定义下拉菜单容器 */
+html body #settingsModal .custom-select-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 自定义下拉菜单按钮 */
+html body #settingsModal #settingsLogLevelBtn {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  pointer-events: auto;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* 自定义下拉菜单选项列表 */
+html body #settingsModal #settingsLogLevelDropdown {
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  left: 0;
+  right: 0;
+  top: 100%;
+  pointer-events: auto;
+  z-index: 9999;
+  transform: translate(var(--dropdown-offset-x, 0), var(--dropdown-offset-y, 0));
+}
+
+/* 自定义下拉菜单选项 */
+html body #settingsModal .custom-select-option {
+  color: inherit;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  font-size: 18px;
+}
+
+html body #settingsModal .custom-select-option:first-child {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+html body #settingsModal .custom-select-option:last-child {
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+/* 强制限制所有包含自定义下拉菜单的容器 */
+html body #settingsModal div:has(#settingsLogLevel) {
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* 弹窗容器尺寸限制 - 确保不超出屏幕，居中显示 */
+html body #settingsModal .bg-white,
+html body #settingsModal .dark\:bg-gray-800 {
+  max-width: 85vw;
+  width: 100%;
+  min-width: 320px;
+  max-height: min(85vh, calc(var(--viewport-height) - 2rem));
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+  position: relative;
+  contain: layout style paint;
+  clip-path: inset(0);
+}
+
+/* 确保弹窗外层容器不超出屏幕并裁剪下拉列表，确保居中 */
+html body #settingsModal > div:last-child {
+  padding: 0.5rem;
+  max-width: 100vw;
+  max-height: var(--viewport-height);
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+  clip-path: inset(0);
+  contain: layout style paint;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* 弹窗内容区 - 强制裁剪所有溢出内容，包括下拉列表 */
+html body #settingsModal > div:last-child > div {
+  max-width: 85vw;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+  clip-path: inset(0);
+  contain: layout style paint;
+}
+
+/* ==================== 页面统一字体大小管理 ==================== */
+/* 标题字体 */
+.page-title {
+  font-size: var(--page-title-font-size);
+}
+
+/* 副标题字体 - 使用更高优先级确保覆盖其他样式 */
+.page-subtitle,
+.selected-action-subtitle.page-subtitle,
+.smartl-tab-btn .page-subtitle,
+.selected-tab-btn .page-subtitle,
+.sung-tab-btn .page-subtitle {
+  font-size: var(--page-subtitle-font-size);
+}
+
+/* 快捷栏字体 - 使用更高优先级确保覆盖其他样式 */
+.page-toolbar,
+.smartl-tab-btn.page-toolbar,
+.selected-tab-btn.page-toolbar,
+.sung-tab-btn.page-toolbar {
+  font-size: var(--page-toolbar-font-size);
+}
+
+/* 按钮字体 - 使用更高优先级确保覆盖其他样式 */
+.page-button,
+.selected-action-btn.page-button,
+.selected-action-label.page-button {
+  font-size: var(--page-button-font-size);
+}
+
+/* 按钮图标字体 - 使用更高优先级确保覆盖其他样式 */
+.page-button-icon,
+.selected-action-btn .page-button-icon,
+.selected-action-icon.page-button-icon,
+.smartl-tab-btn .page-button-icon,
+.selected-tab-btn .page-button-icon,
+.sung-tab-btn .page-button-icon {
+  font-size: var(--page-button-icon-font-size);
+}
+
+/* 标签字体 */
+.page-label {
+  font-size: var(--page-label-font-size);
+}
+
+/* 空状态字体 - 统一管理 */
+.page-empty-state-title,
+.page-empty-state-text {
+  font-size: var(--page-empty-state-font-size);
+}
+
+/* 空状态图标 - 统一管理 */
+.empty-state-icon,
+.page-empty-state-title .fa,
+.page-empty-state-title i {
+  font-size: var(--page-empty-state-icon-font-size);
+}
+
+/* 空状态容器 - 模态框居中显示 */
+#empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 50vh;
+  text-align: center;
+}
+
+/* ==================== 加载屏幕样式 ==================== */
+/* 从 index.html 移入，避免内联样式 */
+#app-loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0b1120 0%, #1e293b 100%);
+  background-image: url('../images/bg_single.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+#app-loading-screen.hidden {
+  display: none;
+}
+
+#app-loading-screen h1 {
+  font-size: var(--font-size-loading-title);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 0.4rem 0;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+#app-loading-screen p {
+  font-size: var(--font-size-loading-text);
+  color: rgba(156, 163, 175, 0.8);
+  margin: 0 0 0.3rem 0;
+  line-height: 1.5;
+}
+
+#app-loading-screen .loading-text-container {
+  margin-bottom: var(--margin-loading-container);
+  text-align: center;
+}
+
+#app-loading-screen .loading-progress-container {
+  width: var(--width-loading-progress);
+  max-width: 14rem;
+  margin: 0 auto;
+}
+
+#app-loading-screen .loading-progress-bar {
+  height: 0.35rem;
+  background-color: rgba(55, 65, 81, 0.5);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+#app-loading-screen #loading-progress {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #e53e3e 0%, #f97316 100%);
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+#app-loading-screen #loading-text {
+  text-align: center;
+  color: rgba(156, 163, 175, 0.8);
+  font-size: var(--font-size-loading-progress);
+  margin-top: var(--margin-loading-progress);
+  font-weight: 400;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==================== 清理内联样式：替代样式类 ==================== */
+
+/* 面板初始隐藏状态 */
+.panel-content-container.panel-hidden {
+  transform: translateY(100%);
+}
+
+/* 面板显示状态 */
+.panel-content-container.panel-visible {
+  transform: translateY(0);
+}
+
+/* 按钮容器样式 */
+.scene-btn-container {
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+/* 无限滚动加载指示器样式 */
+.infinite-loading-indicator {
+  width: 100%;
+}
+
+.infinite-loading-indicator .loading-wrapper {
+  min-height: 80px;
+}
+
+.infinite-loading-indicator .loading-content {
+  font-size: 20px;
+  font-weight: 600;
+  color: white;
+}
+
+.infinite-loading-indicator .loading-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgb(209, 213, 219);
+  border-top-color: rgb(59, 130, 246);
+}
+
+.infinite-loading-indicator .loading-text {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* 无限滚动"没有更多数据"提示样式 */
+.infinite-no-more-indicator {
+  width: 100%;
+}
+
+.infinite-no-more-indicator .no-more-wrapper {
+  min-height: 64px;
+}
+
+.infinite-no-more-indicator .no-more-message {
+  font-size: 28px;
+  font-weight: 600;
+  color: white;
+  line-height: 1.2;
+}
+
+.infinite-no-more-indicator .no-more-translation {
+  font-size: 22px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.2;
+  margin-top: 4px;
+  letter-spacing: -0.02em;
+}
+
+/* Toast 容器样式 */
+#global-toast-container {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 11000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+}
+
+/* Toast 消息样式 */
+.global-toast {
+  padding: 10px 22px;
+  border-radius: 16px;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.25);
+  transition: all 0.3s ease;
+  max-width: 520px;
+  font-size: var(--toast-font-size, 1.2rem);
+  line-height: 1.35;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(-20px) scale(0.95);
+  animation: toastSlideIn 0.35s forwards;
+  pointer-events: auto;
+  background-color: #3b82f6;
+}
+
+@keyframes toastSlideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastSlideOut {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.global-toast.global-toast-slide-out {
+  animation: toastSlideOut 0.3s forwards;
+}
+
+/* 进度条宽度通过 CSS 变量控制 */
+.progress-bar {
+  width: var(--progress-width, 0%);
+  transition: width 0.3s ease;
+}
+
+/* 标签页激活状态颜色 */
+.tab-active-color {
+  color: #ef4444;
+}
+
+.tab-inactive-color {
+  color: #6B7280;
+}
+
+/* 禁用指针事件 */
+.pointer-events-none {
+  pointer-events: none;
+}
+
+.pointer-events-auto {
+  pointer-events: auto;
+}
+

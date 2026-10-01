@@ -1,0 +1,627 @@
+/* HVideo Admin responsive layout
+ * Supports the Tauri minimum viewport (about 889x595 content area) through 4K.
+ * Layout reflows instead of applying browser zoom, keeping text and controls sharp.
+ */
+:root {
+    --admin-sidebar-width: 16rem;
+    --admin-page-padding: 1.5rem;
+    --admin-panel-gap: 1rem;
+}
+
+html,
+body,
+#admin-page,
+#admin-main {
+    width: 100%;
+    max-width: 100%;
+}
+
+body {
+    min-width: 0;
+}
+
+/* Keep the login card compact on high-DPI and scaled displays. */
+#login-page {
+    overflow-y: auto;
+}
+
+#login-page > .login-card {
+    width: min(100%, 28rem);
+    max-width: 28rem !important;
+    margin: auto;
+    flex: 0 0 auto;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+.admin-sidebar {
+    width: var(--admin-sidebar-width) !important;
+}
+
+.admin-main {
+    min-width: 0;
+    margin-left: var(--admin-sidebar-width) !important;
+}
+
+.admin-main.expanded {
+    margin-left: 0 !important;
+}
+
+#admin-main > header,
+#admin-main > .flex-1,
+.section-content,
+.section-content > * {
+    min-width: 0;
+}
+
+#admin-main > .flex-1 {
+    padding-left: var(--admin-page-padding) !important;
+    padding-right: var(--admin-page-padding) !important;
+    padding-bottom: var(--admin-page-padding) !important;
+}
+
+.section-content {
+    max-width: 100%;
+    overscroll-behavior: contain;
+}
+
+.section-content input,
+.section-content select,
+.section-content textarea,
+.section-content button {
+    max-width: 100%;
+}
+
+.section-content img,
+.section-content video,
+.section-content canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Data tables retain readable columns and scroll inside their own panel. */
+.section-content .overflow-x-auto {
+    max-width: 100%;
+    overscroll-behavior-x: contain;
+}
+
+#terminals-section table,
+#songs-section table,
+#artists-section table,
+#cloud-section table,
+#streams-section table,
+#users-section table,
+#logs-section table {
+    width: 100%;
+    min-width: 720px;
+}
+
+#dashboard-section table {
+    width: 100%;
+    min-width: 620px;
+}
+
+/* Song controls reflow independently from the table instead of being clipped. */
+#song-page-actions,
+#song-page-actions-buttons,
+#song-filters,
+#songs-table-scroll {
+    min-width: 0;
+}
+
+#song-page-actions {
+    gap: .75rem;
+}
+
+#song-page-actions-buttons {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .5rem;
+}
+
+#song-page-actions-buttons > :not([hidden]) ~ :not([hidden]) {
+    margin-left: 0 !important;
+}
+
+#song-page-actions-buttons button {
+    white-space: nowrap;
+}
+
+#song-filters {
+    flex-wrap: wrap;
+    gap: .75rem;
+}
+
+#songs-section,
+#songs-section > .bg-gray-800 {
+    min-height: 0;
+    overflow: hidden;
+}
+
+#songs-table-scroll {
+    max-width: 100% !important;
+    min-height: 0;
+    overflow: auto !important;
+    scrollbar-gutter: stable;
+    overscroll-behavior: contain;
+}
+
+#songs-table-scroll thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: rgb(31 41 55);
+}
+
+#songs-pagination-bar {
+    min-width: 0;
+    gap: .75rem;
+}
+
+#songs-pagination {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+/* Long values must not expand cards or panels beyond the viewport. */
+.section-content td,
+.section-content th,
+.section-content p,
+.section-content .break-all,
+#room-details-panel {
+    overflow-wrap: anywhere;
+}
+
+/* Room cards choose their column count from available content width, not window width. */
+#rooms-grid {
+    grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)) !important;
+}
+
+#rooms-section > :first-child {
+    gap: .5rem;
+}
+
+#room-type-tabs {
+    min-width: 0;
+    flex: 1 1 auto;
+    padding-bottom: 2px;
+}
+
+#rooms-section > :first-child > :last-child {
+    flex: 0 0 auto;
+}
+
+#rooms-section > .flex-1 {
+    min-height: 0;
+    position: relative;
+}
+
+#rooms-container,
+#room-details-content,
+#tab-content-info {
+    min-width: 0;
+    min-height: 0;
+}
+
+#room-details-content,
+#tab-content-info {
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+}
+
+#room-details-panel.translate-x-full {
+    width: 0 !important;
+    border-left-width: 0;
+    overflow: hidden;
+}
+
+/* Modals remain reachable on low-height screens. */
+[id$="-modal"] {
+    padding: 12px;
+    overflow-y: auto;
+}
+
+[id$="-modal"] > div {
+    max-width: min(100%, var(--modal-max-width, 64rem));
+    max-height: calc(100dvh - 24px) !important;
+    overflow-y: auto;
+}
+
+.admin-confirm-box,
+.admin-prompt-box,
+.admin-toast {
+    max-width: min(calc(100vw - 24px), 400px);
+}
+
+/* Prevent the fixed status area from compressing labels into vertical text. */
+#main-status-bar {
+    min-width: 0;
+    gap: 1rem;
+}
+
+#main-status-bar > div {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+#peripheral-status-bar {
+    min-width: 0;
+    overflow-x: auto;
+    justify-content: flex-start !important;
+    scrollbar-width: none;
+}
+
+#peripheral-status-bar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Tauri desktop diagnostics stay compact and fully reachable. */
+#tauri-test-block,
+#tauri-test-status-grid,
+#tauri-test-actions {
+    min-width: 0;
+}
+
+#tauri-test-actions > button {
+    flex: 0 1 auto;
+    white-space: nowrap;
+}
+
+#tauri-test-msg {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+/* Medium desktop windows: reduce chrome without changing content scale. */
+@media (max-width: 1440px) {
+    :root {
+        --admin-sidebar-width: 14rem;
+        --admin-page-padding: 1rem;
+        --admin-panel-gap: .75rem;
+    }
+
+    #admin-main > header {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    #dashboard-section > .grid:first-child {
+        gap: 1rem !important;
+    }
+
+    #dashboard-section .stats-card {
+        padding: 1rem;
+    }
+
+    #rooms-container {
+        padding: .75rem !important;
+    }
+
+    #room-details-panel {
+        width: 17rem !important;
+    }
+}
+
+/* Compact desktop: sidebar becomes a drawer so it never steals content width. */
+@media (max-width: 1180px) {
+    :root {
+        --admin-page-padding: .75rem;
+    }
+
+    .admin-main,
+    .admin-main.expanded {
+        margin-left: 0 !important;
+    }
+
+    .admin-sidebar {
+        width: min(16rem, calc(100vw - 3rem)) !important;
+        z-index: 60 !important;
+        box-shadow: 14px 0 32px rgba(0, 0, 0, .42);
+    }
+
+    #sidebar-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: none;
+        border: 0;
+        background: rgba(0, 0, 0, .48);
+    }
+
+    body.compact-layout.sidebar-open #sidebar-backdrop {
+        display: block;
+    }
+
+    #admin-main > header {
+        padding-left: .75rem !important;
+        padding-right: .75rem !important;
+    }
+
+    #page-title {
+        font-size: 1.35rem !important;
+    }
+
+    #dashboard-section > .grid:first-child {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    #dashboard-section > div:nth-child(2) > .grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    #terminals-section > div > div:first-child,
+    #artists-section > div > div:first-child,
+    #cloud-section > div > div:first-child,
+    #streams-section > div:first-child,
+    #users-section > div > div:first-child,
+    #logs-section > div > div:first-child {
+        flex-wrap: wrap;
+        gap: .75rem;
+    }
+
+    #peripherals-section > .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-auto-rows: minmax(250px, 1fr);
+        overflow-y: auto !important;
+        padding-right: 2px;
+    }
+
+    #settings-section .grid-cols-2,
+    #settings-section .md\:grid-cols-2,
+    #settings-section .lg\:grid-cols-2 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Tauri minimum window and similar 1024x600 displays. */
+@media (max-width: 980px) {
+    :root {
+        --admin-page-padding: .5rem;
+    }
+
+    #admin-main > header {
+        min-height: 42px;
+        margin-bottom: .25rem !important;
+        padding-top: .25rem !important;
+    }
+
+    #admin-main > header .space-x-4 {
+        gap: .35rem;
+    }
+
+    #admin-main > header .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+        margin-left: 0 !important;
+    }
+
+    #rooms-section > :first-child {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+    }
+
+    #rooms-section > :first-child > :last-child {
+        gap: .35rem;
+    }
+
+    #room-search {
+        width: 7rem !important;
+    }
+
+    #manage-room-configs,
+    #add-room {
+        padding-left: .6rem !important;
+        padding-right: .6rem !important;
+    }
+
+    #room-area-tabs {
+        width: 4.25rem !important;
+    }
+
+    #room-area-tabs button {
+        width: 3.5rem !important;
+    }
+
+    #rooms-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
+        gap: .5rem !important;
+    }
+
+    /* Detail becomes an overlay; opening it no longer crushes the room grid. */
+    #room-details-panel {
+        position: absolute;
+        inset: 0 0 0 auto;
+        z-index: 30;
+        width: min(20rem, calc(100% - 4.25rem)) !important;
+        max-width: calc(100% - 4.25rem);
+        box-shadow: -16px 0 28px rgba(0, 0, 0, .45);
+    }
+
+    #room-details-panel.translate-x-full {
+        width: min(20rem, calc(100% - 4.25rem)) !important;
+        border-left-width: 1px;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    #song-page-actions {
+        align-items: center;
+        flex-wrap: nowrap !important;
+    }
+
+    #song-page-actions-buttons {
+        flex: 0 1 auto !important;
+        width: auto !important;
+        align-self: auto;
+        justify-content: flex-end;
+    }
+
+    #song-filters > div:first-child {
+        flex: 1 1 15rem;
+        width: auto !important;
+    }
+
+    #song-filters > div:nth-child(2) {
+        flex: 2 1 18rem;
+        width: auto !important;
+    }
+
+    #song-language-filter {
+        flex: 1 1 12rem;
+        width: auto !important;
+    }
+
+    #songs-section .grid-cols-4,
+    #songs-section .lg\:grid-cols-4,
+    #streams-section .grid-cols-4,
+    #streams-section .lg\:grid-cols-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    #settings-idle-song-path-browse,
+    #settings-idle-song-path-scan {
+        padding-left: .7rem !important;
+        padding-right: .7rem !important;
+    }
+
+    #syslogs-section > div > div:first-child > div:first-child,
+    #syslogs-section > div > div:first-child > div:nth-child(2) {
+        flex-wrap: wrap;
+        gap: .5rem;
+    }
+
+    #main-status-bar {
+        height: 40px !important;
+        padding-left: .75rem !important;
+        padding-right: .75rem !important;
+        gap: .75rem !important;
+        overflow-x: auto;
+    }
+
+    #peripheral-status-bar {
+        flex: 0 0 auto !important;
+        max-width: 45%;
+    }
+}
+
+@media (max-height: 700px) {
+    .admin-sidebar > nav {
+        margin-top: .35rem !important;
+    }
+
+    .admin-sidebar .nav-item {
+        padding-top: .55rem !important;
+        padding-bottom: .55rem !important;
+    }
+
+    #admin-main > header {
+        min-height: 40px;
+    }
+
+    #admin-main > .flex-1 {
+        padding-bottom: .5rem !important;
+    }
+
+    #dashboard-section > .grid:first-child {
+        margin-bottom: .75rem !important;
+    }
+
+    #dashboard-section .stats-card {
+        padding-top: .75rem;
+        padding-bottom: .75rem;
+    }
+
+    #dashboard-section .stats-card .value {
+        font-size: 1.5rem;
+    }
+
+    #room-details-actions {
+        padding: .5rem !important;
+        gap: .35rem !important;
+    }
+
+    #songs-section > .bg-gray-800 {
+        padding: .75rem !important;
+    }
+
+    #song-page-actions,
+    #song-filters {
+        margin-bottom: .5rem !important;
+    }
+
+    #songs-table-scroll td {
+        padding-top: .45rem !important;
+        padding-bottom: .45rem !important;
+    }
+
+    #tauri-test-block {
+        margin-bottom: 1rem !important;
+        padding: .75rem !important;
+    }
+
+    #tauri-test-block > p,
+    #tauri-test-status-grid {
+        margin-bottom: .75rem !important;
+    }
+
+    #syslog-container {
+        padding: .75rem !important;
+        font-size: .75rem !important;
+    }
+}
+
+@media (max-width: 639px) {
+    #song-page-actions {
+        align-items: flex-start;
+    }
+
+    #song-page-actions-buttons {
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        align-self: stretch;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 760px) {
+    #dashboard-section > .grid:first-child,
+    #peripherals-section > .grid,
+    #songs-section .grid-cols-4,
+    #streams-section .grid-cols-4 {
+        grid-template-columns: 1fr !important;
+    }
+
+    #rooms-section > :first-child {
+        grid-template-columns: 1fr;
+    }
+
+    #rooms-section > :first-child > :last-child {
+        width: 100%;
+    }
+
+    #room-search {
+        flex: 1 1 auto;
+        width: auto !important;
+    }
+
+    #tauri-test-status-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    #tauri-test-actions > button {
+        flex: 1 1 calc(50% - .5rem);
+    }
+
+    #main-status-bar > div:nth-child(-n+3) {
+        display: none;
+    }
+
+    #peripheral-status-bar {
+        max-width: calc(100% - 5rem);
+    }
+}

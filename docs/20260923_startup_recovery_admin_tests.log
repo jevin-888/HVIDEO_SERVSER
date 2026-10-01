@@ -1,0 +1,11 @@
+   Compiling hvideo-server v0.1.0 (D:\HVIDEO\Hvideo_server)
+   Compiling hvideo-admin v0.2.0 (D:\HVIDEO\Hvideo_server\src-tauri)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 09s
+     Running unittests src\main.rs (src-tauri\target\debug\deps\hvideo_admin-b3fb37ae03bd6c02.exe)
+
+running 2 tests
+test tests::readiness_does_not_accept_an_unrelated_listener ... ok
+test tests::interrupted_stop_keeps_thread_until_it_really_exits ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+

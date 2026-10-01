@@ -1,0 +1,6 @@
+PASS: port conflict keeps actual error and usable NIC; retry and logs use existing commands
+PASS: configuration failure does not masquerade as missing network hardware
+PASS: reconnect/refresh reenables NIC selector and sends exact host/port contract
+PASS: failed retry restores controls and a second retry succeeds without reload
+PASS: readiness polling continues through initialization and redirects after recovery
+PASS: network-config read errors preserve the original startup error and allow refresh

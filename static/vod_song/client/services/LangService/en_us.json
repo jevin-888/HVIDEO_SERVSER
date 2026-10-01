@@ -1,0 +1,17 @@
+{
+  "party": "Party",
+  "order": "Order",
+  "music": "Music",
+  "smartControl": "Control",
+  "scene": "Scene",
+  "selected": "Selected",
+  "languageText": "English",
+  "repeat": "Repeat",
+  "vocal": "Vocal",
+  "origin": "Origin",
+  "pause": "Pause",
+  "play": "Play",
+  "next": "Next",
+  "mute": "Mute",
+  "unmute": "Unmute"
+}

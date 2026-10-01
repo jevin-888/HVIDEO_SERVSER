@@ -1,0 +1,29 @@
+﻿1080p屏幕分辨率检查清单 (1920x1080)
+===========================================
+
+页面尺寸分析：
+- 侧边栏宽度: 256px (w-64)
+- 主内容区: 1920 - 256 = 1664px
+- 顶部栏高度: ~48px
+- 可用内容高度: 1080 - 48 = 1032px
+
+需要检查的页面（左侧导航）：
+1. ✓ 系统概览 (dashboard) - grid-cols-1 md:grid-cols-2 lg:grid-cols-4
+2. ✓ 终端管理 (terminals) - table布局
+3. ✓ 房间管理 (rooms) - grid布局 + 筛选
+4. ✓ 歌曲管理 (songs) - table布局
+5. ✓ 歌手管理 (artists) - table布局
+6. ✓ 云端同步 (cloud)
+7. ✓ 直播频道 (streams) - grid布局
+8. ✓ 用户管理 (users) - table布局
+9. ✓ 中控配置 (peripherals)
+10. ✓ 运行监控 (syslogs)
+11. ✓ 操作日志 (logs) - table布局
+12. ✓ 系统设置 (settings) - form布局
+
+潜在问题点：
+1. grid-cols-4 在1080p下每列约416px - 合适
+2. xl:grid-cols-2 在1664px下触发 - 合适
+3. 表格列数过多可能需要横向滚动
+4. 长文本需要省略或换行
+

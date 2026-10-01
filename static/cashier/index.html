@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HVideo 收银系统</title>
+    <link rel="icon" href="data:,">
+    <script>
+        const cashierConsoleWarn = console.warn;
+        console.warn = (...args) => {
+            if (String(args[0] || '').includes('cdn.tailwindcss.com should not be used in production')) return;
+            cashierConsoleWarn.apply(console, args);
+        };
+    </script>
+    <script src="/static/libs/tailwindcss.js"></script>
+    <script src="/static/cashier/desktop_bridge.js?v=20260925-checkout-snapshot"></script>
+    <script src="/static/admin/api.js"></script>
+    <style>
+        #employee-module-permissions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 16px; }
+        .employee-identity-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+        #employee-role { display: flex; flex-wrap: wrap; gap: 8px; }
+        .employee-role-option { display: flex; align-items: center; gap: 8px; min-width: 100px; padding: 10px 14px; border: 1px solid #4b5563; border-radius: 6px; cursor: pointer; background: #374151; }
+        .employee-role-option:has(input:checked) { border-color: #ef4444; background: #7f1d1d; }
+        .employee-role-option:focus-within { outline: 2px solid #93c5fd; outline-offset: 2px; }
+        .employee-role-option input { accent-color: #ef4444; }
+        input[type="date"], input[type="datetime-local"] { color-scheme: dark; color: #f8fafc; accent-color: #38bdf8; }
+        input[type="date"]::-webkit-calendar-picker-indicator, input[type="datetime-local"]::-webkit-calendar-picker-indicator { display: none !important; visibility: hidden !important; opacity: 0 !important; width: 0 !important; height: 0 !important; -webkit-appearance: none; }
+        input[data-cashier-date-bound] { appearance: none !important; -webkit-appearance: none !important; }
+        input[data-cashier-date-bound]::-webkit-inner-spin-button, input[data-cashier-date-bound]::-webkit-clear-button { display: none !important; }
+        .cashier-date-field { position: relative; display: block; min-width: 0; width: 100%; }
+        .cashier-date-field > input { display: block; width: 100%; margin: 0 !important; padding-right: 46px !important; color: #f8fafc; color-scheme: dark; }
+        .cashier-date-open { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; width: 29px; height: 29px; padding: 4px; border: 0; border-radius: 6px; color: #e2e8f0; background: transparent; cursor: pointer; }
+        .cashier-date-open svg { display: block; width: 20px; height: 20px; }
+        .cashier-date-open:focus-visible { outline: 2px solid #38bdf8; outline-offset: 1px; }
+        .cashier-date-field:has(input:disabled) .cashier-date-open { opacity: .4; pointer-events: none; }
+        .cashier-date-open:hover { background: #0ea5e9; color: #fff; }
+        .cashier-date-picker { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; background: rgba(2, 6, 23, .72); }
+        .cashier-date-panel { width: 330px; border: 1px solid #475569; border-radius: 12px; background: #1e293b; color: #f8fafc; box-shadow: 0 18px 50px rgba(0,0,0,.55); padding: 15px; }
+        .cashier-date-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 700; }
+        .cashier-date-head button, .cashier-date-actions button { border: 1px solid #475569; border-radius: 6px; background: #334155; color: #f8fafc; padding: 5px 10px; cursor: pointer; }
+        .cashier-date-head button:hover, .cashier-date-actions button:hover { background: #0284c7; }
+        .cashier-date-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+        .cashier-date-grid button { border: 0; border-radius: 6px; padding: 7px 0; color: #e2e8f0; background: transparent; cursor: pointer; }
+        .cashier-date-grid button:hover, .cashier-date-grid button.selected { background: #0284c7; color: #fff; }
+        .cashier-date-week { color: #94a3b8; font-size: 11px; padding-bottom: 4px; }
+        .cashier-date-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 13px; }
+        .holiday-date-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .holiday-date-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; border: 1px solid #475569; border-radius: 7px; background: #1e293b; color: #e2e8f0; }
+        .cashier-scrollbar-hidden {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        .cashier-scrollbar-hidden::-webkit-scrollbar,
+        .cashier-scrollbar-hidden::-webkit-scrollbar-track,
+        .cashier-scrollbar-hidden::-webkit-scrollbar-thumb,
+        .cashier-scrollbar-hidden::-webkit-scrollbar-button {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            background: transparent !important;
+        }
+@media (max-width: 1600px), (max-height: 800px) {
+            .cashier-room-grid {
+                grid-template-columns: repeat(auto-fill, minmax(8rem, 9rem)) !important;
+                gap: 0.625rem !important;
+            }
+            .cashier-room-card {
+                min-height: 92px !important;
+            }
+            .cashier-room-card-head {
+                padding: 0.4rem 0.5rem 0 !important;
+            }
+            .cashier-room-card-name {
+                font-size: 1.05rem !important;
+            }
+            .cashier-room-card-badge {
+                padding: 0.1rem 0.4rem !important;
+                font-size: 0.625rem !important;
+            }
+            .cashier-room-card-sub {
+                margin-top: 0.3rem !important;
+                padding: 0 0.5rem !important;
+                font-size: 0.7rem !important;
+            }
+            .cashier-room-card-extra {
+                min-height: 36px !important;
+                padding: 0.25rem 0.5rem !important;
+                font-size: 0.7rem !important;
+                line-height: 0.875rem !important;
+            }
+        }    </style>
+</head>
+<body class="h-screen bg-gray-900 text-white overflow-hidden">
+    <div id="cashier-login" class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-gray-800 rounded-lg shadow-xl p-8">
+            <h1 class="text-3xl font-bold mb-2">HVideo 收银系统</h1>
+            <p class="text-gray-400 mb-6">员工账号登录</p>
+            <form id="cashier-login-form" class="space-y-4">
+                <input id="cashier-login-no" required autocomplete="username" placeholder="登录账号/工号" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                <input id="cashier-login-password" required autocomplete="current-password" type="password" placeholder="密码" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                <select id="cashier-login-shift" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                    <option value="白班">白班 12:00-00:00</option>
+                    <option value="夜班">夜班 00:00-12:00</option>
+                    <option value="全天班">全天班</option>
+                </select>
+                <button class="w-full bg-red-600 hover:bg-red-700 px-4 py-3 rounded-lg font-semibold">登录</button>
+            </form>
+            <button type="button" onclick="openChangePasswordDialog()" class="w-full mt-4 text-sm text-blue-300 hover:text-blue-200">修改密码</button>
+        </div>
+    </div>
+
+    <div id="cashier-app" class="hidden h-screen flex overflow-hidden">
+        <aside class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
+            <div class="h-14 flex items-center justify-center border-b border-gray-700 font-bold text-xl">收银系统</div>
+            <nav class="p-3 space-y-1 flex-1">
+                <button data-page="cashier" class="cashier-nav w-full text-left px-4 py-3 rounded bg-red-600"><span class="inline-block w-7 text-lg">💵</span> 前台收银</button>
+                <button data-page="reservation" class="cashier-nav w-full text-left px-4 py-3 rounded hover:bg-gray-700"><span class="inline-block w-7 text-lg">📅</span> 预定管理</button>
+                <button data-page="member" class="cashier-nav w-full text-left px-4 py-3 rounded hover:bg-gray-700"><span class="inline-block w-7 text-lg">💳</span> 会员管理</button>
+                <button data-page="warehouse" class="cashier-nav w-full text-left px-4 py-3 rounded hover:bg-gray-700"><span class="inline-block w-7 text-lg">📦</span> 库存管理</button>
+                <button data-page="finance" class="cashier-nav w-full text-left px-4 py-3 rounded hover:bg-gray-700"><span class="inline-block w-7 text-lg">📊</span> 财务报表</button>
+                <button data-page="base-settings" class="cashier-nav w-full text-left px-4 py-3 rounded hover:bg-gray-700"><span class="inline-block w-7 text-lg">⚙️</span> 基础设置</button>
+                <button data-page="system" class="cashier-nav w-full text-left px-4 py-3 rounded hover:bg-gray-700"><span class="inline-block w-7 text-lg">🛠️</span> 系统管理</button>
+            </nav>
+            <div class="p-3 border-t border-gray-700">
+                <div id="cashier-employee-name" class="text-sm text-gray-300 mb-2"></div>
+                <button id="cashier-logout" class="w-full bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">退出登录</button>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-hidden p-6">
+            <section id="page-cashier" class="cashier-page h-full flex flex-col overflow-hidden">
+                <div class="bg-slate-900/95 border border-slate-700 rounded-t-xl p-2 flex justify-between items-center shrink-0 shadow-lg shadow-black/20">
+                    <div class="flex items-center space-x-2 overflow-x-auto" id="cashier-room-type-tabs">
+                        <button class="px-5 py-2 bg-sky-500 text-white text-sm font-bold rounded-xl shadow-sm hover:bg-sky-400 transition active-type-tab" data-type="all" onclick="setCashierRoomType('all')">全部类型</button>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button type="button" onclick="showPage('checkout-desk')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-sm font-bold border border-emerald-400/60">结账台</button>
+                        <input type="text" id="cashier-room-search" placeholder="搜索房间" oninput="loadCashierRooms(false)" class="w-44 px-3 py-2 bg-slate-800 border border-slate-600 rounded-xl text-sm text-white focus:outline-none focus:border-sky-400">
+                        <button type="button" onclick="loadCashierRooms(true)" class="bg-slate-700 hover:bg-slate-600 text-gray-100 px-4 py-2 rounded-xl text-sm border border-slate-500">刷新</button>
+                    </div>
+                </div>
+                <div class="flex flex-1 overflow-hidden">
+                    <div class="w-24 bg-slate-900 border-x border-slate-700 flex flex-col items-center py-3 space-y-2 overflow-y-auto shrink-0" id="cashier-room-area-tabs">
+                        <button class="w-20 py-4 text-xs text-center bg-sky-500 text-white border border-sky-300/50 rounded-xl hover:bg-sky-400 transition active-area-tab" data-area="all" onclick="setCashierRoomArea('all')">全部<br>区域</button>
+                    </div>
+                    <div class="flex-1 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 overflow-y-auto relative" id="cashier-rooms-container" onclick="deselectCashierRoom(event)">
+                        <div id="cashier-rooms" class="cashier-room-grid grid grid-cols-[repeat(auto-fill,minmax(9rem,10rem))] gap-3 auto-rows-max"></div>
+                    </div>
+                    <div class="w-[18rem] bg-gray-800 border-l border-gray-700 flex flex-col shrink-0 overflow-hidden" id="cashier-room-details-panel">
+                        <div class="flex-1 flex flex-col min-h-0 overflow-hidden" id="cashier-room-details-content">
+                            <div class="text-center text-gray-500 mt-10"><div class="text-3xl mb-2 opacity-30"></div><p>请点击包厢查看点单和账单</p></div>
+                        </div>
+                        <div class="p-3 border-t border-gray-700 bg-gray-800/50 flex flex-col gap-2" id="cashier-room-details-actions">
+                            <div class="text-xs text-gray-500">快捷进入业务子页面</div>
+                            <button onclick="showCashierRoomContextMenu(event, document.getElementById('cashier-room-id').value)" class="bg-gray-700 text-white px-3 py-2 rounded">房间操作</button>
+                            <div class="flex gap-2">
+                                <button onclick="openOpenRoomPage()" class="flex-1 bg-green-700 text-white py-2 px-1 rounded text-xs font-bold hover:bg-green-600 transition">开房</button>
+                                <button onclick="printRoomBill()" class="flex-1 bg-blue-700 text-white py-2 px-1 rounded text-xs font-bold hover:bg-blue-600 transition">打印账单</button>
+                                <button onclick="openOrderPanel()" class="flex-1 bg-purple-700 text-white py-2 px-1 rounded text-xs font-bold hover:bg-purple-600 transition">点单</button>
+                                <button onclick="openCheckoutPage()" class="flex-1 bg-red-700 text-white py-2 px-1 rounded text-xs font-bold hover:bg-red-600 transition">结账</button>
+                            </div>
+                            <select id="cashier-pay-method" class="hidden"><option value="cash">现金</option><option value="wechat">微信</option><option value="alipay">支付宝</option><option value="bankcard">银行卡</option></select>
+                        </div>
+                    </div>
+                </div>
+                <div id="cashier-room-status-bar" class="h-12 bg-slate-900 border border-slate-700 rounded-b-xl px-3 flex items-center justify-between text-xs text-gray-300 shrink-0">
+                    <div class="flex items-center gap-2 overflow-x-auto">
+                        <span class="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-600 whitespace-nowrap">总房间：<b id="cashier-stat-total" class="text-white">0</b></span>
+                        <span class="px-3 py-1.5 rounded-lg bg-sky-100 text-slate-700 border border-sky-300 whitespace-nowrap">空闲 <b id="cashier-stat-idle" class="text-sky-700">0</b></span>
+                        <span class="px-3 py-1.5 rounded-lg bg-rose-600 text-white border border-rose-300/70 whitespace-nowrap">使用 <b id="cashier-stat-using">0</b></span>
+                        <span class="px-3 py-1.5 rounded-lg bg-violet-600 text-white border border-violet-300/70 whitespace-nowrap">预订 <b id="cashier-stat-reserved">0</b></span>
+                        <span class="px-3 py-1.5 rounded-lg bg-amber-300 text-slate-800 border border-amber-200 whitespace-nowrap">维护 <b id="cashier-stat-maintenance">0</b></span>
+                        <span class="px-3 py-1.5 rounded-lg bg-cyan-500 text-white border border-cyan-200 whitespace-nowrap">测试 <b id="cashier-stat-test">0</b></span>
+                    </div>
+                    <div id="cashier-stat-selected" class="text-gray-400">未选择房间</div>
+                </div>
+                <input id="cashier-room-id" type="hidden">
+                <div id="cashier-bill-detail" class="hidden"></div>
+                <div id="cashier-room-context-menu" class="hidden fixed bg-gray-800 border border-gray-600 shadow-xl rounded py-1 z-50 w-36 text-sm">
+                    <div id="cashier-room-context-actions"></div>
+                </div>
+            </section>
+
+            <section id="page-open-room" class="cashier-page hidden h-full overflow-y-auto bg-gray-900 rounded-lg p-6">
+                <div class="min-h-full flex items-center justify-center">
+                <div class="w-full max-w-4xl bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-700 flex items-center justify-between bg-gray-800/80">
+                        <button onclick="backToCashierRooms()" class="text-gray-300 hover:text-white font-semibold"><span>返回房间</span> <kbd>Esc</kbd></button>
+                        <h2 class="text-xl font-bold text-white">开房计费</h2>
+                        <button onclick="submitOpenRoomPage()" class="bg-green-700 hover:bg-green-600 text-white px-6 py-2 rounded font-bold"><span>开房</span> <kbd>F5</kbd></button>
+                    </div>
+                    <div class="p-5 space-y-4 text-sm text-gray-300">
+                        <div class="rounded border border-gray-700 bg-gray-900/40 p-4">
+                            <h3 class="font-bold text-white mb-3">开房信息</h3>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>包厢名称：<span id="open-room-name" class="text-blue-400 font-bold"></span></div>
+                                <div>房间类型：<span id="open-room-type" class="text-blue-400 font-bold"></span></div>
+                                <div>当前状态：<span id="open-room-state" class="text-green-400 font-bold"></span></div>
+                            </div>
+                        </div>
+                        <div class="rounded border border-gray-700 bg-gray-900/40 p-4">
+                            <h3 class="font-bold text-white mb-3">计费信息</h3>
+                            <div class="grid grid-cols-3 gap-4">
+                                <label>计费方式：<select id="open-billing-mode" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 mt-1 text-white"><option value="buyout">买断</option><option value="minute" selected>计时</option><option value="activity">活动</option><option value="member">会员</option></select></label>
+                                <div id="open-timer-row" class="col-span-2 grid grid-cols-2 gap-4">
+                                    <label>定时时长：<div class="grid grid-cols-2 gap-2 mt-1"><select id="open-timer-hours" onchange="refreshOpenTimePreview()" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 text-white"></select><select id="open-timer-minutes" onchange="refreshOpenTimePreview()" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 text-white"></select></div></label>
+                                    <label>到时提醒：<select id="open-timer-reminder" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 mt-1 text-white"><option value="1">是</option><option value="0" selected>否</option></select></label>
+                                </div>
+                                <label id="open-buyout-row" class="hidden col-span-2">买断方案：<select id="open-buyout-period" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 mt-1 text-white"></select></label>
+                                <label id="open-activity-row" class="hidden col-span-2">活动方案：<select id="open-activity-rule" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 mt-1 text-white"></select></label>
+                                <div class="col-span-3 rounded border border-blue-800 bg-blue-950/30 px-3 py-2 h-[100px] overflow-hidden flex flex-col justify-center">
+                                    <div class="text-xs text-blue-200">当前时段价格</div>
+                                    <div id="open-price-preview" class="mt-1 text-lg font-bold text-white">请选择开房方式</div>
+                                    <div id="open-price-rule" class="text-xs text-gray-400 mt-1"></div>
+                                </div>
+                                <div class="col-span-3 grid grid-cols-2 gap-4 rounded border border-gray-700 bg-gray-950/40 px-3 py-2">
+                                    <div>当前时间：<span id="open-current-time" class="text-blue-200 font-bold">-</span></div>
+                                    <div>预计结束：<span id="open-expected-end-time" class="text-emerald-300 font-bold">-</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="rounded border border-gray-700 bg-gray-900/40 p-4">
+                            <h3 class="font-bold text-white mb-3">顾客信息</h3>
+                            <div class="grid grid-cols-3 gap-4">
+                                <label>顾客类型：<select id="open-customer-type" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 mt-1 text-white"><option>散客</option><option>会员</option></select></label>
+                                <label>客源：<input id="open-customer-source" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 mt-1 text-white" value="散客"></label>
+                                <label>营销经理：<input id="open-marketer-name" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 mt-1 text-white" placeholder="无"></label>
+                                <label>会员号：<input id="open-member-no" oninput="applyOpenMemberNo()" pattern="[A-Za-z0-9_-]{3,32}" maxlength="32" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 mt-1 text-white" placeholder="输入会员卡号"></label>
+                                <label>客人姓名：<input id="open-customer-name" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 mt-1 text-white" placeholder="客人姓名"></label>
+                                <label>联系电话：<input id="open-customer-phone" type="tel" inputmode="numeric" pattern="1[3-9][0-9]{9}" maxlength="11" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 mt-1 text-white" placeholder="联系电话"></label>
+                                <label>客人人数：<input id="open-customer-count" type="number" value="1" min="1" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 mt-1 text-white"></label>
+                                <label>预付费：<input id="open-prepay" type="number" value="0" min="0" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 mt-1 text-white"></label>
+                                <label>备注：<input id="open-remark" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 mt-1 text-white" placeholder="备注信息"></label>
+                                <div class="col-span-3 text-xs text-blue-300" id="open-member-service-tip">输入会员号后自动匹配会员级别和服务体验</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </section>
+
+            <section id="page-order" class="cashier-page hidden h-full overflow-hidden bg-gray-900 rounded-lg">
+                <div class="h-full grid grid-cols-[320px_1fr] border border-gray-700 rounded-lg overflow-hidden bg-gray-800">
+                    <div class="border-r border-gray-700 bg-gray-800 flex flex-col min-h-0">
+                        <div class="p-4 border-b border-gray-700 flex items-center justify-between"><button onclick="backToCashierRooms()" class="text-blue-400 hover:text-white">返回</button><div class="font-bold text-white" id="order-room-title"></div></div>
+                        <div id="order-cart-list" class="flex-1 overflow-y-auto divide-y divide-gray-700 text-gray-200"></div>
+                        <div class="p-4 border-t border-gray-700 bg-gray-800">
+                            <div class="flex justify-between text-sm mb-2 text-gray-300"><span>共计<span id="order-cart-count">0</span>件</span><span>合计 <b class="text-red-400 text-xl" id="order-cart-total">¥0.00</b></span></div>
+                            <button onclick="submitOrderPage()" class="w-full bg-orange-700 hover:bg-orange-600 text-white py-3 rounded font-bold text-lg">提交点单</button>
+                        </div>
+                    </div>
+                    <div class="flex flex-col min-h-0 bg-gray-900">
+                        <div class="p-3 border-b border-gray-700 flex gap-4 items-center bg-gray-800">
+                            <div id="order-category-tabs" class="flex-1 flex gap-4 overflow-x-auto"></div>
+                            <input id="order-product-search" oninput="renderOrderProducts()" class="bg-gray-700 border border-gray-600 rounded px-3 py-2 w-64 text-white" placeholder="名称/条码/简拼">
+                            <button onclick="loadOrderPageData()" class="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2 rounded">刷新</button>
+                        </div>
+                        <div id="order-product-grid" class="flex-1 overflow-y-auto p-4 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 auto-rows-max"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="page-checkout" class="cashier-page hidden h-full overflow-y-auto bg-gray-900 rounded-lg p-6">
+                <div class="min-h-full flex items-center justify-center">
+                <div class="w-full max-w-5xl bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden text-gray-200">
+                    <div class="bg-gray-800 border-b border-gray-700 px-4 py-3 grid grid-cols-3 items-center"><button onclick="backToCashierRooms()" class="text-left text-gray-300 hover:text-white">取消 Esc</button><h2 class="text-center text-xl font-bold text-white">结算</h2><div></div></div>
+                    <div class="px-4 pt-3 flex items-center gap-3" role="status" aria-live="polite">
+                        <span id="checkout-bill-status" class="text-amber-300"></span>
+                        <button id="checkout-bill-retry" type="button" onclick="reloadCheckoutBill()" class="hidden bg-blue-700 text-white rounded px-3 py-2">重新查询账单</button>
+                    </div>
+                    <div class="grid grid-cols-[260px_1fr_300px] gap-3 p-4">
+                        <div class="bg-gray-900/50 rounded border border-gray-700 overflow-hidden flex flex-col min-h-[360px]">
+                            <div class="p-3 border-b border-gray-700 font-bold text-white" id="checkout-room-title"></div>
+                            <div id="checkout-items" class="flex-1 overflow-y-auto divide-y divide-gray-700"></div>
+                            <div class="p-3 border-t border-gray-700 flex justify-between"><span id="checkout-count">共计0件</span><b class="text-red-400 text-xl" id="checkout-total-left">¥0.00</b></div>
+                        </div>
+                        <div class="bg-gray-900/50 rounded border border-gray-700 p-4">
+                            <div class="text-lg mb-3">收款 <span class="text-red-400 text-2xl font-bold" id="checkout-payable">¥0.00</span></div>
+                            <div class="border border-gray-700 rounded p-4 text-sm space-y-3">
+                                <div class="flex justify-between"><span>订单金额</span><span id="checkout-order-amount">¥0.00</span></div>
+                                <div class="flex justify-between"><span>点单金额</span><span id="checkout-beverage-amount">¥0.00</span></div>
+                                <div class="flex justify-between"><span>房费金额</span><span id="checkout-room-amount">¥0.00</span></div>
+                                <div class="flex justify-between border-t border-gray-700 pt-3 text-red-400 font-bold"><span>应收</span><span id="checkout-receivable">¥0.00</span></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div id="checkout-cash-fields" class="col-span-3 text-sm"><label>实收金额<input id="checkout-received" inputmode="decimal" oninput="updateCheckoutChange()" placeholder="按应收金额收款" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"></label><div>找零：<span id="checkout-change">¥0.00</span></div></div>
+                            <label id="checkout-member-field" class="col-span-3 hidden">选择会员<select id="checkout-member" onchange="currentCashierMemberId = this.value" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"></select></label>
+                            <button class="checkout-key bg-gray-700 hover:bg-gray-600 rounded text-2xl">1</button><button class="checkout-key bg-gray-700 hover:bg-gray-600 rounded text-2xl">2</button><button class="checkout-key bg-gray-700 hover:bg-gray-600 rounded text-2xl">3</button>
+                            <button class="checkout-key bg-gray-700 hover:bg-gray-600 rounded text-2xl">4</button><button class="checkout-key bg-gray-700 hover:bg-gray-600 rounded text-2xl">5</button><button class="checkout-key bg-gray-700 hover:bg-gray-600 rounded text-2xl">6</button>
+                            <button class="checkout-key bg-gray-700 hover:bg-gray-600 rounded text-2xl">7</button><button class="checkout-key bg-gray-700 hover:bg-gray-600 rounded text-2xl">8</button><button class="checkout-key bg-gray-700 hover:bg-gray-600 rounded text-2xl">9</button>
+                            <button class="checkout-key bg-gray-700 rounded" data-key=".">.</button><button class="checkout-key bg-gray-700 rounded">0</button><button class="checkout-key bg-gray-700 rounded" data-key="back">⌫</button>
+                            <button class="checkout-key col-span-3 bg-gray-700 rounded" data-key="clear">清空金额</button>
+                            <button data-payment-method="wechat" onclick="setCheckoutMethod('wechat')" class="border border-green-500/60 bg-green-900/30 text-green-300 rounded">微信</button><button data-payment-method="alipay" onclick="setCheckoutMethod('alipay')" class="border border-orange-500/60 bg-orange-900/30 text-orange-300 rounded">支付宝</button><button data-payment-method="cash" onclick="setCheckoutMethod('cash')" class="border border-red-500/60 bg-red-900/30 text-red-300 rounded">现金</button>
+                            <button data-payment-method="member" onclick="setCheckoutMethod('member')" class="col-span-3 border border-blue-500/60 bg-blue-900/30 text-blue-300 rounded py-2">会员余额支付</button>
+                            <button id="checkout-submit" disabled onclick="submitCheckoutPage()" class="col-span-3 bg-orange-700 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xl font-bold rounded py-3">收款 Space</button>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </section>
+            <section id="page-reservation" class="cashier-page hidden h-full overflow-y-auto bg-gray-800 rounded-lg p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-xl font-semibold text-white">预定管理</h2>
+                        <div class="text-sm text-gray-400">预定统一保存在服务器，到店后可转开房</div>
+                    </div>
+                    <div class="flex gap-2"><button onclick="importLegacyCustomers()" class="bg-gray-700 px-3 py-2 rounded">导入本浏览器旧数据</button><button onclick="loadReservations()" class="bg-gray-700 px-3 py-2 rounded">刷新</button><button onclick="resetReservationForm()" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">新增预定</button></div>
+                </div>
+                <div class="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-4">
+                    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                        <h3 class="font-bold mb-3 text-white">预定信息</h3>
+                        <form id="reservation-form" class="space-y-3">
+                            <input id="reservation-id" type="hidden">
+                            <label class="block text-sm text-gray-300">预定包厢<select id="reservation-room-id" required class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></select></label>
+                            <label class="block text-sm text-gray-300">预定时间<input id="reservation-time" type="datetime-local" required class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="block text-sm text-gray-300">会员号<input id="reservation-member-no" oninput="applyReservationMemberNo()" pattern="[A-Za-z0-9_-]{3,32}" maxlength="32" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white" placeholder="输入会员卡号"></label>
+                                <label class="block text-sm text-gray-300">预定营销人员<select id="reservation-marketer-id" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></select></label>
+                                <label class="block text-sm text-gray-300">客人姓名<input id="reservation-customer-name" required class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                                <label class="block text-sm text-gray-300">联系电话<input id="reservation-phone" type="tel" inputmode="numeric" pattern="1[3-9][0-9]{9}" maxlength="11" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="block text-sm text-gray-300">人数<input id="reservation-people" type="number" min="1" value="1" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                                <label class="block text-sm text-gray-300">预付费<input id="reservation-prepay" type="number" min="0" value="0" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                            </div>
+                            <textarea id="reservation-remark" rows="3" placeholder="备注" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></textarea>
+                            <div class="flex justify-end gap-2">
+                                <button type="button" onclick="resetReservationForm()" class="bg-gray-700 px-4 py-2 rounded">清空</button>
+                                <button class="bg-emerald-700 hover:bg-emerald-600 px-5 py-2 rounded font-bold">保存预定</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between mb-3">
+                            <h3 class="font-bold text-white">预定列表</h3>
+                            <input id="reservation-search" oninput="renderReservations()" placeholder="搜索姓名/电话/房间" class="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm">
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-sm">
+                                <thead><tr class="text-gray-400 border-b border-gray-700"><th class="text-left py-2">房间</th><th class="text-left py-2">预定时间</th><th class="text-left py-2">客人</th><th class="text-left py-2">电话</th><th class="text-left py-2">营销人员</th><th class="text-left py-2">人数</th><th class="text-left py-2">预付</th><th class="text-left py-2">状态</th><th class="text-left py-2">操作</th></tr></thead>
+                                <tbody id="reservation-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="page-member" class="cashier-page hidden h-full overflow-y-auto bg-gray-800 rounded-lg p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-xl font-semibold text-white">会员管理</h2>
+                        <div class="text-sm text-gray-400">会员资料、余额和积分统一保存在服务器</div>
+                    </div>
+                    <div class="flex gap-2"><button onclick="importLegacyCustomers()" class="bg-gray-700 px-3 py-2 rounded">导入本浏览器旧数据</button><button onclick="loadMembers()" class="bg-gray-700 px-3 py-2 rounded">刷新</button><button onclick="resetMemberForm()" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">新增会员</button></div>
+                </div>
+                <div class="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-4">
+                    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                        <h3 class="font-bold mb-3 text-white">会员资料</h3>
+                        <form id="member-form" class="space-y-3">
+                            <input id="member-id" type="hidden">
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="block text-sm text-gray-300">会员卡号<input id="member-card-no" required class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                                <label class="block text-sm text-gray-300">会员姓名<input id="member-name" required class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="block text-sm text-gray-300">手机号<input id="member-phone" required class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                                <label class="block text-sm text-gray-300">会员级别<select id="member-level" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"><option value="普通会员">普通会员</option><option value="银卡会员">银卡会员</option><option value="金卡会员">金卡会员</option><option value="VIP会员">VIP会员</option></select></label>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="block text-sm text-gray-300">生日<input id="member-birthday" type="date" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                                <label class="block text-sm text-gray-300">余额<input id="member-balance" type="number" min="0" value="0" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="block text-sm text-gray-300">积分<input id="member-points" type="number" min="0" value="0" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                            </div>
+                            <textarea id="member-remark" rows="3" placeholder="备注" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></textarea>
+                            <div class="flex justify-end gap-2">
+                                <button type="button" onclick="resetMemberForm()" class="bg-gray-700 px-4 py-2 rounded">清空</button>
+                                <button class="bg-emerald-700 hover:bg-emerald-600 px-5 py-2 rounded font-bold">保存会员</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between mb-3">
+                            <h3 class="font-bold text-white">会员列表</h3>
+                            <input id="member-search" oninput="renderMembers()" placeholder="搜索卡号/姓名/手机号/级别" class="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm">
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-sm">
+                                <thead><tr class="text-gray-400 border-b border-gray-700"><th class="text-left py-2">卡号</th><th class="text-left py-2">会员</th><th class="text-left py-2">手机号</th><th class="text-left py-2">级别</th><th class="text-left py-2">余额</th><th class="text-left py-2">积分</th><th class="text-left py-2">生日</th><th class="text-left py-2">操作</th></tr></thead>
+                                <tbody id="member-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="page-warehouse" class="cashier-page hidden h-full overflow-y-auto bg-gray-800 rounded-lg p-4">
+                <div class="flex justify-between mb-4"><h2 class="text-xl font-semibold">库存管理</h2><button onclick="loadWarehouseInventory()" class="bg-gray-700 px-3 py-2 rounded">刷新</button></div>
+                <div class="flex gap-2 border-b border-gray-700 mb-4">
+                    <button id="warehouse-tab-inventory" onclick="switchWarehouseTab('inventory')" class="px-4 py-2 border-b-2 border-blue-500 text-blue-300">商品库存</button>
+                    <button id="warehouse-tab-inbound-form" onclick="switchWarehouseTab('inbound-form')" class="px-4 py-2 border-b-2 border-transparent text-gray-400 hover:text-white">商品入库</button>
+                    <button id="warehouse-tab-inbound" onclick="switchWarehouseTab('inbound')" class="px-4 py-2 border-b-2 border-transparent text-gray-400 hover:text-white">入库记录</button>
+                    <button id="warehouse-tab-outbound" onclick="switchWarehouseTab('outbound')" class="px-4 py-2 border-b-2 border-transparent text-gray-400 hover:text-white">出库记录</button>
+                </div>
+                <div id="warehouse-inventory-panel">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4"><input id="warehouse-keyword" placeholder="搜索商品" class="px-3 py-2 bg-gray-700 border border-gray-600 rounded"><input id="warehouse-low-stock" type="number" placeholder="低库存阈值" class="px-3 py-2 bg-gray-700 border border-gray-600 rounded"><button onclick="loadWarehouseInventory()" class="bg-blue-600 px-3 py-2 rounded">查询</button></div>
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-4">
+                    <div class="rounded-lg border border-gray-700 bg-gray-900/40 p-3">
+                        <div class="flex gap-2 mb-2"><input id="warehouse-category-name" placeholder="新增商品类别" class="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded"><button onclick="createWarehouseCategory()" class="bg-emerald-700 hover:bg-emerald-600 px-3 py-2 rounded">添加类别</button><button id="warehouse-category-edit-btn" onclick="toggleWarehouseCategoryEdit()" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">编辑</button></div>
+                        <div id="warehouse-category-list" class="text-sm text-gray-300 flex flex-wrap gap-2"></div>
+                    </div>
+                    <div class="rounded-lg border border-gray-700 bg-gray-900/40 p-3">
+                        <div class="flex gap-2 mb-2"><input id="warehouse-location-name" placeholder="新增二级库房，如超市/厨房/前台" class="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded"><button onclick="createWarehouseLocation()" class="bg-emerald-700 hover:bg-emerald-600 px-3 py-2 rounded">添加库房</button><button id="warehouse-location-edit-btn" onclick="toggleWarehouseLocationEdit()" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">编辑</button></div>
+                        <div id="warehouse-location-list" class="text-sm text-gray-300 flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+                <div class="rounded-lg border border-gray-700 bg-gray-900/40 p-3 mb-4">
+                    <div class="font-semibold text-white mb-3">新增商品</div>
+                    <div class="grid grid-cols-1 md:grid-cols-7 gap-3">
+                        <label class="block text-sm text-gray-300">商品编号<input id="warehouse-new-product-code" readonly class="w-full mt-1 px-3 py-2 bg-gray-900 border border-gray-600 rounded text-emerald-300"></label>
+                        <label class="block text-sm text-gray-300">商品名称<input id="warehouse-new-product-name" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white" placeholder="商品名称"></label>
+                        <label class="block text-sm text-gray-300">商品类别<select id="warehouse-new-product-category" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></select></label>
+                        <label class="block text-sm text-gray-300">销售价格<input id="warehouse-new-product-price" type="number" min="0" step="0.01" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white" placeholder="0.00"></label>
+                        <label class="block text-sm text-gray-300">商品图片<input id="warehouse-new-product-image" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white" placeholder="/assets/products/xxx.jpg"></label>
+                        <label class="block text-sm text-gray-300">期初数量<input id="warehouse-new-product-stock" type="number" min="0" step="1" value="0" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                        <div class="flex items-end gap-2"><button onclick="createWarehouseProduct()" class="flex-1 bg-blue-700 hover:bg-blue-600 px-3 py-2 rounded">新增商品</button><button onclick="resetWarehouseProductForm()" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">换编号</button></div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto rounded-lg border border-gray-700 bg-gray-900/40">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-gray-900/80 text-gray-300">
+                            <tr>
+                                <th class="text-left px-4 py-3 border-b border-gray-700">编号</th>
+                                <th class="text-left px-4 py-3 border-b border-gray-700">商品</th>
+                                <th class="text-left px-4 py-3 border-b border-gray-700">分类</th>
+                                <th class="text-left px-4 py-3 border-b border-gray-700">入库时间</th>
+                                <th class="text-left px-4 py-3 border-b border-gray-700">有效期</th>
+                                <th class="text-right px-4 py-3 border-b border-gray-700">售价</th>
+                                <th class="text-right px-4 py-3 border-b border-gray-700">库存</th>
+                                <th class="text-center px-4 py-3 border-b border-gray-700">状态</th>
+                                <th class="text-center px-4 py-3 border-b border-gray-700">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="warehouse-inventory-table" class="divide-y divide-gray-800"></tbody>
+                    </table>
+                </div>
+                <div id="warehouse-outbound-panel" class="hidden rounded-lg border border-orange-700 bg-gray-900/70 p-4 mt-4">
+                    <div class="font-semibold text-white mb-3">商品出库</div>
+                    <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
+                        <label class="block text-sm text-gray-300">出库编号<input id="warehouse-outbound-code" readonly class="w-full mt-1 px-3 py-2 bg-gray-900 border border-gray-600 rounded text-orange-300"></label>
+                        <label class="block text-sm text-gray-300">商品<input id="warehouse-outbound-product-name" readonly class="w-full mt-1 px-3 py-2 bg-gray-900 border border-gray-600 rounded text-white"></label>
+                        <label class="block text-sm text-gray-300">出库数量<input id="warehouse-outbound-quantity" type="number" min="1" step="1" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                        <label class="block text-sm text-gray-300">目标库房<select id="warehouse-outbound-location" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></select></label>
+                        <label class="block text-sm text-gray-300">出库时间<input id="warehouse-outbound-time" type="datetime-local" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                        <label class="block text-sm text-gray-300">操作员<input id="warehouse-outbound-operator" readonly class="w-full mt-1 px-3 py-2 bg-gray-900 border border-gray-600 rounded text-blue-300"></label>
+                        <div class="flex items-end gap-2"><button onclick="submitWarehouseOutbound()" class="flex-1 bg-orange-600 hover:bg-orange-500 px-3 py-2 rounded">确认出库</button><button onclick="cancelWarehouseOutbound()" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">取消</button></div>
+                    </div>
+                    <textarea id="warehouse-outbound-remark" rows="2" placeholder="出库备注，可空" class="w-full mt-3 px-3 py-2 bg-gray-700 border border-gray-600 rounded"></textarea>
+                </div>
+                </div>
+                <div id="warehouse-inbound-form-panel" class="hidden rounded-lg border border-gray-700 bg-gray-900/40 p-4">
+                    <div class="flex justify-between items-center mb-4"><h3 class="font-semibold text-white">商品入库</h3><button type="button" onclick="resetWarehouseInboundForm()" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm">清空表单</button></div>
+                    <form id="warehouse-inbound-form" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                            <label class="block text-sm text-gray-300">商品类别<select id="warehouse-inbound-category" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded"></select></label>
+                            <label class="block text-sm text-gray-300 xl:col-span-2">入库商品<select id="warehouse-inbound-product" required class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded"></select></label>
+                            <label class="block text-sm text-gray-300">入库数量<input id="warehouse-inbound-quantity" type="number" min="1" required placeholder="入库数量" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded"></label>
+                            <label class="block text-sm text-gray-300">入库编号<input id="warehouse-inbound-code" readonly class="w-full mt-1 px-3 py-2 bg-gray-900 border border-gray-600 rounded text-emerald-300"></label>
+                            <label class="block text-sm text-gray-300">入库时间<input id="warehouse-inbound-time" type="datetime-local" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                            <label class="block text-sm text-gray-300">有效期至<input id="warehouse-expiry-date" type="date" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"></label>
+                            <label class="block text-sm text-gray-300">操作员<input id="warehouse-inbound-operator" readonly class="w-full mt-1 px-3 py-2 bg-gray-900 border border-gray-600 rounded text-blue-300"></label>
+                        </div>
+                        <div class="grid grid-cols-1 xl:grid-cols-3 gap-3">
+                            <input id="warehouse-inbound-reference" placeholder="单据号，可空" class="px-3 py-2 bg-gray-700 border border-gray-600 rounded">
+                            <textarea id="warehouse-inbound-remark" rows="3" placeholder="备注，可空" class="xl:col-span-2 px-3 py-2 bg-gray-700 border border-gray-600 rounded"></textarea>
+                        </div>
+                        <div id="warehouse-inbound-current-stock" class="rounded border border-gray-700 bg-gray-950/60 p-3 text-sm"></div>
+                        <div class="flex justify-end"><button class="bg-emerald-600 hover:bg-emerald-500 px-6 py-2 rounded font-semibold">确认入库</button></div>
+                    </form>
+                </div>
+                <div id="warehouse-inbound-record-panel" class="hidden rounded-lg border border-gray-700 bg-gray-900/40 p-4">
+                    <div class="flex justify-between items-center mb-3"><h3 class="font-semibold text-white">入库记录</h3><button onclick="loadWarehouseInboundRecords()" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm">刷新记录</button></div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-gray-900/80 text-gray-300"><tr><th class="text-left px-3 py-2">入库编号</th><th class="text-left px-3 py-2">时间</th><th class="text-left px-3 py-2">商品</th><th class="text-right px-3 py-2">数量</th><th class="text-left px-3 py-2">操作员</th><th class="text-left px-3 py-2">备注</th></tr></thead>
+                            <tbody id="warehouse-inbound-records" class="divide-y divide-gray-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="warehouse-outbound-record-panel" class="hidden rounded-lg border border-gray-700 bg-gray-900/40 p-4">
+                    <div class="flex justify-between items-center mb-3"><h3 class="font-semibold text-white">出库记录</h3><button onclick="loadWarehouseOutboundRecords()" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm">刷新记录</button></div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-gray-900/80 text-gray-300"><tr><th class="text-left px-3 py-2">出库编号</th><th class="text-left px-3 py-2">时间</th><th class="text-left px-3 py-2">商品</th><th class="text-right px-3 py-2">数量</th><th class="text-left px-3 py-2">目标库房</th><th class="text-left px-3 py-2">操作员</th><th class="text-left px-3 py-2">备注</th></tr></thead>
+                            <tbody id="warehouse-outbound-records" class="divide-y divide-gray-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="page-system" class="cashier-page hidden h-full overflow-y-auto bg-gray-800 rounded-lg p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-xl font-semibold text-white">系统管理</h2>
+                        <div class="text-sm text-gray-400">人员档案、员工账号和角色权限基础维护</div>
+                    </div>
+                    <button onclick="resetEmployeeForm()" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">新增人员</button>
+                </div>
+                <div class="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-4">
+                    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                        <h3 id="employee-form-title" class="font-bold mb-3 text-white">新增人员</h3>
+                        <form id="employee-form" class="space-y-3">
+                            <div class="employee-identity-row">
+                                <div>
+                                    <label class="block text-sm text-gray-300">登录账号/工号<input id="employee-no" readonly class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white" placeholder="由服务器自动分配"></label>
+                                </div>
+                                <label class="block text-sm text-gray-300">人员姓名<input id="employee-name" required autocomplete="name" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white" placeholder="人员姓名"></label>
+                                <label class="block text-sm text-gray-300">密码<input id="employee-password" type="password" required minlength="4" maxlength="8" pattern="[A-Za-z0-9]{4,8}" autocomplete="new-password" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white" placeholder="4–8 位数字或字母" aria-describedby="employee-password-hint"></label>
+                            </div>
+                            <div id="employee-password-hint" class="text-xs text-gray-300">密码支持 4–8 位数字或字母，可混合使用。</div>
+                            <fieldset class="text-sm text-gray-300"><legend class="mb-1">角色</legend><div id="employee-role" role="radiogroup" aria-label="角色"><span>正在加载角色…</span></div></fieldset>
+                            <fieldset class="rounded border border-gray-700 p-3"><legend class="px-1 text-sm text-gray-300">模块权限</legend><div id="employee-module-permissions" class="text-sm"></div><div class="mt-2 text-xs text-gray-500">登录后只显示勾选的左侧模块；管理员角色自动拥有全部模块。</div></fieldset>
+                            <div class="text-xs text-gray-500">人员档案保存后，可用该工号和密码登录收银系统。</div>
+                            <div class="flex justify-end gap-2">
+                                <button type="button" onclick="resetEmployeeForm()" class="bg-gray-700 px-4 py-2 rounded">清空</button>
+                                <button type="submit" class="bg-emerald-700 hover:bg-emerald-600 px-5 py-2 rounded font-bold">保存人员</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between mb-3">
+                            <h3 class="font-bold text-white">人员列表</h3>
+                            <button onclick="loadEmployees()" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded text-sm">刷新</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-sm">
+                                <thead><tr class="text-gray-400 border-b border-gray-700"><th class="text-left py-2">工号</th><th class="text-left py-2">姓名</th><th class="text-left py-2">角色</th><th class="text-left py-2">状态</th><th class="text-left py-2">创建时间</th><th class="text-left py-2">操作</th></tr></thead>
+                                <tbody id="employee-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="page-checkout-desk" class="cashier-page hidden h-full overflow-y-auto bg-gray-800 rounded-lg p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-xl font-semibold">结账台</h2>
+                        <div id="checkout-desk-range" class="text-sm text-gray-400 mt-1"></div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="showPage('cashier')" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">关闭</button>
+                        <button onclick="loadCheckoutDesk()" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">刷新</button>
+                        <button onclick="submitShiftReport()" class="bg-red-700 hover:bg-red-600 px-4 py-2 rounded font-bold">交班</button>
+                    </div>
+                </div>
+                <div id="checkout-desk-summary" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4"></div>
+                <div class="overflow-x-auto rounded-lg border border-gray-700 bg-gray-900/40">
+                    <table class="min-w-full text-sm text-left border-collapse">
+                        <thead class="bg-gray-900 text-gray-300 uppercase text-xs">
+                            <tr class="border-b border-gray-700">
+                                <th class="px-4 py-3 whitespace-nowrap">流水号</th>
+                                <th class="px-4 py-3 whitespace-nowrap">结账时间</th>
+                                <th class="px-4 py-3 whitespace-nowrap">房间号</th>
+                                <th class="px-4 py-3 whitespace-nowrap text-right">房价计费</th>
+                                <th class="px-4 py-3 whitespace-nowrap text-right">点单消费</th>
+                                <th class="px-4 py-3 whitespace-nowrap text-right">合计</th>
+                                <th class="px-4 py-3 whitespace-nowrap">班次</th>
+                                <th class="px-4 py-3 whitespace-nowrap">收银员</th>
+                                <th class="px-4 py-3 whitespace-nowrap text-center">消费明细</th>
+                            </tr>
+                        </thead>
+                        <tbody id="checkout-desk-records" class="divide-y divide-gray-700"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="page-finance" class="cashier-page hidden h-full overflow-y-auto bg-gray-800 rounded-lg p-4">
+                <div class="flex justify-between mb-4"><h2 class="text-xl font-semibold">财务报表</h2><button onclick="loadFinanceReport()" class="bg-gray-700 px-3 py-2 rounded">查询</button></div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4"><input id="finance-start" type="datetime-local" class="px-3 py-2 bg-gray-700 border border-gray-600 rounded"><input id="finance-end" type="datetime-local" class="px-3 py-2 bg-gray-700 border border-gray-600 rounded"><input id="finance-room-id" placeholder="房间" class="px-3 py-2 bg-gray-700 border border-gray-600 rounded"><select id="finance-income-type" class="px-3 py-2 bg-gray-700 border border-gray-600 rounded"><option value="">全部</option><option value="room">房型计费</option><option value="beverage">酒水销售</option></select></div>
+                <div id="finance-summary" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4"></div>
+                <div class="overflow-x-auto rounded-lg border border-gray-700 bg-gray-900/40">
+                    <table class="min-w-full text-sm text-left border-collapse">
+                        <thead class="bg-gray-900 text-gray-300 uppercase text-xs">
+                            <tr class="border-b border-gray-700">
+                                <th class="px-4 py-3 whitespace-nowrap">流水号</th>
+                                <th class="px-4 py-3 whitespace-nowrap">结账时间</th>
+                                <th class="px-4 py-3 whitespace-nowrap">房间号</th>
+                                <th class="px-4 py-3 whitespace-nowrap text-right">房价计费</th>
+                                <th class="px-4 py-3 whitespace-nowrap text-right">点单消费</th>
+                                <th class="px-4 py-3 whitespace-nowrap text-right">合计</th>
+                                <th class="px-4 py-3 whitespace-nowrap">班次</th>
+                                <th class="px-4 py-3 whitespace-nowrap">收银员</th>
+                                <th class="px-4 py-3 whitespace-nowrap">服务员</th>
+                                <th class="px-4 py-3 whitespace-nowrap">销售经理</th>
+                                <th class="px-4 py-3 whitespace-nowrap text-center">消费明细</th>
+                            </tr>
+                        </thead>
+                        <tbody id="finance-records" class="divide-y divide-gray-700"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="page-base-settings" class="cashier-page hidden h-full overflow-y-auto bg-gray-800 rounded-lg p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">基础设置</h2>
+                    <button onclick="loadBillingBaseSettings()" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">刷新</button>
+                </div>
+                <div class="flex gap-2 mb-4 overflow-x-auto">
+                    <button onclick="showBillingSettingTab('basic')" id="billing-setting-tab-basic" class="billing-setting-tab px-4 py-2 rounded bg-blue-700 text-white">基础规则</button>
+                    <button onclick="showBillingSettingTab('rates')" id="billing-setting-tab-rates" class="billing-setting-tab px-4 py-2 rounded bg-gray-700 text-gray-200">房型价格</button>
+                    <button onclick="showBillingSettingTab('buyout')" id="billing-setting-tab-buyout" class="billing-setting-tab px-4 py-2 rounded bg-gray-700 text-gray-200">买断时段</button>
+                    <button onclick="showBillingSettingTab('activity')" id="billing-setting-tab-activity" class="billing-setting-tab px-4 py-2 rounded bg-gray-700 text-gray-200">活动设置</button>
+                    <button onclick="showBillingSettingTab('packages')" id="billing-setting-tab-packages" class="billing-setting-tab px-4 py-2 rounded bg-gray-700 text-gray-200">套餐配置</button>
+                    <button onclick="showBillingSettingTab('gifts')" id="billing-setting-tab-gifts" class="billing-setting-tab px-4 py-2 rounded bg-gray-700 text-gray-200">开房赠品</button>
+                </div>
+                <div class="space-y-4">
+                    <div data-billing-setting-panel="basic" class="billing-setting-panel grid grid-cols-1 xl:grid-cols-2 gap-4">
+                    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-4 xl:col-span-2">
+                        <h3 class="font-bold mb-3 text-blue-200">门店信息</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <label>门店名称<input id="setting-store-name" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded" placeholder="请输入门店名称"></label>
+                            <label>联系电话<input id="setting-store-phone" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded" placeholder="请输入联系电话"></label>
+                            <label>门店地址<input id="setting-store-address" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded" placeholder="请输入门店地址"></label>
+                        </div>
+                        <label class="block mt-3">小票底部说明<textarea id="setting-store-receipt-footer" rows="2" class="w-full mt-1 px-3 py-2 bg-gray-950 border border-gray-700 rounded" placeholder="例如：谢谢惠顾，欢迎下次光临"></textarea></label>
+                        <button onclick="saveStoreInfoSetting()" class="mt-3 bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded">保存门店信息</button>
+                    </div>
+                    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                        <h3 class="font-bold mb-3 text-blue-200">营业时间</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label>开始时间<input id="setting-business-start" type="time" step="1800" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded"></label>
+                            <label>结束时间<input id="setting-business-end" type="time" step="1800" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded"></label>
+                        </div>
+                        <button onclick="saveBusinessHoursSetting()" class="mt-3 bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded">保存营业时间</button>
+                    </div>
+                    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                        <h3 class="font-bold mb-3 text-blue-200">试唱时长设置</h3>
+                        <div class="grid grid-cols-3 gap-3">
+                            <label>启用<select id="setting-trial-enabled" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded"><option value="true">启用</option><option value="false">停用</option></select></label>
+                            <label>分钟<input id="setting-trial-minutes" type="number" min="0" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded"></label>
+                            <label>免费结账<select id="setting-trial-free" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded"><option value="true">允许</option><option value="false">不允许</option></select></label>
+                        </div>
+                        <button onclick="saveTrialSingingSetting()" class="mt-3 bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded">保存试唱设置</button>
+                    </div>
+                    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                        <h3 class="font-bold mb-3 text-blue-200">PAD 点单</h3>
+                        <div class="text-sm text-gray-400 mb-3">控制 PAD 是否显示和使用商品点单功能，默认未启用。</div>
+                        <label>是否启用<select id="setting-pad-ordering-enabled" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded"><option value="false">未启用</option><option value="true">启用</option></select></label>
+                        <button onclick="savePadOrderingStatus()" class="mt-3 bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded">保存 PAD 点单设置</button>
+                    </div>
+                    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-4 xl:col-span-2">
+                        <h3 class="font-bold mb-3 text-blue-200">打印机配置</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <label>打印机名称<input id="setting-printer-name" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded" placeholder="前台小票机"></label>
+                            <label>类型<select id="setting-printer-type" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded"><option value="browser">浏览器打印</option><option value="network">网络打印机</option><option value="usb">USB打印机</option></select></label>
+                            <label>地址<input id="setting-printer-address" class="w-full mt-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded" placeholder="浏览器打印可填 default"></label>
+                            <div class="flex items-end"><button id="setting-printer-save-btn" onclick="savePrinterConfig()" class="w-full bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded">新增打印机</button></div>
+                        </div>
+                        <div id="setting-printer-list" class="mt-3 text-sm text-gray-300"></div>
+                    </div>
+                    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-4 xl:col-span-2">
+                        <h3 class="font-bold mb-2 text-blue-200">节假日日期设置</h3>
+                        <div class="text-xs text-gray-400 mb-2">每行一个日期，格式：2026-05-01。配置日期和周六/周日会自动使用节假日价格。</div>
+                        <div class="flex flex-wrap gap-2"><input id="setting-holiday-date-input" type="date" class="px-3 py-2 bg-gray-950 border border-gray-700 rounded text-white"><button type="button" onclick="addHolidayDate()" class="bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded">添加日期</button></div>
+                        <div id="setting-holiday-date-list" class="holiday-date-list mt-3"></div>
+                        <textarea id="setting-holiday-dates" class="hidden"></textarea>
+                        <button onclick="saveHolidayDatesSetting()" class="mt-3 bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded">保存节假日</button>
+                    </div>
+                    </div>
+                    <div data-billing-setting-panel="rates" class="billing-setting-panel hidden bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                        <h3 class="font-bold mb-2 text-blue-200">房间类型计费设置（正常价格 / 节假日价格 / 会员价格）</h3>
+                        <div class="overflow-x-auto border border-gray-700 rounded">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-950 text-gray-300">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left">房间类型ID</th>
+                                        <th class="px-3 py-2 text-left">适用星期</th>
+                                        <th class="px-3 py-2 text-left">开始时间</th>
+                                        <th class="px-3 py-2 text-left">结束时间</th>
+                                        <th class="px-3 py-2 text-left">正常价/小时</th>
+                                        <th class="px-3 py-2 text-left">节假日价/小时</th>
+                                        <th class="px-3 py-2 text-left">会员价/小时</th>
+                                        <th class="px-3 py-2 text-left">最低分钟</th>
+                                        <th class="px-3 py-2 text-center">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="setting-room-type-rates-rows" class="divide-y divide-gray-700"></tbody>
+                            </table>
+                        </div>
+                        <textarea id="setting-room-type-rates" rows="4" class="hidden w-full font-mono text-xs px-3 py-2 bg-gray-950 border border-gray-700 rounded"></textarea>
+                        <button onclick="addRoomTypeRateRow()" class="mt-3 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">新增房型价格</button>
+                        <button onclick="saveJsonBillingSetting('room_type_rates')" class="mt-3 bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded">保存房型计费</button>
+                    </div>
+                    <div data-billing-setting-panel="buyout" class="billing-setting-panel hidden bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                        <h3 class="font-bold mb-2 text-blue-200">买断时间段设置</h3>
+                        <div class="overflow-x-auto border border-gray-700 rounded">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-950 text-gray-300"><tr><th class="px-3 py-2 text-left">名称</th><th class="px-3 py-2 text-left">房型ID</th><th class="px-3 py-2 text-left">价格</th><th class="px-3 py-2 text-left">时长分钟</th><th class="px-3 py-2 text-left">超时/分钟</th><th class="px-3 py-2 text-center">操作</th></tr></thead>
+                                <tbody id="setting-buyout-periods-rows" class="divide-y divide-gray-700"></tbody>
+                            </table>
+                        </div>
+                        <textarea id="setting-buyout-periods" rows="4" class="hidden w-full font-mono text-xs px-3 py-2 bg-gray-950 border border-gray-700 rounded"></textarea>
+                        <button onclick="addBuyoutPeriodRow()" class="mt-3 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">新增买断时段</button>
+                        <button onclick="saveJsonBillingSetting('buyout_periods')" class="mt-3 bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded">保存买断时段</button>
+                    </div>
+                    <div data-billing-setting-panel="activity" class="billing-setting-panel hidden bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                        <h3 class="font-bold mb-2 text-blue-200">活动设置</h3>
+                        <div class="overflow-x-auto border border-gray-700 rounded">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-950 text-gray-300"><tr><th class="px-3 py-2 text-left">名称</th><th class="px-3 py-2 text-left">房型ID</th><th class="px-3 py-2 text-left">固定价</th><th class="px-3 py-2 text-left">折扣</th><th class="px-3 py-2 text-left">启用</th><th class="px-3 py-2 text-center">操作</th></tr></thead>
+                                <tbody id="setting-activity-rules-rows" class="divide-y divide-gray-700"></tbody>
+                            </table>
+                        </div>
+                        <textarea id="setting-activity-rules" rows="4" class="hidden w-full font-mono text-xs px-3 py-2 bg-gray-950 border border-gray-700 rounded"></textarea>
+                        <button onclick="addActivityRuleRow()" class="mt-3 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">新增活动</button>
+                        <button onclick="saveJsonBillingSetting('activity_rules')" class="mt-3 bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded">保存活动设置</button>
+                    </div>
+                    <div data-billing-setting-panel="packages" class="billing-setting-panel hidden bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                        <h3 class="font-bold mb-2 text-blue-200">套餐配置</h3>
+                        <div class="text-xs text-gray-400 mb-3">后台预设固定套餐内容，落单员只能选择整套套餐，不能临时修改包含商品。</div>
+                        <div id="setting-package-configs-list" class="space-y-3"></div>
+                        <div id="setting-package-item-editor" class="hidden mt-4 border border-blue-800/60 bg-blue-950/20 rounded-lg p-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 id="setting-package-item-editor-title" class="font-bold text-blue-100">套餐包含商品</h4>
+                                <button onclick="closePackageItemEditor()" class="text-gray-400 hover:text-white">关闭</button>
+                            </div>
+                            <div class="overflow-x-auto border border-gray-700 rounded">
+                                <table class="w-full text-sm">
+                                    <thead class="bg-gray-950 text-gray-300"><tr><th class="px-3 py-2 text-left">商品</th><th class="px-3 py-2 text-left">数量</th><th class="px-3 py-2 text-center">操作</th></tr></thead>
+                                    <tbody id="setting-package-items-rows" class="divide-y divide-gray-700"></tbody>
+                                </table>
+                            </div>
+                            <button onclick="addPackageItemRow()" class="mt-3 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">新增包含商品</button>
+                        </div>
+                        <textarea id="setting-package-configs" rows="4" class="hidden w-full font-mono text-xs px-3 py-2 bg-gray-950 border border-gray-700 rounded"></textarea>
+                        <button onclick="addPackageConfig()" class="mt-3 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">新增套餐</button>
+                        <button onclick="saveJsonBillingSetting('package_configs')" class="mt-3 bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded">保存套餐配置</button>
+                    </div>
+                    <div data-billing-setting-panel="gifts" class="billing-setting-panel hidden bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                        <h3 class="font-bold mb-2 text-blue-200">房型开房赠送商品设置</h3>
+                        <div class="overflow-x-auto border border-gray-700 rounded">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-950 text-gray-300"><tr><th class="px-3 py-2 text-left">房型ID</th><th class="px-3 py-2 text-left">商品ID</th><th class="px-3 py-2 text-left">数量</th><th class="px-3 py-2 text-center">操作</th></tr></thead>
+                                <tbody id="setting-room-type-gifts-rows" class="divide-y divide-gray-700"></tbody>
+                            </table>
+                        </div>
+                        <textarea id="setting-room-type-gifts" rows="4" class="hidden w-full font-mono text-xs px-3 py-2 bg-gray-950 border border-gray-700 rounded"></textarea>
+                        <button onclick="addRoomTypeGiftRow()" class="mt-3 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">新增赠品</button>
+                        <button onclick="saveJsonBillingSetting('room_type_gifts')" class="mt-3 bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded">保存赠送商品</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 hidden bg-gray-800 border border-gray-700 px-4 py-2 rounded shadow"></div>
+    <div id="cashier-dialog" class="fixed inset-0 hidden items-center justify-center bg-black/60 z-[9999]">
+        <div id="cashier-dialog-panel" class="w-full max-w-md bg-gray-800 border border-gray-700 rounded-xl shadow-2xl overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-700">
+                <h3 id="cashier-dialog-title" class="text-lg font-bold text-white">提示</h3>
+                <div id="cashier-dialog-message" class="text-sm text-gray-300 mt-2 whitespace-pre-line"></div>
+            </div>
+            <div id="cashier-dialog-input-wrap" class="px-5 py-4 hidden">
+                <input id="cashier-dialog-input" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500">
+            </div>
+            <div class="px-5 py-4 bg-gray-900/40 flex justify-end gap-3">
+                <button id="cashier-dialog-cancel" class="px-5 py-2 bg-gray-700 hover:bg-gray-600 rounded text-gray-100">取消</button>
+                <button id="cashier-dialog-confirm" class="px-5 py-2 bg-blue-700 hover:bg-blue-600 rounded text-white font-bold">确定</button>
+            </div>
+        </div>
+    </div>
+    <script src="/static/cashier/cashier.js?v=20260925-checkout-snapshot"></script>
+    <script src="/static/cashier/cashier_room_pos.js?v=20260925-checkout-snapshot"></script>
+    <script src="/static/cashier/settings_translations.js?v=20260925-checkout-snapshot"></script>
+    <script src="/static/cashier/settings_controls.js?v=20260925-checkout-snapshot"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+   Compiling hvideo-watchdog v0.1.0 (D:\HVIDEO\Hvideo_server\watchdog)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.08s
+PASS: independent executable and duplicate-launch exclusion
+PASS: forced termination recovered in 230 ms, watchdog survived
+PASS: zero exit recovered
+PASS: panic exit recovered
+PASS: relaunch exit recovered
+PASS: native exit recovered
+PASS: real native dump contains expected exception code and context
+PASS: explicit exit stops both; next launch works; stop markers cleaned

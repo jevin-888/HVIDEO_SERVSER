@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HVideo Admin</title>
+    <style>
+        * { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; }
+        body { display: grid; place-items: center; background: #111827; color: #e5e7eb; font-family: "Microsoft YaHei", sans-serif; }
+        main { width: min(520px, calc(100vw - 32px)); padding: 28px; border: 1px solid #374151; border-radius: 14px; background: #1f2937; box-shadow: 0 18px 60px rgba(0,0,0,.35); }
+        h1 { margin: 0 0 10px; font-size: 22px; }
+        p { margin: 0; color: #9ca3af; line-height: 1.6; }
+        #recovery { display: none; margin-top: 22px; padding-top: 20px; border-top: 1px solid #374151; }
+        label { display: block; margin-bottom: 8px; color: #d1d5db; font-size: 13px; }
+        select { min-height: 42px; border-radius: 8px; font: inherit; }
+        select { width: 100%; padding: 0 12px; border: 1px solid #4b5563; color: #fff; background: #374151; }
+        select:disabled { cursor: not-allowed; opacity: .55; }
+        #network-status, #startup-error { margin-top: 9px; font-size: 12px; color: #fbbf24; overflow-wrap: anywhere; white-space: pre-wrap; }
+        .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+        button { padding: 8px 12px; border: 1px solid #6b7280; border-radius: 6px; background: #374151; color: #fff; font: inherit; cursor: pointer; }
+        button:disabled { opacity: .55; cursor: wait; }
+    </style>
+</head>
+<body>
+    <main>
+        <h1 id="startup-title">HVideo 服务器正在启动</h1>
+        <p id="startup-message">&#27491;&#22312;&#26816;&#26597;&#26381;&#21153;&#22120;&#32593;&#21345;&#21644;&#21518;&#21488;&#26381;&#21153;&hellip;</p>
+        <section id="recovery">
+            <div id="startup-error" role="alert"></div>
+            <label for="network-interface">服务器使用的 IPv4 网卡</label>
+            <select id="network-interface"><option value="">&#27491;&#22312;&#35835;&#21462;&#26412;&#26426;&#32593;&#21345;&hellip;</option></select>
+            <div id="network-status"></div>
+            <div class="actions">
+                <button id="refresh-network" type="button">刷新网卡</button>
+                <button id="retry-startup" type="button">重试启动</button>
+                <button id="open-logs" type="button">查看日志</button>
+            </div>
+        </section>
+    </main>
+    <script>
+        const invoke = window.__TAURI__?.tauri?.invoke || window.__TAURI__?.invoke || window.__TAURI_INVOKE__;
+        const recovery = document.getElementById('recovery');
+        const select = document.getElementById('network-interface');
+        const status = document.getElementById('network-status');
+        const startupMessage = document.getElementById('startup-message');
+        const startupTitle = document.getElementById('startup-title');
+        const startupError = document.getElementById('startup-error');
+        const refresh = document.getElementById('refresh-network');
+        const retry = document.getElementById('retry-startup');
+        let configuredPort = 9898;
+        let checks = 0;
+        let busy = false;
+        let loading = false;
+        let hasInterfaces = false;
+        let lastError = null;
+
+        function showRecovery(message) {
+            recovery.style.display = 'block';
+            startupTitle.textContent = 'HVideo 服务器尚未启动';
+            startupMessage.textContent = '请查看下面的启动原因，处理后可直接重试。';
+            startupError.textContent = message || '';
+        }
+
+        async function loadNetworkOptions() {
+            if (loading || busy) return;
+            loading = true;
+            refresh.disabled = true;
+            try {
+                const options = await invoke('get_server_network_options');
+                configuredPort = Number(options?.configuredPort) || 9898;
+                const interfaces = Array.isArray(options?.interfaces) ? options.interfaces : [];
+                hasInterfaces = interfaces.length > 0;
+                const previous = select.value;
+                select.innerHTML = '';
+                interfaces.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.ip;
+                    option.textContent = item.name ? `${item.name} — ${item.ip}` : item.ip;
+                    select.appendChild(option);
+                });
+                if (!interfaces.length) {
+                    select.innerHTML = '<option value="">\u672a\u68c0\u6d4b\u5230\u53ef\u7528 IPv4 \u7f51\u5361</option>';
+                    select.disabled = true;
+                    status.textContent = '\u8bf7\u5148\u8fde\u63a5\u6709\u7ebf\u7f51\u5361\u6216 Wi-Fi';
+                    return;
+                }
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = '\u8bf7\u9009\u62e9\u670d\u52a1\u5668\u7f51\u5361 IP';
+                select.insertBefore(placeholder, select.firstChild);
+                select.disabled = false;
+                select.value = interfaces.some(item => item.ip === previous) ? previous
+                    : options.configuredAvailable ? options.configuredHost : '';
+                status.textContent = options.configuredAvailable
+                    ? `已识别当前网卡 ${options.configuredHost}；可直接重试启动。`
+                    : '请选择服务器 IP，选择后自动保存并启动。连接网络后也可点击刷新网卡。';
+            } catch (error) {
+                hasInterfaces = false;
+                select.innerHTML = '<option value="">无法读取网络配置</option>';
+                select.disabled = true;
+                status.textContent = String(error?.message || error);
+            } finally {
+                loading = false;
+                refresh.disabled = false;
+            }
+        }
+
+        async function checkStartup() {
+            if (!invoke) {
+                startupMessage.textContent = '\u65e0\u6cd5\u8c03\u7528\u684c\u9762\u7a0b\u5e8f\u63a5\u53e3\uff0c\u8bf7\u91cd\u542f HVideo Admin';
+                return;
+            }
+            checks += 1;
+            try {
+                const server = await invoke('get_server_status');
+                if (server?.running && !server?.last_error && server?.server_url) {
+                    window.location.replace(server.server_url);
+                    return;
+                }
+                if (busy) return;
+                if (server?.last_error || checks >= 5) {
+                    const message = server?.last_error || '后台仍在初始化，可查看日志；无需重启电脑。';
+                    if (message !== lastError) {
+                        lastError = message;
+                        showRecovery(message);
+                        await loadNetworkOptions();
+                    } else if (!hasInterfaces && checks % 3 === 0) {
+                        await loadNetworkOptions();
+                    }
+                }
+            } catch (error) {
+                showRecovery(String(error?.message || error));
+            } finally {
+                window.setTimeout(checkStartup, 1000);
+            }
+        }
+
+        async function start(command, args) {
+            if (busy || loading) return;
+            busy = true;
+            select.disabled = true;
+            refresh.disabled = true;
+            retry.disabled = true;
+            status.textContent = '正在启动服务器…';
+            try {
+                const result = await invoke(command, args);
+                status.textContent = '\u670d\u52a1\u5668\u5df2\u542f\u52a8\uff0c\u6b63\u5728\u6253\u5f00\u767b\u5f55\u9875\u2026';
+                if (result?.serverUrl) window.location.replace(result.serverUrl);
+            } catch (error) {
+                lastError = String(error?.message || error);
+                showRecovery(lastError);
+                status.textContent = '处理上述原因后，可刷新网卡或再次重试。';
+            } finally {
+                busy = false;
+                select.disabled = !hasInterfaces;
+                refresh.disabled = false;
+                retry.disabled = false;
+            }
+        }
+
+        select.addEventListener('change', () => {
+            if (select.value) start('select_server_network', { host: select.value, port: configuredPort });
+        });
+        refresh.addEventListener('click', loadNetworkOptions);
+        retry.addEventListener('click', () => start('restart_server'));
+        document.getElementById('open-logs').addEventListener('click', async () => {
+            try { await invoke('open_logs_dir'); }
+            catch (error) { status.textContent = String(error?.message || error); }
+        });
+
+        window.setTimeout(checkStartup, 800);
+    </script>
+</body>
+</html>

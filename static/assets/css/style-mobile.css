@@ -1,0 +1,1601 @@
+/* 禁用双击缩放，优化触摸交互（全局） */
+html, body {
+  touch-action: manipulation;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* 灯光按钮容器内的按钮样式 */
+#light-buttons button {
+  padding: 1rem;
+  min-height: 5.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 确保灯光按钮内的图标和文字适应较小的高度 */
+#light-buttons .text-2xl {
+  font-size: 1.5rem;
+}
+
+#light-buttons .mb-2 {
+  margin-bottom: 0.25rem;
+}
+
+#light-buttons .text-sm {
+  font-size: 0.75rem;
+}
+
+/* 灯光按钮内的图标和文字容器 */
+#light-buttons .flex.flex-col.items-center.justify-center {
+  gap: 0.25rem;
+}
+
+/* 灯光控制区域自适应样式 */
+#light-tab .pr-2.mb-2.h-full {
+  height: 100%;
+  overflow: hidden;
+}
+
+#light-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  height: 100%;
+  overflow-y: auto;
+  align-content: start;
+}
+
+/* 移除了媒体查询，现在所有设备都显示3列 */
+
+@media (max-width: 640px), (max-width: 480px) {
+  #light-buttons {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.25rem;
+  }
+}
+
+/* 自动灯光按钮红点样式 */
+.status-dot {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  width: 0.375rem;
+  height: 0.375rem;
+  background-color: #ef4444; /* red-500 */
+  border-radius: 50%;
+  z-index: 1000;
+}
+
+.auto-dot {
+  composes: status-dot;
+}
+
+.sound-effect-dot {
+  composes: status-dot;
+}
+
+/* 按钮点击动画效果 */
+.clicked {
+  transform: scale(0.95);
+  transition: transform 0.15s ease-out;
+}
+
+/* 全局CSS变量（浅色/深色） */
+:root {
+  --transition-default: all 0.2s ease;
+  --bg-light: #f8fafc;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-light: #e5e7eb;
+  --primary: #e53e3e;
+  --primary-dark: #b91c1c;
+  --danger: #ef4444;
+}
+.dark {
+  --bg-light: #111827;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --border-light: #374151;
+}
+
+/* 分类标签样式（浅色/深色一致） */
+.category-tabs-container {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--border-light);
+}
+.category-tabs-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+.category-tabs-wrapper::-webkit-scrollbar { height: 4px; }
+.category-tabs-wrapper::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 2px; }
+.dark .category-tabs-wrapper::-webkit-scrollbar-thumb { background-color: #4b5563; }
+.category-tabs { display: flex; gap: 0.5rem; padding: 0.5rem 0; min-width: max-content; }
+.category-tab { cursor: pointer; padding: 0.3rem 1rem; border-radius: 999px; white-space: nowrap; transition: var(--transition-default); color: var(--text-primary); }
+.category-tabs-container .category-tab.active { background-color: #3b82f6; color: #fff; transform: scale(1.05); }
+.dark .category-tabs-container .category-tab.active { background-color: var(--primary-dark); color: #fff; }
+.category-tabs-container .category-tab:active { transform: scale(0.98); }
+
+/* 素材卡片统一样式（加固防覆盖） */
+.material-card { transition: transform 0.3s ease, box-shadow 0.3s ease; border: 2px solid #e2e8f0; border-radius: 0.5rem; overflow: hidden; background-color: var(--bg-light); display: flex; flex-direction: column; box-sizing: border-box; }
+.dark .material-card { border-color: #374151; background-color: #1F2937; }
+.material-card .thumb { width: 100%; height: 140px !important; flex: 0 0 140px !important; background-color: var(--bg-light); display: flex; align-items: center; justify-content: center; }
+.dark .material-card .thumb { background-color: #1F2937; }
+.material-card .thumb img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block; }
+.material-card .thumb i { font-size: 2.5rem; color: #9ca3af; }
+.material-card .card-body { padding: 0.75rem !important; height: 64px !important; flex: 0 0 64px !important; overflow: hidden !important; }
+.material-card .card-title { margin: 0; font-size: 1rem !important; line-height: 1.2 !important; height: 1.2em !important; color: var(--text-primary) !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+.material-card .card-subtitle { margin: 0.25rem 0 0 0; font-size: 0.875rem !important; line-height: 1.2 !important; height: 1.2em !important; color: var(--text-secondary) !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+.dark .material-card .card-title { color: #f3f4f6 !important; }
+.dark .material-card .card-subtitle { color: #9ca3af !important; }
+
+.material-card.selected, .material-card.active { border: 2px solid var(--primary); box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.2); background-color: rgba(229, 62, 62, 0.05); }
+.dark .material-card.selected, .dark .material-card.active { border-color: var(--primary); background-color: rgba(229, 62, 62, 0.1); }
+
+/* 修复排行榜歌曲卡片自适应区域问题 */
+#top-songs-list {
+  max-height: calc(100vh - 140px) !important; /* 增加显示区域，减少底部空白 */
+  height: auto !important;
+  flex: 1 1 auto !important; /* 允许flex-grow填充剩余空间 */
+  margin-bottom: 0 !important; /* 移除可能的底部边距 */
+  padding-bottom: 0 !important; /* 移除可能的底部内边距 */
+}
+
+#top-songs-list .grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.1rem; /* 从0.25rem进一步减小到0.1rem */
+  max-height: calc(100vh - 254px); /* 根据视口高度动态计算并减去其他元素高度 */
+  overflow-y: auto;
+  /* 添加滚动条样式 */
+  scrollbar-width: thin;
+  scrollbar-color: #E53E3E #f1f1f1;
+  /* 添加硬件加速优化 */
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  will-change: scroll-position;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  margin-bottom: 0; /* 移除可能的底部边距 */
+  padding-bottom: 0; /* 移除可能的底部内边距 */
+}
+
+/* 确保已选区域容器可以滚动 */
+#selectedListContainer {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#selectedListContainer .space-y-1 {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+}
+
+/* 确保排行榜歌曲卡片有间距 */
+#top-songs-list .song-card {
+  margin-bottom: 0.1rem; /* 从0.25rem进一步减小到0.1rem */
+}
+
+#top-songs-list .song-card:last-child {
+  margin-bottom: 0; /* 最后一个卡片不需要底部边距 */
+}
+
+#top-songs-list .grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+#top-songs-list .grid::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+#top-songs-list .grid::-webkit-scrollbar-thumb {
+  background: #E53E3E;
+  border-radius: 10px;
+}
+
+
+
+@media (min-width: 768px) {
+  #top-songs-list .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* 调整歌曲卡片高度和内边距 */
+.song-card {
+  height: auto;
+  /* 默认更紧凑（用于手机） */
+  min-height: 1.5rem;
+  max-height: none;
+  padding: 0.25rem 0.25rem; /* 手机更小的内边距 */
+}
+
+/* 首页已选列表卡片高度优化 */
+#selectedList .song-card {
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+/* 平板优化：增大歌曲卡片可点击面积与文字可读性 */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .song-card {
+    min-height: 3.75rem; /* 约 60px */
+    padding: 0.75rem 1rem;
+  }
+  .song-card .icon-circle {
+    width: 48px;
+    height: 48px;
+  }
+  .song-card .add-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  /* 平板设备首页已选列表卡片优化 */
+  #selectedList .song-card,
+  .song-list .song-card {
+    min-height: 4rem; /* 约 64px */
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  /* 平板设备首页已选列表图标优化 */
+  #selectedList .song-card .music-icon-container .w-8,
+  .song-list .song-card .music-icon-container .w-8 {
+    width: 2.5rem; /* 40px */
+  }
+  
+  #selectedList .song-card .music-icon-container .h-8,
+  .song-list .song-card .music-icon-container .h-8 {
+    height: 2.5rem; /* 40px */
+  }
+  
+  #selectedList .song-card .music-icon-container .text-sm,
+  .song-list .song-card .music-icon-container .text-sm {
+    font-size: 1.125rem; /* 18px */
+  }
+  
+  #selectedList .song-card .music-icon-container .space-x-4,
+  .song-list .song-card .music-icon-container .space-x-4 {
+    gap: 1.5rem;
+  }
+}
+
+/* 调整歌曲卡片中的文字大小 */
+.song-card h3 {
+  font-size: 1.125rem; /* 统一标题字体大小与热门歌曲一致 */
+}
+
+.song-card .text-sm {
+  font-size: 1rem; /* 统一副标题字体大小与热门歌曲一致 */
+}
+
+.song-card .px-2 {
+  /* 移除固定内边距，让 Tailwind 类控制内边距 */
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.song-card .py-1 {
+  /* 移除固定内边距，让 Tailwind 类控制内边距 */
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* 调整歌曲卡片中的图标大小 */
+.song-card .icon-circle {
+  width: 36px;
+  height: 36px;
+}
+
+.song-card .icon-circle .fa {
+  font-size: 1rem;
+}
+
+.song-card .add-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.song-card .add-btn .fa {
+  font-size: 1rem;
+}
+
+/* 统一歌曲卡片标签样式 */
+.song-card span[class*="rounded-full"],
+.singer-card span[class*="rounded-full"] {
+  border-radius: 0.25rem; /* 小圆角 */
+}
+
+/* 防止容器自适应填充剩余空间 */
+.search-modal-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-modal-content > div[style*="height: calc(100% - 200px)"] {
+  flex: 0 0 auto !important;
+}
+
+/* 确保排行榜区域不自动扩展 */
+.mb-6[style*="height: calc(100% - 200px)"] {
+  flex: 1 1 auto !important;
+  height: auto !important;
+  max-height: none !important; /* 移除固定的最大高度限制 */
+  margin-bottom: 0 !important; /* 移除可能的底部边距 */
+  padding-bottom: 0 !important; /* 移除可能的底部内边距 */
+}
+
+/* 确保只有已选区域可以滚动，而不是整个页面 */
+#selectedList {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  max-height: 600px;
+  min-height: 600px;
+}
+
+/* 确保已选区域容器正确布局 */
+section.px-3.mt-4.flex.flex-col.flex-1.overflow-hidden {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* 底部导航栏固定在底部 */
+/* 确保底部导航始终位于面板与遮罩层之上 */
+#bottom-nav {
+  position: fixed; /* 保底：如果运行时类未生效，确保固定定位 */
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10050 !important; /* 显式高层级，覆盖任意遮罩层 */
+  height: 80px;
+  flex-shrink: 0;
+}
+
+/* 为底部导航栏留出空间 */
+main {
+  padding-bottom: 80px;
+}
+
+/* 确保已选列表容器可以滚动 */
+#selectedList.space-y-1.overflow-y-auto.flex-1 {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+}
+
+/* 确保已选区域容器正确布局 */
+section.px-3.mt-4.flex.flex-col.flex-1.overflow-hidden {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+  min-height: 0;
+}
+
+/* 确保主内容区不滚动 */
+main {
+  overflow: hidden;
+  height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* 确保页面不滚动 */
+body {
+  overflow: hidden;
+  height: 100vh;
+  max-height: 100vh;
+}
+
+html {
+  overflow: hidden;
+  height: 100vh;
+  max-height: 100vh;
+}
+
+/* 确保轮播图区域不滚动 */
+section.relative {
+  flex-shrink: 0;
+}
+
+/* 轮播图区域固定高度 */
+section.relative.h-\[28vh\] {
+  height: 28vh;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  section.relative.h-\[28vh\] {
+    height: 40vh;
+  }
+}
+
+@media (min-width: 1024px) {
+  section.relative.h-\[28vh\] {
+    height: 48vh;
+  }
+}
+
+/* 确保轮播图容器正确显示 */
+#carousel {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+#carousel img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.5s ease;
+}
+
+/* 响应式标签容器优化 */
+.search-modal-content .flex.flex-wrap.gap-2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem; /* 减小标签间距 */
+  width: 100%;
+}
+
+/* 标签响应式优化 */
+.search-modal-content .tag {
+  flex: 1 1 auto;
+  min-width: 50px;
+  max-width: fit-content;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  /* 减小内边距 */
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+  font-size: 0.875rem;
+}
+
+/* 小屏幕设备标签优化 */
+@media (max-width: 640px) {
+  .search-modal-content .tag {
+    min-width: 50px;
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
+    padding-top: 0.125rem !important;
+    padding-bottom: 0.125rem !important;
+  }
+  
+  .search-modal-content .tag > div:first-child {
+    font-size: 0.875rem;
+  }
+  
+  .search-modal-content .tag > div:last-child {
+    font-size: 0.5rem;
+  }
+  
+  .search-modal-content .flex.flex-wrap.gap-1 {
+    gap: 0.25rem;
+  }
+  
+  /* 防止搜索输入框导致页面放大 */
+  .search-modal-content input[type="text"], 
+  .search-modal-content input[type="search"], 
+  .search-modal-content .search-input {
+    font-size: 16px !important;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
+/* 平板设备标签优化 */
+@media (min-width: 641px) and (max-width: 768px) {
+  .search-modal-content .tag {
+    min-width: 60px;
+  }
+  
+  .search-modal-content .flex.flex-wrap.gap-1 {
+    gap: 0.5rem;
+  }
+  
+  /* 防止搜索输入框导致页面放大 */
+  .search-modal-content input[type="text"], 
+  .search-modal-content input[type="search"], 
+  .search-modal-content .search-input {
+    font-size: 16px !important;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
+/* 大屏幕设备标签优化 */
+@media (min-width: 769px) {
+  .search-modal-content .flex.flex-wrap.gap-1 {
+    gap: 0.5rem;
+  }
+  
+  .search-modal-content .tag {
+    min-width: 70px;
+  }
+  
+  /* 防止搜索输入框导致页面放大 */
+  .search-modal-content input[type="text"], 
+  .search-modal-content input[type="search"], 
+  .search-modal-content .search-input {
+    font-size: 16px !important;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
+
+
+.search-modal-content .tag:active {
+  transform: translateY(0);
+}
+
+/* 标签中的主文字 */
+.search-modal-content .tag > div:first-child {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* 标签中的拼音文字 */
+.search-modal-content .tag > div:last-child {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 防止模态框内容缩放 */
+.search-modal-content,
+.search-modal-content * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 确保搜索输入框字体大小防止页面放大 */
+.search-modal-content .search-input {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* 分类项样式优化 */
+.classify-item {
+  font-size: 1.2rem; /* 从1.5rem减小到1.2rem */
+  padding: 1rem; /* 从1.5rem减小到1rem */
+}
+
+.classify-item h3 {
+  font-size: 1.2rem; /* 从1.5rem减小到1.2rem */
+  font-weight: bold;
+}
+
+.classify-item .fa-chevron-right {
+  font-size: 1.2rem; /* 从1.5rem减小到1.2rem */
+}
+
+/* 增大歌手卡片的样式 */
+.singer-card {
+  height: auto;
+  min-height: 4.375rem;
+  max-height: none;
+  padding: 0.75rem;
+}
+
+/* 增大歌手卡片中的文字大小 */
+.singer-card h3 {
+  font-size: 1.125rem; /* 增大标题字体大小 */
+}
+
+.singer-card .text-sm {
+  font-size: 0.875rem; /* 增大副标题字体大小 */
+}
+
+.singer-card .px-2 {
+}
+
+/* 调整歌曲卡片高度和内边距 */
+.song-card {
+  height: auto;
+  /* 减小最小高度，让卡片更紧凑 */
+  min-height: 1.5rem;
+  max-height: none;
+  /* 设置固定的内边距，确保所有卡片大小一致且更紧凑 */
+  padding: 0.25rem 0.25rem; /* 更小的内边距 */
+}
+
+.singer-card .py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+/* 增大歌手卡片中的图标大小 */
+.singer-card .icon-circle {
+  width: 64px; /* 增大图标容器宽度 */
+  height: 64px; /* 增大图标容器高度 */
+}
+
+.singer-card .icon-circle .fa {
+  font-size: 1.5rem; /* 增大图标字体大小 */
+}
+
+.singer-card .singer-default-icon {
+  font-size: 2.5rem; /* 增大默认图标字体大小 */
+}
+
+/* 商品列表容器 - 优化响应式布局 */
+.dish-list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2vw, 12px);
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+}
+
+/* 单个商品卡片 - 优化响应式布局 */
+.dish-item {
+  background-color: #fff;
+  border-radius: 0.625rem;
+  padding: clamp(0.5rem, 2vw, 0.75rem);
+  display: flex;
+  align-items: center;
+  gap: clamp(0.375rem, 1.5vw, 0.625rem);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 5.625rem;
+}
+
+
+
+/* 图片容器 - 优化响应式尺寸 */
+.dish-img-container {
+  width: clamp(3.125rem, 12vw, 4.375rem);
+  height: clamp(3.125rem, 12vw, 4.375rem);
+  border-radius: 0.375rem;
+  overflow: hidden;
+  background-color: #f0f0f0;
+  flex-shrink: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 商品图片 */
+.dish-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* 商品信息区 - 优化响应式布局 */
+.dish-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 1vw, 6px);
+  min-width: 0;
+}
+
+.dish-name {
+  font-size: clamp(14px, 3vw, 16px);
+  font-weight: 600;
+  color: #333;
+}
+
+.dish-taste {
+  font-size: clamp(11px, 2vw, 13px);
+  color: #666;
+}
+
+.dish-price {
+  font-size: clamp(13px, 2.5vw, 15px);
+  color: #e63946;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.dish-price span {
+  font-size: 13px;
+  font-weight: normal;
+}
+
+/* 数量加减控制区 - 优化响应式布局 */
+.count-control {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.25rem, 1vw, 0.625rem);
+  flex-shrink: 0;
+}
+
+.count-btn {
+  width: clamp(1.25rem, 5vw, 1.75rem);
+  height: clamp(1.25rem, 5vw, 1.75rem);
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  color: #333;
+  font-size: clamp(0.75rem, 3vw, 1rem);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  min-width: 1.25rem;
+}
+
+
+
+.count-btn:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+  background-color: #fafafa;
+}
+
+.count-num {
+  font-size: clamp(0.75rem, 2.5vw, 0.9375rem);
+  color: #333;
+  width: clamp(1.5625rem, 5vw, 2.1875rem);
+  text-align: center;
+}
+
+/* 浅色模式下的数量控制样式 */
+:not(.dark) .count-btn {
+  background-color: #fff;
+  border-color: #ddd;
+  color: #333;
+}
+
+
+
+:not(.dark) .count-btn:disabled {
+  background-color: #fafafa;
+  color: #ccc;
+}
+
+:not(.dark) .count-num {
+  color: #333;
+}
+
+/* 暗黑模式下的数量控制样式 */
+.dark .count-btn {
+  background-color: #1f2937;
+  border-color: #374151;
+  color: #f9fafb;
+}
+
+
+
+.dark .count-btn:disabled {
+  background-color: #1f2937;
+  color: #4b5563;
+}
+
+.dark .count-num {
+  color: #f9fafb;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .dish-item {
+    padding: 10px;
+    gap: 8px;
+  }
+  
+  .dish-img-container {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .dish-name {
+    font-size: 15px;
+  }
+  
+  .dish-taste {
+    font-size: 12px;
+  }
+  
+  .dish-price {
+    font-size: 14px;
+  }
+  
+  .count-control {
+    gap: 6px;
+  }
+  
+  .count-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+  }
+  
+  .count-num {
+    font-size: 13px;
+    width: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dish-list {
+    gap: 8px;
+  }
+  
+  .dish-item {
+    padding: 8px;
+    gap: 6px;
+  }
+  
+  .dish-img-container {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .dish-name {
+    font-size: 14px;
+  }
+  
+  .dish-taste {
+    font-size: 11px;
+  }
+  
+  .dish-price {
+    font-size: 13px;
+  }
+  
+  .count-control {
+    gap: 4px;
+  }
+  
+  .count-btn {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+  }
+  
+  .count-num {
+    font-size: 12px;
+    width: 25px;
+  }
+}
+
+/* 浅色模式适配 */
+:not(.dark) .dish-item {
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+
+
+:not(.dark) .dish-img-container {
+  background-color: #f0f0f0;
+}
+
+:not(.dark) .dish-name {
+  color: #333;
+}
+
+:not(.dark) .dish-taste {
+  color: #666;
+}
+
+:not(.dark) .dish-price {
+  color: #e63946;
+}
+
+/* 暗黑模式适配 */
+.dark .dish-item {
+  background-color: #1f2937;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+
+
+.dark .dish-img-container {
+  background-color: #374151;
+}
+
+.dark .dish-name {
+  color: #f9fafb;
+}
+
+.dark .dish-taste {
+  color: #9ca3af;
+}
+
+.dark .dish-price {
+  color: #f87171;
+}
+
+/* 分类内容容器 */
+#categoryContentContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0.5rem;
+  background-color: #fff;
+}
+
+@media (min-width: 640px) {
+  #categoryContentContainer {
+    padding: 0.75rem;
+  }
+}
+
+/* 浅色模式下的分类内容容器 */
+:not(.dark) #categoryContentContainer {
+  background-color: #fff;
+}
+
+/* 深色模式下的分类内容容器 */
+.dark #categoryContentContainer {
+  background-color: #1f2937;
+}
+
+/* 确保商品列表区域能完全显示 */
+.category-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0; /* 确保flex子元素可以正常收缩 */
+}
+
+/* 分类项样式 - 优化响应式布局 */
+.category-item {
+  background-color: #fff;
+  border-radius: 0.625rem;
+  padding: clamp(0.5rem, 2vw, 0.75rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.25rem, 1vw, 0.5rem);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 5rem;
+}
+
+
+
+/* 分类项图标容器 */
+.category-icon {
+  width: 3.125rem;
+  height: 3.125rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  background-color: #f0f0f0;
+}
+
+/* 分类项图标 */
+.category-item i {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* 分类项信息区 */
+.category-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+/* 分类项文字 */
+.category-name {
+  font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+  word-break: break-word;
+  padding: 0 4px;
+}
+
+/* 选中分类项样式 */
+.category-item.active {
+  background-color: #f0f9ff;
+  border: 1px solid #0ea5e9;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+}
+
+.category-item.active .category-icon {
+  background-color: #e0f2fe;
+}
+
+.category-item.active i {
+  color: #0ea5e9;
+}
+
+.category-item.active .category-name {
+  color: #0ea5e9;
+  font-weight: 600;
+}
+
+/* 浅色模式分类项样式 */
+:not(.dark) .category-item {
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+
+
+:not(.dark) .category-icon {
+  background-color: #f0f0f0;
+}
+
+:not(.dark) .category-item i {
+  color: #333;
+}
+
+:not(.dark) .category-name {
+  color: #333;
+}
+
+:not(.dark) .category-item.active {
+  background-color: #f0f9ff;
+  border: 1px solid #0ea5e9;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+}
+
+:not(.dark) .category-item.active .category-icon {
+  background-color: #e0f2fe;
+}
+
+:not(.dark) .category-item.active i {
+  color: #0ea5e9;
+}
+
+:not(.dark) .category-item.active .category-name {
+  color: #0ea5e9;
+}
+
+/* 深色模式分类项样式 */
+.dark .category-item {
+  background-color: #1f2937;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+
+
+.dark .category-icon {
+  background-color: #374151;
+}
+
+.dark .category-item i {
+  color: #f9fafb;
+}
+
+.dark .category-name {
+  color: #f9fafb;
+}
+
+.dark .category-item.active {
+  background-color: #0c4a6e;
+  border: 1px solid #0ea5e9;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+.dark .category-item.active .category-icon {
+  background-color: #0284c7;
+}
+
+.dark .category-item.active i {
+  color: #bae6fd;
+}
+
+.dark .category-item.active .category-name {
+  color: #bae6fd;
+}
+
+/* 小屏幕优化 */
+@media (max-width: 768px) {
+  .category-item {
+    padding: 10px;
+    gap: 6px;
+  }
+  
+  .category-icon {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .category-item i {
+    font-size: 1.25rem;
+  }
+  
+  .category-name {
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-item {
+    padding: 8px;
+    gap: 4px;
+  }
+  
+  .category-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .category-item i {
+    font-size: 1.125rem;
+  }
+  
+  .category-name {
+    font-size: 0.75rem;
+  }
+}
+
+/* 模态框头部响应式优化 */
+#orderModalContent .flex.items-center.justify-between {
+  padding: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  #orderModalContent .flex.items-center.justify-between {
+    padding: 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #orderModalContent .flex.items-center.justify-between {
+    padding: 0.5rem;
+  }
+  
+  #orderModalContent .flex.items-center.justify-between h3 {
+    font-size: 0.875rem;
+  }
+  
+  #orderModalContent .flex.items-center.justify-between button {
+    padding: 0.25rem;
+  }
+  
+  #orderModalContent .flex.items-center.justify-between button i {
+    font-size: 0.875rem;
+  }
+}
+
+/* 分类标题和商品标题统一样式 */
+.category-title, .product-title {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  display: flex;
+  align-items: center;
+  min-height: 50px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .category-title, .product-title {
+    padding: 0.75rem;
+  }
+}
+
+/* 浅色模式下的标题样式 */
+:not(.dark) .category-title, :not(.dark) .product-title {
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+/* 深色模式下的标题样式 */
+.dark .category-title, .dark .product-title {
+  border-bottom: 1px solid #374151;
+  background-color: #1f2937;
+}
+
+/* 标题文字样式 */
+.category-title h4, .product-title h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+:not(.dark) .category-title h4, :not(.dark) .product-title h4 {
+  color: #1f2937;
+}
+
+.dark .category-title h4, .dark .product-title h4 {
+  color: #f9fafb;
+}
+
+@media (max-width: 480px) {
+  .category-title h4, .product-title h4 {
+    font-size: 0.75rem;
+  }
+}
+
+/* 商品内容区域响应式优化 */
+#productContentContainer {
+  padding: 0.5rem;
+  background-color: #fff;
+}
+
+@media (min-width: 640px) {
+  #productContentContainer {
+    padding: 1rem;
+  }
+}
+
+/* 浅色模式下的商品内容容器 */
+:not(.dark) #productContentContainer {
+  background-color: #fff;
+}
+
+/* 深色模式下的商品内容容器 */
+.dark #productContentContainer {
+  background-color: #1f2937;
+}
+
+/* 商品选择提示文本响应式优化 */
+#productContentContainer .text-center.text-gray-500.dark\:text-gray-400.flex.items-center.justify-center.h-full p {
+  font-size: 1rem;
+}
+
+@media (min-width: 640px) {
+  #productContentContainer .text-center.text-gray-500.dark\:text-gray-400.flex.items-center.justify-center.h-full p {
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #productContentContainer .text-center.text-gray-500.dark\:text-gray-400.flex.items-center.justify-center.h-full p {
+    font-size: 0.875rem;
+  }
+}
+
+/* 已选商品徽标样式 */
+#selectedBadge {
+  background-color: #ef4444; /* red-500 */
+  color: white;
+  border-radius: 9999px;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  /* 确保徽标在标题栏中正确对齐 */
+  flex-shrink: 0;
+}
+
+
+
+/* 确保商品标题栏正确显示徽标 */
+#productTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 已选文字样式 */
+#productTitle .flex.items-center .text-xs.sm\:text-sm {
+  color: #1f2937; /* gray-800 */
+}
+
+:not(.dark) #productTitle .flex.items-center .text-xs.sm\:text-sm {
+  color: #1f2937; /* gray-800 */
+}
+
+.dark #productTitle .flex.items-center .text-xs.sm\:text-sm {
+  color: white;
+}
+
+/* 确保徽标容器正确对齐 */
+#productTitle .flex.items-center {
+  display: flex;
+  align-items: center;
+}
+
+/* 已选商品模态框样式 */
+#selectedProductsModal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 10002;
+}
+
+#selectedProductsModal .modal-content {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 90vh;
+  background-color: white;
+  border-radius: 0.75rem 0.75rem 0 0;
+  box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.1);
+  z-index: 10003;
+  display: block;
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
+}
+
+.dark #selectedProductsModal .modal-content {
+  background-color: #1F2937;
+  color: var(--text-primary);
+}
+
+#selectedProductsModal .modal-content.active {
+  transform: translateY(0);
+}
+
+#selectedProductsModal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dark #selectedProductsModal .modal-header {
+  border-bottom: 1px solid #374151;
+}
+
+#selectedProductsModal .modal-body {
+  padding: 1rem;
+  height: calc(90vh - 120px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#selectedProductsModal .modal-footer {
+  padding: 1rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.dark #selectedProductsModal .modal-footer {
+  border-top: 1px solid #374151;
+}
+
+#selectedProductsModal .clear-all-btn {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+
+
+#selectedProductsModal .close-btn {
+  background-color: #e5e7eb;
+  color: #1f2937;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.dark #selectedProductsModal .close-btn {
+  background-color: #374151;
+  color: #f9fafb;
+}
+
+
+
+/* 已选商品列表样式 */
+#selectedProductsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.selected-product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.dark .selected-product-item {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.selected-product-info {
+  flex: 1;
+}
+
+.selected-product-name {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.selected-product-category {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.dark .selected-product-category {
+  color: #9ca3af;
+}
+
+.selected-product-price {
+  font-weight: 600;
+  color: #ef4444;
+}
+
+.selected-product-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.selected-product-quantity {
+  font-weight: 500;
+}
+
+.selected-product-remove {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+/* 空状态样式 */
+#selectedProductsList:empty::after {
+  content: "暂无已选商品";
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+.dark #selectedProductsList:empty::after {
+  color: #9ca3af;
+}
+
+/* 素材栅格容器统一规则：避免行高被容器高度拉伸 */
+#materialsContainer, #materialListContainer, .material-content.grid {
+  align-content: start !important;
+  align-items: start !important;
+  grid-auto-rows: max-content !important;
+  height: auto !important;
+}
+
+/* 场景按钮内容容器垂直布局修复 */
+.btn-content {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+
+.btn-content i {
+  margin-bottom: 4px;
+}
+
+.btn-content span {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+/* 热门歌曲模态框快速分类标签样式 */
+#quick-categories .flex.gap-2 > div {
+  min-width: 0;
+  flex: 1;
+}
+
+#quick-categories .flex.gap-2 > div:first-child {
+  margin-right: 0.5rem;
+}
+
+#quick-categories .hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+#quick-categories .hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* 分类和语种选择器样式 */
+#quick-categories .flex.gap-2.mb-2 button {
+  transition: all 0.2s ease;
+}
+
+
+
+/* 面板遮罩层不覆盖底部导航区域 */
+.panel-overlay {
+  bottom: 80px !important; /* 与面板内容底部保持一致，避免遮挡导航 */
+}
+
+/* 平板设备音频快捷栏高度优化 */
+@media (min-width: 641px) and (max-width: 1024px) {
+  #audio-buttons {
+    min-height: 200px !important;
+  }
+  
+  #audio-buttons .control-btn {
+    min-height: 80px !important;
+    padding: 1rem !important;
+  }
+  
+  #audio-buttons .control-btn i {
+    font-size: 1.25rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  #audio-buttons .control-btn span {
+    font-size: 0.875rem !important;
+  }
+  
+  /* 平板设备标签导航栏高度优化 */
+  .tab-btn {
+    min-height: 50px !important;
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+    font-size: 1rem !important;
+  }
+}

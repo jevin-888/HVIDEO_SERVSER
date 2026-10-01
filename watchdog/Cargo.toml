@@ -1,0 +1,19 @@
+[package]
+name = "hvideo-watchdog"
+version = "0.1.0"
+edition = "2021"
+
+[[example]]
+name = "monitored-app"
+path = "tests/fixtures/monitored_app.rs"
+
+[dependencies]
+chrono = "0.4"
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true

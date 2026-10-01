@@ -1,0 +1,47 @@
+{
+  "name": "hvideo-admin",
+  "version": "0.2.0",
+  "description": "HVideo 点歌系统桌面管理端",
+  "main": "electron-main.js",
+  "scripts": {
+    "electron:dev": "electron .",
+    "electron:build": "electron-builder",
+    "tauri:dev": "cross-env SKIP_BACKEND=1 tauri dev",
+    "tauri:dev:full": "tauri dev",
+    "tauri:build": "tauri build",
+    "tauri:release": "npm run tauri:portable",
+    "linux:build": "bash scripts/build-linux.sh",
+    "tauri:portable": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build_watchdog.ps1 -Release && cargo build --manifest-path src-tauri/Cargo.toml --release && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build_portable.ps1"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@tauri-apps/cli": "^1.5",
+    "concurrently": "^9.0.0",
+    "cross-env": "^7.0.3",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "playwright": "^1.58.2",
+    "wait-on": "^8.0.0"
+  },
+  "build": {
+    "appId": "com.hvideo.admin",
+    "productName": "HVideo Admin",
+    "directories": {
+      "output": "electron-dist"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}

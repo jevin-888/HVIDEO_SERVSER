@@ -1,0 +1,47 @@
+# Build and dependency output
+node_modules/
+target/
+src-tauri/target/
+watchdog/target/
+release/
+outputs/
+backups/
+scratch/
+temp/
+logs/
+
+# Local runtime data and large media indexes
+data/
+song_db/
+*.db
+*.db-shm
+*.db-wal
+
+# Generated binaries and installers
+*.exe
+*.msi
+*.AppImage
+*.deb
+*.rpm
+*.zip
+
+# Local tooling and editor state
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Android/Flutter generated output
+**/.dart_tool/
+**/build/
+**/android/.gradle/
+
+# Local test captures
+*.png
+*.mp4
+*.mkv
+*.avi
+*.mov
+!resources/**
+!static/**
+static/singer-all/

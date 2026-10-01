@@ -1,0 +1,89 @@
+[package]
+name = "hvideo-server"
+version = "0.1.0"
+edition = "2021"
+description = "KTV点歌后台服务器 - Rust + Nginx"
+authors = ["HVideo Team"]
+default-run = "hvideo-server"
+
+# 同时作为库和二进制使用
+[lib]
+name = "hvideo_server"
+path = "src/lib.rs"
+
+[[bin]]
+name = "hvideo-server"
+path = "src/main.rs"
+
+[dependencies]
+# Web 框架
+axum = { version = "0.7", features = ["ws", "multipart"] }
+tokio = { version = "1", features = ["full"] }
+tokio-util = { version = "0.7", features = ["io"] }
+tower = { version = "0.4", features = ["full"] }
+tower-http = { version = "0.5", features = ["cors", "fs", "trace", "compression-gzip"] }
+
+# 数据库
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid"] }
+libsqlite3-sys = { version = "0.27", features = ["bundled"] } # 强制静态链接满血版 SQLite (含 FTS5)
+
+# 序列化
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+percent-encoding = "2"
+
+quick-xml = "0.41"
+base64 = "0.22"
+sha2 = "0.10"
+ring = "0.17"
+ed25519-dalek = "2"
+flate2 = "1"
+# 配置
+toml = "0.8"
+
+# 日志
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# 认证与安全
+jsonwebtoken = "9"
+bcrypt = "0.15"
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# 时间
+chrono = { version = "0.4", features = ["serde"] }
+
+# 网络扫描（TCP端口探测，无需ICMP）
+local-ip-address = "0.6"
+socket2 = "0.6"
+tokio-stream = "0.1.18"
+async-stream = "0.3.6"
+rand = "0.10.0"
+zip = { version = "8.6.0", default-features = false, features = ["deflate"] }
+
+# Windows 下列出所有网卡（跨平台时仅 Windows 启用）
+[target.'cfg(windows)'.dependencies]
+ipconfig = "0.3"
+winreg = "0.52"
+
+# 异步工具
+futures = "0.3"
+
+# HTTP 客户端（云端同步）
+reqwest = { version = "0.12", features = ["json", "multipart", "stream", "gzip"] }
+
+# 其他
+thiserror = "1"
+anyhow = "1"
+sysinfo = "0.33"
+dashmap = "6"
+tempfile = "3"
+
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+

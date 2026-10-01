@@ -1,0 +1,25 @@
+[package]
+name = "hvideo-admin"
+version = "0.2.0"
+description = "HVideo 点歌系统桌面管理端"
+authors = ["you"]
+license = ""
+repository = ""
+edition = "2021"
+
+[features]
+# 生产构建时 Tauri 会启用 custom-protocol 加载 distDir，需在此声明并转发给 tauri
+custom-protocol = ["tauri/custom-protocol"]
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[dependencies]
+tauri = { version = "1.5", features = ["api-all", "system-tray"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+
+# 引用主后端项目作为库
+hvideo-server = { path = ".." }
+

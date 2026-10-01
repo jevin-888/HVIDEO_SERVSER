@@ -1,0 +1,81 @@
+import {chromium} from 'playwright';
+import {readFileSync} from 'node:fs';
+import assert from 'node:assert/strict';
+const issuer='D:/HVIDEO/server_license-tool/';
+const read=p=>readFileSync(issuer+p,'utf8');
+const browser=await chromium.launch({headless:true,channel:'msedge'});
+try {
+ const page=await browser.newPage({viewport:{width:1500,height:1100}});
+ await page.clock.setFixedTime(new Date('2026-01-31T12:00:00+08:00'));
+ await page.setContent(read('public/index.html').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,''));
+ await page.addStyleTag({content:read('public/css/main.css')});
+ await page.addScriptTag({content:`
+  window.requests=[]; window.records=[];
+  window.__TAURI__={invoke:async(command,{input}={})=>{
+   if(command==='list_server_license_records') return records;
+   requests.push({command,input});
+   if(command==='generate_server_license') return {content:'synthetic',licenseId:'test-license',fileName:'server.lic'};
+   if(command==='archive_server_license'){ records=[{...input,archivedAt:Date.now()/1000}]; return records[0]; }
+  },dialog:{save:async()=>'D:/synthetic/server.lic'},fs:{writeTextFile:async()=>{}}};
+ `});
+ await page.addScriptTag({content:read('public/js/app.js')});
+ assert.equal(await page.locator('#cloud-update-enabled').isChecked(),false);
+ assert.equal(await page.locator('#cloud-update-expires').isDisabled(),true);
+ assert.equal(await page.locator('#cloud-quick-dates button:disabled').count(),6);
+ await page.locator('#cloud-update-enabled').check();
+ const serverExpiry=await page.locator('#expires-date').inputValue();
+ for (const [months,expected] of [['1','2026-02-28'],['3','2026-04-30'],['6','2026-07-31'],['12','2027-01-31']]) {
+  await page.locator('[data-cloud-months="'+months+'"]').click();
+  assert.equal(await page.locator('#cloud-update-expires').inputValue(),expected);
+  assert.equal(await page.locator('#expires-date').inputValue(),serverExpiry);
+  assert.match(await page.locator('#preview-cloud-update').textContent(),new RegExp(expected));
+  assert.equal(await page.locator('#server-quick-dates .active').textContent(),'1 年');
+ }
+ await page.locator('[data-cloud-months="36"]').click();
+ assert.equal(await page.locator('#cloud-update-expires').inputValue(),serverExpiry);
+ assert.match(await page.locator('#cloud-date-hint').textContent(),/已按服务器授权期限/);
+ assert.equal(await page.locator('#cloud-quick-dates .active').count(),0);
+ await page.locator('[data-months="3"]').click();
+ await page.locator('[data-cloud-same]').click();
+ assert.equal(await page.locator('#cloud-update-expires').inputValue(),await page.locator('#expires-date').inputValue());
+ await page.locator('[data-permanent="true"]').click();
+ assert.equal(await page.locator('[data-cloud-same]').isDisabled(),true);
+ await page.locator('[data-cloud-months="36"]').click();
+ assert.equal(await page.locator('#cloud-update-expires').inputValue(),'2029-01-31');
+ await page.clock.setFixedTime(new Date('2028-02-29T12:00:00+08:00'));
+ await page.locator('[data-cloud-months="12"]').click();
+ assert.equal(await page.locator('#cloud-update-expires').inputValue(),'2029-02-28');
+ await page.clock.setFixedTime(new Date('2026-01-31T12:00:00+08:00'));
+ await page.locator('#cloud-update-expires').fill('2027-03-01');
+ assert.equal(await page.locator('#cloud-quick-dates .active').count(),0);
+ await page.locator('#cloud-update-enabled').uncheck();
+ assert.equal(await page.locator('#cloud-quick-dates button:disabled').count(),6);
+ await page.locator('#machine-code').fill('AAAA-BBBB-CCCC-DDDD-EEEE-FFFF-1111-2222');
+ for(const [id,value] of [['venue-name','测试场所'],['contact','测试'],['phone','13800000000'],['address','测试地址']]) await page.locator('#'+id).fill(value);
+ await page.locator('#cloud-update-enabled').check();
+ await page.locator('[data-permanent="true"]').click();
+ await page.locator('#cloud-update-expires').fill('2027-01-31');
+ await page.locator('#generate-button').click();
+ await page.waitForFunction(()=>requests.some(r=>r.command==='archive_server_license'));
+ const input=await page.evaluate(()=>requests.find(r=>r.command==='generate_server_license').input);
+ assert.equal(input.cloudUpdate.enabled,true);
+ assert.equal(new Date(input.cloudUpdate.expiresAt*1000).getFullYear(),2027);
+ assert.deepEqual(await page.evaluate(()=>records[0].cloudUpdate),input.cloudUpdate);
+ await page.locator('#archive-list button').first().click();
+ assert.match(await page.locator('#detail-cloud-update').textContent(),/2027/);
+ await page.locator('#renew-license-button').click();
+ assert.equal(await page.locator('#cloud-update-enabled').isChecked(),true);
+ assert.equal(await page.locator('#cloud-update-expires').inputValue(),'2027-01-31');
+ await page.locator('#cloud-update-expires').fill('2020-01-01');
+ const count=await page.evaluate(()=>requests.length);
+ await page.locator('#generate-button').click();
+ assert.equal(await page.evaluate(()=>requests.length),count);
+ await page.locator('#cloud-update-enabled').uncheck();
+ await page.locator('#generate-button').click();
+ await page.waitForFunction(()=>requests.filter(r=>r.command==='generate_server_license').length===2);
+ assert.equal(await page.evaluate(()=>requests.filter(r=>r.command==='generate_server_license').at(-1).input.cloudUpdate),null);
+ await page.locator('#cloud-update-enabled').check();
+ await page.locator('#cloud-update-expires').fill('2027-01-31');
+ await page.screenshot({path:'outputs/cloud-updates-20260924/cloud-issuer.png',fullPage:true});
+ console.log('PASS issuer UI: calendar month-end/leap-year shortcuts, server expiry cap, independent presets, permanent disables same-date, opt-in, independent expiry, generation/archive matching contract, renewal, expired rejection, disabled grant');
+} finally {await browser.close();}

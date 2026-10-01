@@ -1,0 +1,189 @@
+/**
+ * ButtonStateManager CSS - 支持统一按钮状态管理
+ */
+
+/* 音量按钮固定尺寸样式 */
+.volume-btn-control-fixed {
+  width: var(--volume-btn-size, 44px) !important;
+  height: var(--volume-btn-size, 44px) !important;
+  min-width: var(--volume-btn-size, 44px) !important;
+  min-height: var(--volume-btn-size, 44px) !important;
+  max-width: var(--volume-btn-size, 44px) !important;
+  max-height: var(--volume-btn-size, 44px) !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  background-color: #f3f4f6 !important; /* bg-gray-100 */
+  color: #374151 !important; /* text-gray-700 */
+  transition: all 0.15s ease-out !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* 深色主题支持 */
+.volume-btn-control-fixed.is-dark-theme {
+  background-color: #374151 !important; /* dark:bg-gray-700 */
+  color: #d1d5db !important; /* dark:text-gray-300 */
+}
+
+/* 音量按钮图标尺寸 */
+.volume-btn-control-fixed i {
+  font-size: var(--volume-icon-size, 1rem) !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: inherit !important;
+}
+
+/* 音量控制行布局 */
+.volume-control-row-fixed {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--volume-control-gap, 0.45rem) !important;
+}
+
+/* 进度条样式 */
+.smartl-progress-bar {
+  height: 8px !important;
+  border-radius: 9999px !important;
+  overflow: hidden !important;
+  background-color: #e5e7eb !important; /* bg-gray-200 */
+}
+
+.smartl-progress-bar.is-dark-theme {
+  background-color: #374151 !important; /* dark:bg-gray-700 */
+}
+
+.progress-bar {
+  height: 100% !important;
+  background-color: #ef4444 !important; /* bg-red-500 */
+  width: var(--progress-width, 0%) !important;
+  transition: width 0.3s ease !important;
+}
+
+/* 按钮点击效果 */
+.volume-btn-control-fixed:active {
+  transform: scale(0.95) !important;
+}
+
+/* 禁用所有可能影响尺寸的变换 */
+.volume-btn-control-fixed * {
+  transform: none !important;
+  scale: none !important;
+}
+
+/* 确保父容器不影响按钮尺寸 */
+.volume-control-row-fixed .volume-btn-control-fixed {
+  flex: none !important;
+}
+
+/* 响应式调整 */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* 平板设备 */
+  .volume-btn-control-fixed {
+    --volume-btn-size: 56px;
+    --volume-icon-size: 1.2rem;
+  }
+  
+  .volume-control-row-fixed {
+    --volume-control-gap: 0.6rem;
+  }
+}
+
+@media (min-width: 1000px), (min-height: 1800px), (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  /* 高分辨率设备 */
+  .volume-btn-control-fixed {
+    --volume-btn-size: 64px;
+    --volume-icon-size: 1.4rem;
+  }
+  
+  .volume-control-row-fixed {
+    --volume-control-gap: 0.8rem;
+  }
+}
+
+/* 防止其他样式覆盖 */
+.smartl-panel .volume-btn-control-fixed {
+  all: unset !important;
+  width: var(--volume-btn-size, 44px) !important;
+  height: var(--volume-btn-size, 44px) !important;
+  min-width: var(--volume-btn-size, 44px) !important;
+  min-height: var(--volume-btn-size, 44px) !important;
+  max-width: var(--volume-btn-size, 44px) !important;
+  max-height: var(--volume-btn-size, 44px) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #f3f4f6 !important;
+  color: #374151 !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+}
+
+.smartl-panel .volume-btn-control-fixed.is-dark-theme {
+  background-color: #374151 !important;
+  color: #d1d5db !important;
+}
+
+/* 自动灯光按钮红点 */
+.auto-dot {
+  position: absolute !important;
+  top: 8px !important;
+  left: 8px !important;
+  width: 6px !important;
+  height: 6px !important;
+  background-color: #ef4444 !important; /* bg-red-500 */
+  border-radius: 50% !important;
+  z-index: 1000 !important;
+  pointer-events: none !important;
+}
+
+/* 音效按钮红点 */
+.sound-effect-dot {
+  position: absolute !important;
+  top: 8px !important;
+  left: 8px !important;
+  width: 6px !important;
+  height: 6px !important;
+  background-color: #ef4444 !important; /* bg-red-500 */
+  border-radius: 50% !important;
+  z-index: 1000 !important;
+  pointer-events: none !important;
+}
+
+/* 确保按钮容器支持相对定位 */
+button[data-command="light/auto"],
+button[data-command="audio/effect/cycle"] {
+  position: relative !important;
+}
+
+/* 红点在不同尺寸下的适配 */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .auto-dot,
+  .sound-effect-dot {
+    top: 10px !important;
+    left: 10px !important;
+    width: 8px !important;
+    height: 8px !important;
+  }
+}
+
+@media (min-width: 1000px), (min-height: 1800px), (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  .auto-dot,
+  .sound-effect-dot {
+    top: 12px !important;
+    left: 12px !important;
+    width: 10px !important;
+    height: 10px !important;
+  }
+}

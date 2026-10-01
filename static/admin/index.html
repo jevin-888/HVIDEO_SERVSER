@@ -1,0 +1,2659 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth dark" data-version="20260731-11">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
+    <meta name="robots" content="noindex">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+    <title>HVideo 服务器管理</title>
+
+    <!-- Tailwind CSS -->
+    <script src="/libs/tailwindcss.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="/assets/css/all-client.min.css">
+
+    <!-- 自定义样式-->
+    <style>
+        html,
+        body {
+            height: 100%;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        /* 全局滚动条样式 */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(229, 62, 62, 0.5) rgba(30, 41, 59, 0.35);
+        }
+
+        *::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.25);
+            border-radius: 3px;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background: rgba(229, 62, 62, 0.45);
+            border-radius: 3px;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background: rgba(229, 62, 62, 0.65);
+        }
+
+        *::-webkit-scrollbar-thumb:active {
+            background: rgba(229, 62, 62, 0.85);
+        }
+
+        *::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+
+        /* 服务铃房间卡片闪烁动画（持续直到手动完成） */
+        @keyframes svcFlash {
+            0%,100% { border-color: rgba(16,185,129,0.25); background-color: rgb(31,41,55); box-shadow: none; }
+            50%      { border-color: #10b981; background-color: rgba(16,185,129,0.15); box-shadow: 0 0 18px rgba(16,185,129,0.5); }
+        }
+        .svc-flash {
+            animation: svcFlash 1.2s ease-in-out infinite;
+        }
+        .svc-new-badge {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16,185,129,0.15);
+            border: 1px solid rgba(16,185,129,0.5);
+            color: #10b981;
+            border-radius: 8px;
+            padding: 6px 10px;
+            margin-bottom: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .svc-badge-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(16,185,129,0.2);
+            border: 1px solid rgba(16,185,129,0.35);
+            border-radius: 5px;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .admin-sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .admin-sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .admin-main {
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        .admin-main.expanded {
+            margin-left: 0;
+        }
+
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .btn {
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(18, 18, 18, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .form-input:focus {
+            border-color: #E53E3E;
+            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.2);
+        }
+
+        .nav-item {
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            background-color: rgba(229, 62, 62, 0.2);
+            border-left: 4px solid #E53E3E;
+        }
+
+        .stats-card {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .stats-card h3 {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .stats-card .change {
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .stats-card .change.positive {
+            color: #4CAF50;
+        }
+
+        .stats-card .change.negative {
+            color: #E53E3E;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 12px;
+            height: 26px;
+            min-width: 64px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            letter-spacing: 0.02em;
+        }
+
+        .badge-online {
+            background-color: rgba(76, 175, 80, 0.15);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            color: #4CAF50;
+        }
+
+        .badge-offline {
+            background-color: rgba(229, 62, 62, 0.15);
+            border: 1px solid rgba(229, 62, 62, 0.3);
+            color: #E53E3E;
+        }
+
+        .badge-idle {
+            background-color: rgba(255, 152, 0, 0.15);
+            border: 1px solid rgba(255, 152, 0, 0.3);
+            color: #FF9800;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            background-color: #121212;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: #ffffff;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        /* Toast 提示框 - 统一图二风格 */
+        #toast-container {
+            position: fixed;
+            top: 5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 11000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        .admin-toast {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            border-radius: 9999px;
+            background-color: #2C2E3C;
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-weight: 500;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: adminToastSlideIn 0.35s forwards;
+            pointer-events: auto;
+        }
+
+        .admin-toast.admin-toast-slide-out {
+            animation: adminToastSlideOut 0.3s forwards;
+        }
+
+        .admin-toast-success {
+            border: 2px solid #7CFF8A;
+        }
+
+        .admin-toast-success .admin-toast-icon {
+            background-color: #50A75C;
+            color: #ffffff;
+        }
+
+        .admin-toast-error {
+            border: 2px solid #ef4444;
+        }
+
+        .admin-toast-error .admin-toast-icon {
+            background-color: #dc2626;
+            color: #ffffff;
+        }
+
+        .admin-toast-info {
+            border: 2px solid #60a5fa;
+        }
+
+        .admin-toast-info .admin-toast-icon {
+            background-color: #2563eb;
+            color: #ffffff;
+        }
+
+        .admin-toast-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            min-height: 24px;
+            border-radius: 50%;
+            font-size: 0.75rem;
+        }
+
+        .admin-toast-text {
+            line-height: 1.35;
+        }
+
+        @keyframes adminToastSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes adminToastSlideOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
+
+        /* 确认框 - 统一图二风格 */
+        .admin-confirm-backdrop {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 12000;
+        }
+
+        .admin-confirm-box {
+            background-color: #2C2E3C;
+            border: 2px solid #7CFF8A;
+            border-radius: 12px;
+            padding: 20px 24px;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .admin-confirm-message {
+            color: #ffffff;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .admin-confirm-btns {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .admin-confirm-btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.2s;
+        }
+
+        .admin-confirm-btn:hover {
+            opacity: 0.9;
+        }
+
+        .admin-confirm-cancel {
+            background-color: #4B5563;
+            color: #ffffff;
+        }
+
+        .admin-confirm-ok {
+            background-color: #50A75C;
+            color: #ffffff;
+        }
+
+        .admin-prompt-box {
+            background-color: #2C2E3C;
+            border: 2px solid #7CFF8A;
+            border-radius: 12px;
+            padding: 20px 24px;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .admin-prompt-input {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 20px;
+            background-color: #1a1b23;
+            border: 1px solid #4B5563;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 0.95rem;
+        }
+
+        .admin-prompt-input:focus {
+            outline: none;
+            border-color: #7CFF8A;
+        }
+        #room-config-modal { padding: 24px; background: rgba(0, 0, 0, .65); }
+        .room-config-dialog { width: 860px; max-width: 100%; max-height: calc(100dvh - 48px); display: flex; flex-direction: column; background: #222529; border: 1px solid #484c52; border-radius: 8px; box-shadow: 0 24px 80px #0008; color: #f4f5f6; letter-spacing: 0; }
+        .room-config-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid #41454b; }
+        .room-config-header h3 { font-size: 20px; font-weight: 600; margin: 0; }
+        .room-config-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); overflow-y: auto; }
+        .config-panel { padding: 24px; min-width: 0; }
+        .config-panel + .config-panel { border-left: 1px solid #41454b; }
+        .config-panel-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+        .config-panel-heading h4 { font-size: 16px; font-weight: 600; }
+        .config-panel-heading i { color: #71d2c0; }
+        .config-panel:last-child .config-panel-heading i { color: #e2b96d; }
+        .config-count { margin-left: auto; font-size: 13px; color: #afb4bc; font-variant-numeric: tabular-nums; }
+        .config-entry { display: flex; gap: 8px; margin-bottom: 16px; }
+        .config-entry input { width: 0; min-width: 0; flex: 1; height: 40px; padding: 0 12px; background: #191b1e; border: 1px solid #525760; border-radius: 4px; color: #fff; font-size: 14px; }
+        .config-entry input:focus { outline: 2px solid #71d2c0; outline-offset: 1px; }
+        .config-add { flex: 0 0 40px; width: 40px; height: 40px; border-radius: 4px; background: #237e6e; color: #fff; }
+        .config-add:hover { background: #29927e; }
+        .config-list { height: 300px; overflow-y: auto; scrollbar-gutter: stable; border-top: 1px solid #41454b; margin: 0; padding: 0; list-style: none; }
+        .config-item { display: flex; gap: 12px; align-items: center; justify-content: space-between; min-height: 52px; border-bottom: 1px solid #373b41; padding: 8px 0; }
+        .config-item-name { min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
+        .config-delete, .config-reload { flex-shrink: 0; width: 32px; height: 32px; border-radius: 4px; color: #aeb3bb; }
+        .config-close { display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex-shrink: 0; min-width: 88px; min-height: 40px; padding: 8px 12px; border: 1px solid #737b87; border-radius: 6px; background: #374151; color: #fff; font-size: 14px; font-weight: 600; line-height: 1; cursor: pointer; }
+        .config-close svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .config-delete:hover { background: #532b31; color: #ff929c; }
+        .config-close:hover, .config-reload:hover { background: #41454b; color: #fff; }
+        .config-empty { padding: 64px 12px; text-align: center; font-size: 14px; color: #9198a1; }
+        .room-config-footer { border-top: 1px solid #41454b; padding: 12px 24px; display: flex; align-items: center; gap: 12px; min-height: 58px; }
+        #room-config-status { flex: 1; font-size: 13px; color: #85d8bc; overflow-wrap: anywhere; }
+        #room-config-status.config-error { color: #ff9aa4; }
+        #room-config-modal button:disabled { opacity: .45; cursor: wait; }
+        #room-config-modal button:focus-visible { outline: 2px solid #71d2c0; outline-offset: 2px; }
+        @media (max-width: 640px) {
+            #room-config-modal { padding: 12px; }
+            .room-config-dialog { max-height: calc(100dvh - 24px); }
+            .room-config-columns { grid-template-columns: minmax(0, 1fr); }
+            .config-panel { padding: 18px; }
+            .config-panel + .config-panel { border-left: 0; border-top: 1px solid #41454b; }
+            .config-list { height: 180px; }
+        }
+
+        /* Compact cloud settings; keep controls legible at the desktop minimum width. */
+        #cloud-section .cloud-heading { display:flex; align-items:center; flex-wrap:wrap; gap:8px 24px; margin-bottom:16px; }
+        #cloud-section .cloud-title { display:flex; align-items:center; gap:10px; flex:none; }
+        #cloud-section .cloud-title h3 { font-size:18px; font-weight:600; color:#f3f4f6; }
+        #cloud-authorization { font-size:13px; line-height:1.5; margin:0; }
+        #cloud-section .cloud-settings { padding-bottom:16px; border-bottom:1px solid #374151; }
+        #cloud-section .cloud-directory-row, #cloud-section .cloud-actions-row { display:flex; align-items:center; gap:10px; min-width:0; }
+        #cloud-section .cloud-actions-row { margin-top:10px; flex-wrap:wrap; }
+        #cloud-section .cloud-directory-row > label, #cloud-section .cloud-actions-row > label { width:64px; flex:none; color:#cbd5e1; font-size:13px; }
+        #cloud-section .cloud-directory-row > input { flex:1; min-width:0; }
+        #cloud-download-dir, #cloud-update-mode { height:38px; padding:0 12px; border:1px solid #475569; border-radius:7px; background:#111827; color:#e5e7eb; font-size:14px; }
+        #cloud-section .cloud-button { flex:none; min-height:38px; padding:8px 14px; border:1px solid transparent; border-radius:7px; font-size:13px; line-height:20px; white-space:nowrap; }
+        #cloud-section .cloud-secondary { background:#374151; border-color:#4b5563; color:#e5e7eb; }
+        #cloud-section .cloud-secondary:hover { background:#4b5563; }
+        #cloud-section .cloud-primary { background:#2563eb; color:#fff; }
+        #cloud-section .cloud-primary:hover { background:#1d4ed8; }
+        #cloud-section button:disabled { opacity:.45; cursor:not-allowed; }
+        #cloud-section .cloud-actions { display:flex; gap:8px; margin-left:auto; }
+        #cloud-section .cloud-help { color:#94a3b8; font-size:12px; line-height:1.5; }
+        #cloud-update-mode-hint { flex:1; min-width:160px; }
+        #cloud-section .cloud-settings-footer { display:flex; flex-wrap:wrap; gap:4px 16px; align-items:center; margin:9px 0 0 74px; }
+        #cloud-config-message { color:#cbd5e1; font-size:12px; }
+        #cloud-config-message:empty, #cloud-packages:empty { display:none; }
+        #cloud-packages:not(:empty) { display:grid; gap:6px; max-height:180px; overflow-y:auto; margin-top:12px; font-size:13px; color:#cbd5e1; }
+        #cloud-section .cloud-task-summary { display:flex; flex-wrap:wrap; gap:12px 30px; padding:14px 0; color:#94a3b8; font-size:13px; }
+        #cloud-section .cloud-task-summary > span { display:flex; align-items:baseline; gap:8px; }
+        #cloud-section .cloud-task-summary strong { font-size:20px; line-height:1.2; font-weight:600; color:#e5e7eb; font-variant-numeric:tabular-nums; }
+        #cloud-section #running-tasks { color:#60a5fa; }
+        #cloud-section #completed-tasks { color:#4ade80; }
+        #cloud-section #failed-tasks { color:#f87171; }
+        @media(max-width:1100px) {
+            #cloud-update-mode-hint { order:4; flex-basis:100%; margin-left:74px; }
+        }
+        @media(max-width:600px) {
+            #cloud-section .cloud-directory-row { flex-wrap:wrap; }
+            #cloud-section .cloud-directory-row > label { width:100%; }
+            #cloud-section .cloud-actions { flex-basis:100%; margin-left:74px; }
+            #cloud-section .cloud-settings-footer { margin-left:0; }
+        }
+        .admin-language-control { display:inline-flex; align-items:center; gap:7px; color:#cbd5e1; flex:none; }
+        .admin-language-control select { max-width:155px; background:#1f2937; color:#e5e7eb; border:1px solid #475569; border-radius:7px; padding:6px 9px; font-size:13px; }
+        .login-language-row { display:flex; justify-content:flex-end; margin:-12px -12px 12px 0; }
+        html:not([lang="zh-CN"]) #sidebar .nav-item { font-size:14px; }
+        html:not([lang="zh-CN"]) #cloud-section .cloud-actions-row { row-gap:10px; }
+    </style>
+    <link rel="stylesheet" href="responsive.css?v=20260814-01">
+    <link rel="stylesheet" href="dictionary.css?v=20260912-entry-page">
+</head>
+
+<body class="h-screen bg-gray-900 text-white overflow-hidden">
+    <input id="license-file-input" type="file" accept=".lic,text/plain,application/octet-stream" class="hidden">
+    <!-- 加载遮罩 -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="text-center">
+            <i class="fas fa-spinner fa-spin text-4xl text-white mb-4"></i>
+            <p class="text-gray-300">加载中...</p>
+        </div>
+    </div>
+
+    <!-- 登录页面 -->
+    <div id="login-page" class="min-h-screen flex items-center justify-center p-4">
+        <div class="login-card w-full max-w-md bg-gray-800 rounded-lg shadow-xl p-8">
+            <div class="login-language-row"><label class="admin-language-control" data-i18n-ignore translate="no"><i class="fas fa-globe" aria-hidden="true"></i><select data-admin-language aria-label="Language / 语言"><option value="zh">中文</option><option value="id">Bahasa Indonesia</option><option value="vi">Tiếng Việt</option><option value="th">ไทย</option><option value="en">English</option></select></label></div>
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-white mb-2">HVideo 服务器管理</h1>
+                <p class="text-gray-400">登录管理后台</p>
+            </div>
+
+            <section id="login-server-network" class="mb-5 rounded-lg border border-gray-700 bg-gray-900/50 p-3">
+                <div class="mb-2 flex items-center justify-between gap-3">
+                    <label for="login-network-interface" class="text-xs font-medium text-gray-300">
+                        <i class="fas fa-network-wired mr-1 text-red-400"></i>&#26381;&#21153;&#22120;&#32593;&#21345;
+                    </label>
+                    <span id="login-network-status" class="text-xs text-gray-500">&#27491;&#22312;&#35835;&#21462;&hellip;</span>
+                </div>
+                <select id="login-network-interface"
+                    class="form-input w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <option value="">&#27491;&#22312;&#21152;&#36733;&#26412;&#26426;&#32593;&#21345;&hellip;</option>
+                </select>
+                <p class="mt-2 text-xs text-gray-500">&#36873;&#25321;&#32593;&#21345; IP &#21518;&#23558;&#33258;&#21160;&#24212;&#29992;&#24182;&#37325;&#21551;&#26381;&#21153;&#12290;</p>
+            </section>
+
+            <p id="license-source" class="mb-3 text-xs text-gray-400" role="status"></p>
+            <section id="server-license-panel" class="mb-7 rounded-lg border border-gray-700 bg-gray-900/60 p-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-base font-semibold text-white">服务器授权</h2>
+                        <p id="license-status-message" class="mt-1 text-sm text-gray-400">正在检查授权状态…</p>
+                    </div>
+                    <span id="license-status-badge" class="rounded-full bg-gray-700 px-3 py-1 text-xs text-gray-300">检查中</span>
+                </div>
+
+                <div class="mt-4">
+                    <label for="license-machine-code" class="mb-1 block text-xs font-medium text-gray-400">本机机器码</label>
+                    <div class="flex gap-2">
+                        <input id="license-machine-code" type="text" readonly
+                            class="min-w-0 flex-1 rounded-lg border border-gray-600 bg-gray-800 px-3 py-2 font-mono text-sm text-white"
+                            value="读取中…">
+                        <button id="copy-license-machine-code" type="button"
+                            class="rounded-lg border border-gray-600 px-3 py-2 text-sm text-gray-200 hover:border-red-500 hover:text-white">复制</button>
+                    </div>
+                </div>
+
+                <dl id="license-detail-grid" class="mt-4 hidden grid-cols-1 gap-x-5 gap-y-2 text-sm sm:grid-cols-2">
+                    <div><dt class="text-gray-500">场所名称</dt><dd id="license-venue-name" class="text-gray-200">-</dd></div>
+                    <div><dt class="text-gray-500">联系人 / 电话</dt><dd id="license-contact" class="text-gray-200">-</dd></div>
+                    <div><dt class="text-gray-500">地址</dt><dd id="license-address" class="text-gray-200">-</dd></div>
+                    <div><dt class="text-gray-500">到期时间</dt><dd id="license-expires-at" class="text-gray-200">-</dd></div>
+                    <div><dt class="text-gray-500">终端点数</dt><dd id="license-terminal-limit" class="text-gray-200">-</dd></div>
+                    <div><dt class="text-gray-500">授权编号</dt><dd id="license-id" class="break-all text-gray-200">-</dd></div>
+                </dl>
+
+                <div class="mt-4 flex flex-wrap items-center gap-3">
+                    <button id="select-license-file" type="button"
+                        class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">导入授权文件</button>
+                    <span class="text-xs text-gray-500">仅允许在服务器本机操作，导入后立即生效</span>
+                </div>
+            </section>
+
+            <form id="login-form" class="space-y-6" autocomplete="off">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-300 mb-1">用户名</label>
+                    <input type="text" id="username" name="login_account" autocomplete="off" autocapitalize="none" spellcheck="false"
+                        class="form-input w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                        required>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-300 mb-1">密码</label>
+                    <input type="password" id="password" name="login_secret" autocomplete="new-password" spellcheck="false"
+                        class="form-input w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                        required>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="remember-me" name="remember-me" type="checkbox"
+                            class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-600 rounded">
+                        <label for="remember-me" class="ml-2 block text-sm text-gray-400">记住我</label>
+                    </div>
+
+                    <div class="text-sm">
+                        <a href="#" class="font-medium text-red-400 hover:text-red-300">忘记密码?</a>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" id="login-btn"
+                        class="btn w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        登录
+                    </button>
+                </div>
+
+                <div class="mt-8 text-center border-t border-gray-700/50 pt-4">
+                    <button type="button" id="open-login-server-settings" class="text-xs text-gray-500 hover:text-red-400 transition-colors">
+                        <i class="fas fa-server mr-1"></i> 服务器连接配置
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6 text-center text-sm text-gray-400">
+                版权所有 ©2026 HVideo 视频系统. 保留所有权利.
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理页面 -->
+    <div id="admin-page" class="hidden h-screen flex overflow-hidden">
+        <button type="button" id="sidebar-backdrop" aria-label="关闭导航菜单"></button>
+        <!-- 侧边栏 -->
+        <aside id="sidebar"
+            class="admin-sidebar w-64 bg-gray-800 border-r border-gray-700 fixed inset-y-0 left-0 z-10 flex flex-col">
+            <div class="flex items-center justify-center h-12 border-b border-gray-700">
+                <h1 class="text-xl font-bold text-white">HVideo 服务器管理</h1>
+            </div>
+
+            <nav class="mt-5 px-2 flex-1 overflow-y-auto">
+                <div class="space-y-1">
+                    <a href="#dashboard" class="nav-item active flex items-center px-4 py-3 text-white rounded-md"
+                        data-section="dashboard">
+                        <i class="fas fa-tachometer-alt w-6"></i>
+                        <span class="ml-3">系统概览</span>
+                    </a>
+
+                    <a href="#terminals" class="nav-item flex items-center px-4 py-3 text-white rounded-md"
+                        data-section="terminals">
+                        <i class="fas fa-desktop w-6"></i>
+                        <span class="ml-3">终端管理</span>
+                    </a>
+
+                    <a href="#rooms" class="nav-item flex items-center px-4 py-3 text-white rounded-md"
+                        data-section="rooms">
+                        <i class="fas fa-home w-6"></i>
+                        <span class="ml-3">房间管理</span>
+                    </a>
+
+                    <a href="#songs" class="nav-item flex items-center px-4 py-3 text-white rounded-md"
+                        data-section="songs">
+                        <i class="fas fa-music w-6"></i>
+                        <span class="ml-3">歌曲管理</span>
+                    </a>
+
+                    <a href="#artists" class="nav-item flex items-center px-4 py-3 text-white rounded-md"
+                        data-section="artists">
+                        <i class="fas fa-microphone w-6"></i>
+                        <span class="ml-3">歌手管理</span>
+                    </a>
+
+                    <a href="#dicts" class="nav-item flex items-center px-4 py-3 text-white rounded-md"
+                        data-section="dicts">
+                        <i class="fas fa-book w-6"></i>
+                        <span class="ml-3">字典维护</span>
+                    </a>
+
+                    <a href="#cloud" class="nav-item flex items-center px-4 py-3 text-white rounded-md"
+                        data-section="cloud">
+                        <i class="fas fa-cloud w-6"></i>
+                        <span class="ml-3">云端更新</span>
+                    </a>
+
+                    <a href="#streams" class="nav-item flex items-center px-4 py-3 text-white rounded-md"
+                        data-section="streams">
+                        <i class="fas fa-tv w-6"></i>
+                        <span class="ml-3">直播频道</span>
+                    </a>
+
+                    <a href="#users" class="nav-item flex items-center px-4 py-3 text-white rounded-md"
+                        data-section="users">
+                        <i class="fas fa-users w-6"></i>
+                        <span class="ml-3">用户管理</span>
+                    </a>
+
+                    <a href="#peripherals" class="nav-item flex items-center px-4 py-3 text-white rounded-md"
+                        data-section="peripherals">
+                        <i class="fas fa-sliders-h w-6"></i>
+                        <span class="ml-3">中控配置</span>
+                    </a>
+                    
+                    <a href="#syslogs" class="nav-item flex items-center px-4 py-3 text-white rounded-md"
+                        data-section="syslogs">
+                        <i class="fas fa-terminal w-6"></i>
+                        <span class="ml-3">运行监控</span>
+                    </a>
+
+                    <a href="#logs" class="nav-item flex items-center px-4 py-3 text-white rounded-md"
+                        data-section="logs">
+                        <i class="fas fa-file-alt w-6"></i>
+                        <span class="ml-3">操作日志</span>
+                    </a>
+
+                    <a href="#settings" class="nav-item flex items-center px-4 py-3 text-white rounded-md"
+                        data-section="settings">
+                        <i class="fas fa-cog w-6"></i>
+                        <span class="ml-3">系统设置</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="border-t border-gray-700 h-[48px] box-border flex items-center px-4 w-full shrink-0">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+                            <i class="fas fa-user text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-white" id="admin-username">管理员</p>
+                        <p class="text-xs text-gray-400">系统管理员</p>
+                    </div>
+                    <button id="logout-btn" class="ml-auto bg-gray-700 p-2 rounded-full text-gray-400 hover:text-white">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main id="admin-main" class="admin-main flex-1 ml-64 flex flex-col h-screen overflow-hidden bg-gray-900">
+            <!-- 顶部栏 -->
+            <header class="flex items-center justify-between px-6 pt-2 shrink-0 mb-2">
+                <div class="flex items-center">
+                    <button id="sidebar-toggle" class="text-gray-400 hover:text-white focus:outline-none mr-4">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <h2 class="text-2xl font-bold text-white" id="page-title">系统概览</h2>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <label class="admin-language-control" data-i18n-ignore translate="no"><i class="fas fa-globe" aria-hidden="true"></i><select data-admin-language aria-label="Language / 语言"><option value="zh">中文</option><option value="id">Bahasa Indonesia</option><option value="vi">Tiếng Việt</option><option value="th">ไทย</option><option value="en">English</option></select></label>
+                    <button class="bg-gray-800 p-2 rounded-full text-gray-400 hover:text-white">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <button class="bg-gray-800 p-2 rounded-full text-gray-400 hover:text-white">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- 内容区域 -->
+            <div class="flex-1 overflow-hidden relative px-6 pb-6 flex flex-col">
+                <!-- 系统概览 -->
+                <section id="dashboard-section" class="section-content h-full overflow-y-auto">
+                    <!-- 统计卡片 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <div class="stats-card">
+                            <h3>在线终端</h3>
+                            <div class="value" id="active-terminals">0</div>
+                            <div class="change positive">
+                                <i class="fas fa-arrow-up"></i> 2 较昨日
+                            </div>
+                        </div>
+
+                        <div class="stats-card">
+                            <h3>房间总数</h3>
+                            <div class="value" id="total-rooms">0</div>
+                            <div class="change positive">
+                                <i class="fas fa-arrow-up"></i> 1 较昨日
+                            </div>
+                        </div>
+
+                        <div class="stats-card">
+                            <h3>歌曲总数</h3>
+                            <div class="value" id="total-songs">0</div>
+                            <div class="change positive">
+                                <i class="fas fa-arrow-up"></i> 15 较昨日
+                            </div>
+                        </div>
+
+                        <div class="stats-card">
+                            <h3>歌手总数</h3>
+                            <div class="value" id="total-artists">0</div>
+                            <div class="change positive">
+                                <i class="fas fa-arrow-up"></i> 3 较昨日
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 系统状态 -->
+                    <div class="bg-gray-800 rounded-lg shadow p-5 mb-4">
+                        <div class="flex items-center justify-between mb-5">
+                            <h3 class="text-lg font-semibold text-white">系统状态</h3>
+                            <span class="text-xs text-gray-500">实时资源监控</span>
+                        </div>
+                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                            <div class="bg-gray-900/60 border border-gray-700 rounded-xl p-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <div class="text-gray-300 font-medium">运行状态</div>
+                                        <div class="text-xs text-gray-500 mt-1">服务、数据库与连接状态</div>
+                                    </div>
+                                    <i class="fas fa-server text-green-400 text-xl"></i>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="bg-gray-800/70 border border-gray-700 rounded-lg p-3">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <div class="text-xs text-gray-400">服务器状态</div>
+                                            <i class="fas fa-server text-green-400"></i>
+                                        </div>
+                                        <span id="server-status" class="badge badge-online">运行中</span>
+                                    </div>
+                                    <div class="bg-gray-800/70 border border-gray-700 rounded-lg p-3">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <div class="text-xs text-gray-400">数据库状态</div>
+                                            <i class="fas fa-database text-blue-400"></i>
+                                        </div>
+                                        <span id="db-status" class="badge badge-online">已连接</span>
+                                    </div>
+                                    <div class="bg-gray-800/70 border border-gray-700 rounded-lg p-3">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <div class="text-xs text-gray-400">WebSocket 状态</div>
+                                            <i class="fas fa-plug text-purple-400"></i>
+                                        </div>
+                                        <span id="ws-status" class="badge badge-online">已连接</span>
+                                    </div>
+                                    <div class="bg-gray-800/70 border border-gray-700 rounded-lg p-3">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <div class="text-xs text-gray-400">当前连接</div>
+                                            <i class="fas fa-network-wired text-yellow-400"></i>
+                                        </div>
+                                        <span id="system-load" class="badge badge-online">000</span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 gap-3 mt-3">
+                                    <div class="bg-gray-800/70 border border-gray-700 rounded-lg p-3">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-gray-300">CPU 使用率</span>
+                                            <span id="cpu-usage" class="text-white font-semibold">0%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-700 rounded-full h-2">
+                                            <div id="cpu-bar" class="bg-red-500 h-2 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-gray-800/70 border border-gray-700 rounded-lg p-3">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-gray-300">内存使用率</span>
+                                            <span id="memory-usage" class="text-white font-semibold">0%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-700 rounded-full h-2">
+                                            <div id="memory-bar" class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-900/60 border border-gray-700 rounded-xl p-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <div class="text-gray-300 font-medium">硬盘</div>
+                                    </div>
+                                    <i class="fas fa-hdd text-blue-400 text-xl"></i>
+                                </div>
+                                <div id="disk-info-container" class="grid grid-cols-2 2xl:grid-cols-4 gap-3">
+                                    <div class="text-sm text-gray-500">正在加载磁盘信息...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 最近活动 -->
+                    <div class="bg-gray-800 rounded-lg shadow p-4">
+                        <h3 class="text-lg font-semibold text-white mb-4">最近活动</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-700">
+                                <thead>
+                                    <tr>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            时间
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            操作
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            类型
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            详情
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-700" id="activity-log">
+                                    <!-- 由 loadRecentActivities 动态填充 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+
+
+                <!-- 终端设备管理 -->
+                <section id="terminals-section" class="section-content hidden h-full overflow-y-auto">
+                    <div class="bg-gray-800 rounded-lg shadow p-4">
+                        <div class="flex flex-wrap gap-3 items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-white">终端设备管理</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <button id="delete-selected-terminals" type="button" disabled
+                                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i class="fas fa-trash mr-2" aria-hidden="true"></i>批量删除<span id="terminal-selection-count" aria-live="polite">（0）</span>
+                                </button>
+                                <button id="update-terminal-app" type="button"
+                                    class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md flex items-center">
+                                    <i class="fas fa-upload mr-2"></i> APP 更新
+                                </button>
+                                <button id="update-terminal-rom" type="button"
+                                    class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md flex items-center">
+                                    <i class="fas fa-microchip mr-2" aria-hidden="true"></i> ROM 更新
+                                </button>
+                                <button id="scan-terminals"
+                                    class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md flex items-center">
+                                    <i class="fas fa-search mr-2"></i> 扫描终端
+                                </button>
+                                <button id="add-terminal"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md flex items-center">
+                                    <i class="fas fa-plus mr-2"></i> 添加终端
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="relative">
+                                <input type="text" id="terminal-search" placeholder="搜索序列号、设备名称、IP 或 MAC..."
+                                    class="form-input w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                                <div class="absolute inset-y-0 right-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-700">
+                                <thead>
+                                    <tr>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            <input id="select-all-terminals" type="checkbox" class="mr-2" aria-label="全选当前搜索结果中的终端" title="全选当前搜索结果">
+                                            序列号
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            设备名称
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            当前 IP
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            设备 MAC（有线）
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            型号
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            状态
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            最后心跳
+                                        </th>
+                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-400 whitespace-nowrap">属性</th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            操作
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-700" id="terminals-table">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 房间管理 (POS风格重构) -->
+                <section id="rooms-section" class="section-content hidden h-full flex flex-col">
+                    <!-- 顶部工具栏 & 类型筛选 -->
+                    <div class="bg-gray-800 border-b border-gray-700 p-2 flex justify-between items-center shrink-0">
+                        <div class="flex items-center space-x-2 overflow-x-auto" id="room-type-tabs">
+                            <button
+                                class="px-4 py-1.5 bg-blue-600 text-white text-sm font-bold rounded shadow-sm hover:bg-blue-500 transition active-type-tab"
+                                data-type="all">全部类型</button>
+                            <!-- JS动态生成类型Tab -->
+                        </div>
+                        <div class="flex items-stretch space-x-2">
+                            <div class="flex items-center gap-2 rounded border border-gray-600 bg-gray-700/80 px-2.5 py-1.5"
+                                title="控制所有PAD是否显示并使用点单功能">
+                                <i class="fas fa-tablet-alt text-cyan-400"></i>
+                                <span class="text-xs font-medium text-gray-200 whitespace-nowrap">PAD点单</span>
+                                <button type="button" id="pad-ordering-toggle" role="switch" aria-checked="false" disabled
+                                    class="relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full bg-gray-600 transition-colors disabled:cursor-wait disabled:opacity-60">
+                                    <span id="pad-ordering-toggle-knob"
+                                        class="pointer-events-none inline-block h-4 w-4 translate-x-0.5 mt-0.5 rounded-full bg-white shadow transition-transform"></span>
+                                </button>
+                                <span id="pad-ordering-status" class="min-w-[3rem] text-xs text-gray-400 whitespace-nowrap">读取中</span>
+                            </div>
+                            <input type="text" id="room-search" placeholder="搜索..."
+                                class="w-32 px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none">
+                            <button type="button" id="manage-room-configs"
+                                onclick="typeof openRoomConfigModal==='function'&&openRoomConfigModal()"
+                                class="bg-gray-700 hover:bg-gray-600 text-gray-200 px-3 py-1.5 rounded text-sm flex items-center border border-gray-600">
+                                <i class="fas fa-cog mr-1"></i> 管理配置
+                            </button>
+                            <button type="button" id="add-room"
+                                onclick="typeof openAddRoomModal==='function'&&openAddRoomModal()"
+                                class="bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded text-sm flex items-center shadow">
+                                <i class="fas fa-plus mr-1"></i> 新增房间
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 主体布局 -->
+                    <div class="flex flex-1 overflow-hidden">
+                        <!-- 左侧区域筛选 (竖排Tabs) -->
+                        <div class="w-20 bg-gray-800 border-r border-gray-700 flex flex-col items-center py-2 space-y-2 overflow-y-auto shrink-0"
+                            id="room-area-tabs">
+                            <button
+                                class="w-16 py-3 text-xs text-center bg-blue-900/50 text-blue-200 border border-blue-500/30 rounded hover:bg-blue-800/50 transition active-area-tab"
+                                data-area="all">
+                                全部<br>区域
+                            </button>
+                            <!-- JS动态生成区域Tab -->
+                        </div>
+
+                        <!-- 中间网格区域 -->
+                        <div class="flex-1 bg-gray-900 p-4 overflow-y-auto relative" id="rooms-container"
+                            onclick="deselectRoom(event)">
+                            <!-- 网格 -->
+                            <div id="rooms-grid"
+                                class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3 auto-rows-max">
+                                <!-- JS渲染卡片 -->
+                            </div>
+                        </div>
+
+                        <!-- 右侧详情面板 -->
+                        <div class="w-72 bg-gray-800 border-l border-gray-700 flex flex-col shrink-0 transition-all duration-300 transform translate-x-full"
+                            id="room-details-panel">
+                            <div class="flex-1 flex flex-col min-h-0 overflow-hidden" id="room-details-content">
+                                <div class="text-center text-gray-500 mt-10">
+                                    <i class="fas fa-mouse-pointer text-3xl mb-2 opacity-30"></i>
+                                    <p>请点击包厢查看详情</p>
+                                </div>
+                            </div>
+                            <!-- 底部操作区 -->
+                            <div class="p-3 border-t border-gray-700 bg-gray-800/50 flex flex-col gap-2"
+                                id="room-details-actions">
+                                <div class="flex gap-2">
+                                    <button
+                                        class="flex-1 bg-green-700 text-white py-2 px-1 rounded text-xs font-bold hover:bg-green-600 disabled:opacity-50 transition"
+                                        disabled>开房</button>
+                                    <button
+                                        class="flex-1 bg-red-700 text-white py-2 px-1 rounded text-xs font-bold hover:bg-red-600 disabled:opacity-50 transition"
+                                        disabled>关房</button>
+                                    <button
+                                        class="flex-1 bg-yellow-700 text-white py-2 px-1 rounded text-xs font-bold hover:bg-yellow-600 disabled:opacity-50 transition"
+                                        disabled>维修</button>
+                                    <button
+                                        class="flex-1 bg-blue-700 text-white py-2 px-1 rounded text-xs font-bold hover:bg-blue-600 disabled:opacity-50 transition hidden"
+                                        disabled>取消维修</button>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button
+                                        class="flex-1 bg-gray-700 text-white py-2 rounded text-xs hover:bg-gray-600 disabled:opacity-50 transition"
+                                        disabled>编辑</button>
+                                    <button
+                                        class="flex-1 bg-gray-700 text-gray-300 py-2 rounded text-xs hover:bg-red-900/40 hover:text-red-400 disabled:opacity-50 transition"
+                                        disabled>删除</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- 右键可以在此处添加一个隐藏的 Context Menu -->
+                    <div id="room-context-menu"
+                        class="hidden fixed bg-gray-800 border border-gray-600 shadow-xl rounded py-1 z-50 w-32 text-sm">
+                        <a href="#" class="block px-4 py-2 text-gray-200 hover:bg-blue-600 hover:text-white"
+                            onclick="handleContextAction('maintain')"><i class="fas fa-tools mr-2 w-4"></i> 维修</a>
+                        <a href="#" class="block px-4 py-2 text-gray-200 hover:bg-blue-600 hover:text-white"
+                            onclick="handleContextAction('test')"><i class="fas fa-vial mr-2 w-4"></i> 测试</a>
+                    </div>
+                </section>
+
+
+                <!-- 歌曲管理 -->
+                <section id="songs-section" class="section-content hidden h-full min-h-0 flex-1 flex flex-col overflow-hidden">
+                    <div class="bg-gray-800 rounded-lg shadow p-4 flex-1 min-h-0 flex flex-col overflow-hidden">
+                        <div id="song-page-actions" class="flex flex-col flex-nowrap sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                            <h3 class="text-lg font-semibold text-white">歌曲管理</h3>
+                            <div id="song-page-actions-buttons" class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
+                                <button id="btn-toggle-song-import" onclick="window.toggleSongImportPanel()"
+                                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md flex items-center justify-center whitespace-nowrap">
+                                    <i class="fas fa-file-excel mr-2"></i> 1. 导入歌曲数据
+                                </button>
+                                <button id="btn-toggle-scan" onclick="window.toggleScanPanel()"
+                                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center justify-center whitespace-nowrap">
+                                    <i class="fas fa-link mr-2"></i> 2. 路径对照
+                                </button>
+                                <button id="add-song"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md flex items-center justify-center">
+                                    <i class="fas fa-plus mr-2"></i> 添加歌曲
+                                </button>
+                                <button onclick="window.dictionaryPage.open('track')"
+                                    class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md flex items-center justify-center">
+                                    <i class="fas fa-list-ol mr-2"></i>音轨字典维护
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 第一步：整理好的 Excel 歌曲数据导入总曲库 -->
+                        <div id="song-import-panel" class="hidden flex-shrink-0 max-h-[22vh] sm:max-h-[40vh] lg:max-h-[50vh] overflow-y-auto border border-emerald-700 rounded-lg p-4 mb-4 bg-gray-750">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                <div class="min-w-0">
+                                    <div class="text-sm font-semibold text-emerald-300"><i class="fas fa-file-excel mr-2"></i>第一步：导入整理好的歌曲数据</div>
+                                    <div class="text-xs text-gray-400 mt-1">选择字段规范的 .xlsx 文件，写入总曲库后再执行本地视频路径对照。</div>
+                                </div>
+                                <button type="button" onclick="window.toggleSongImportPanel()" class="text-gray-500 hover:text-white text-xs whitespace-nowrap">
+                                    <i class="fas fa-times"></i> 收起
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-3 items-end">
+                                <label class="block min-w-0">
+                                    <span class="block text-xs text-gray-400 mb-1">歌曲信息表（仅支持 XLSX，最大 512 MB）</span>
+                                    <input id="song-import-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                        class="block w-full min-w-0 text-sm text-gray-300 file:mr-3 file:px-3 file:py-2 file:rounded-md file:border-0 file:bg-gray-700 file:text-white hover:file:bg-gray-600 cursor-pointer">
+                                </label>
+                                <button id="song-import-start-btn" type="button" onclick="window.startSongCatalogImport()" disabled
+                                    class="bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed text-white px-5 py-2 rounded-md text-sm flex items-center justify-center whitespace-nowrap">
+                                    <i class="fas fa-upload mr-2"></i> 导入总曲库
+                                </button>
+                            </div>
+                            <div id="song-import-file-info" class="mt-2 text-xs text-gray-500 break-all">尚未选择文件</div>
+                            <div id="song-import-progress-panel" class="hidden mt-3 space-y-3">
+                                <div class="flex items-center justify-between gap-3 text-xs text-gray-400">
+                                    <span id="song-import-status">准备导入...</span>
+                                    <span id="song-import-percentage" class="text-emerald-300 font-mono">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-600 rounded-full h-1.5">
+                                    <div id="song-import-progress-bar" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-300" style="width:0%"></div>
+                                </div>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
+                                    <div class="rounded bg-gray-800 px-2 py-2 text-gray-400">总数 <span id="song-import-total" class="block text-white font-mono mt-1">0</span></div>
+                                    <div class="rounded bg-gray-800 px-2 py-2 text-gray-400">已处理 <span id="song-import-processed" class="block text-white font-mono mt-1">0</span></div>
+                                    <div class="rounded bg-gray-800 px-2 py-2 text-gray-400">新增 <span id="song-import-inserted" class="block text-green-400 font-mono mt-1">0</span></div>
+                                    <div class="rounded bg-gray-800 px-2 py-2 text-gray-400">更新 <span id="song-import-updated" class="block text-blue-400 font-mono mt-1">0</span></div>
+                                    <div class="rounded bg-gray-800 px-2 py-2 text-gray-400">跳过 <span id="song-import-skipped" class="block text-yellow-400 font-mono mt-1">0</span></div>
+                                    <div class="rounded bg-gray-800 px-2 py-2 text-gray-400">失败 <span id="song-import-failed" class="block text-red-400 font-mono mt-1">0</span></div>
+                                </div>
+                                <div id="song-import-message" class="hidden"></div>
+                                <button id="song-import-next-btn" type="button" onclick="window.openSongPathMatchStep()"
+                                    class="hidden bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm items-center justify-center whitespace-nowrap">
+                                    <i class="fas fa-arrow-right mr-2"></i> 下一步：路径对照
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 路径对照面板（默认收起） -->
+                        <div id="scan-panel" class="hidden flex-shrink-0 max-h-[30vh] sm:max-h-[50vh] overflow-y-auto border border-indigo-700 rounded-lg p-4 mb-4 bg-gray-750">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-semibold text-indigo-300"><i class="fas fa-link mr-2"></i>歌曲路径对照</span>
+                                <button onclick="window.toggleScanPanel()" class="text-gray-500 hover:text-white text-xs">
+                                    <i class="fas fa-times"></i> 收起
+                                </button>
+                            </div>
+
+                            <!-- 配置行 -->
+                            <div id="scan-config-panel">
+                                <div class="flex items-center gap-3 flex-wrap">
+                                    <label for="scan-mode" class="text-sm text-gray-300 whitespace-nowrap">对照方式</label>
+                                    <select id="scan-mode" class="bg-gray-700 border border-gray-600 text-gray-200 rounded px-3 py-2 text-sm">
+                                        <option value="full">全量对照</option>
+                                        <option value="incremental">增量对照</option>
+                                    </select>
+                                    <div id="scan-drive-panel" class="flex items-center gap-3 flex-wrap flex-1">
+                                        <span class="text-xs text-gray-400">本地盘符（可多选）：</span>
+                                        <div id="scan-drive-list" class="flex items-center gap-3 flex-wrap" aria-label="服务器本地盘符"></div>
+                                        <span id="scan-drive-status" class="text-xs text-gray-400" role="status"></span>
+                                    </div>
+                                    <div id="scan-directory-panel" class="hidden flex items-center gap-3 flex-wrap flex-1">
+                                        <label for="scan-directories" class="text-xs text-gray-400">歌曲文件夹：</label>
+                                        <input id="scan-directories" type="text" placeholder="选择文件夹，可多选" class="flex-1 min-w-48 bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white">
+                                        <button id="scan-directories-browse" type="button" onclick="chooseDirectoryForInput('scan-directories', 'songScan')" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded">选择文件夹</button>
+                                    </div>
+                                    <div class="flex items-center gap-2 flex-shrink-0">
+                                        <input type="checkbox" id="scan-delete-duplicates"
+                                            class="w-4 h-4 rounded border-gray-600 bg-gray-700 text-indigo-600">
+                                        <label for="scan-delete-duplicates" class="text-xs text-gray-300 whitespace-nowrap">删除重复</label>
+                                    </div>
+                                    <button id="scan-start-btn" onclick="window.startScan()"
+                                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm flex items-center whitespace-nowrap flex-shrink-0">
+                                        <i class="fas fa-play mr-1"></i> 开始对照
+                                    </button>
+                                    <button id="scan-cancel-btn" onclick="window.cancelScan()"
+                                        class="hidden bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm flex items-center whitespace-nowrap flex-shrink-0">
+                                        <i class="fas fa-stop mr-1"></i> 取消
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 进度条 -->
+                            <div id="scan-progress-panel" class="hidden mt-3 space-y-2">
+                                <div class="flex items-center justify-between text-xs text-gray-400">
+                                    <span id="scan-status-text">正在扫描...</span>
+                                    <span id="scan-percentage" class="text-indigo-300 font-mono">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-600 rounded-full h-1.5">
+                                    <div id="scan-progress-bar" class="bg-indigo-500 h-1.5 rounded-full transition-all duration-300" style="width:0%"></div>
+                                </div>
+                                <div class="flex gap-4 text-xs text-gray-400">
+                                    <span>扫描: <span id="scan-count-files" class="text-white font-mono">0</span></span>
+                                    <span>匹配: <span id="scan-count-matched" class="text-green-400 font-mono">0</span></span>
+                                    <span class="truncate flex-1">目录: <span id="scan-current-dir" class="text-gray-300">—</span></span>
+                                </div>
+                            </div>
+
+                            <!-- 结果区 -->
+                            <div id="scan-result-panel" class="hidden mt-3">
+                                <div id="scan-summary" class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3"></div>
+                                <div class="border border-gray-600 rounded overflow-hidden">
+                                    <div class="flex border-b border-gray-600 bg-gray-800 overflow-x-auto">
+                                        <button onclick="window.switchScanTab('matched')" class="scan-tab-btn px-3 py-1.5 text-xs text-gray-400 hover:text-white border-b-2 border-transparent whitespace-nowrap" data-tab="matched">
+                                            <i class="fas fa-check-circle mr-1 text-green-400"></i>已匹配
+                                        </button>
+                                        <button onclick="window.switchScanTab('unmatched')" class="scan-tab-btn px-3 py-1.5 text-xs text-gray-400 hover:text-white border-b-2 border-transparent whitespace-nowrap" data-tab="unmatched">
+                                            <i class="fas fa-question-circle mr-1 text-yellow-400"></i>ID不在库中
+                                        </button>
+                                        <button onclick="window.switchScanTab('unrecognized')" class="scan-tab-btn px-3 py-1.5 text-xs text-gray-400 hover:text-white border-b-2 border-transparent whitespace-nowrap" data-tab="unrecognized">
+                                            <i class="fas fa-ban mr-1 text-red-400"></i>无法提取ID
+                                        </button>
+                                        <button onclick="window.switchScanTab('duplicates')" class="scan-tab-btn px-3 py-1.5 text-xs text-gray-400 hover:text-white border-b-2 border-transparent whitespace-nowrap" data-tab="duplicates">
+                                            <i class="fas fa-copy mr-1 text-blue-400"></i>重复文件
+                                        </button>
+                                        <button onclick="window.switchScanTab('errors')" class="scan-tab-btn px-3 py-1.5 text-xs text-gray-400 hover:text-white border-b-2 border-transparent whitespace-nowrap" data-tab="errors">
+                                            <i class="fas fa-exclamation-circle mr-1 text-red-500"></i>错误
+                                        </button>
+                                        <button onclick="window.resetScan()" class="ml-auto px-3 py-1.5 text-xs text-gray-500 hover:text-white whitespace-nowrap">
+                                            <i class="fas fa-redo mr-1"></i>重置
+                                        </button>
+                                    </div>
+                                    <div class="max-h-48 overflow-y-auto bg-gray-900 p-2">
+                                        <div id="scan-tab-matched" class="scan-tab-content hidden"></div>
+                                        <div id="scan-tab-unmatched" class="scan-tab-content hidden"></div>
+                                        <div id="scan-tab-unrecognized" class="scan-tab-content hidden"></div>
+                                        <div id="scan-tab-duplicates" class="scan-tab-content hidden"></div>
+                                        <div id="scan-tab-errors" class="scan-tab-content hidden"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="song-filters" class="grid grid-cols-2 sm:flex items-center gap-3 sm:gap-4 mb-4 flex-shrink-0">
+                            <div class="col-span-2 w-full sm:w-60 flex-shrink-0 flex bg-gray-900 border border-gray-600 rounded-md overflow-hidden">
+                                <button id="song-data-source-source" onclick="window.switchSongDataSource('source')"
+                                    class="flex-1 px-3 py-2 text-sm bg-blue-600 text-white">
+                                    源数据
+                                </button>
+                                <button id="song-data-source-available" onclick="window.switchSongDataSource('available')"
+                                    class="flex-1 px-3 py-2 text-sm text-gray-300 hover:text-white">
+                                    点播数据
+                                </button>
+                            </div>
+                            <div class="relative col-span-2 w-full sm:w-72 flex-shrink-0">
+                                <input type="text" id="song-search" placeholder="搜索歌曲名/歌手/语言..."
+                                    class="form-input w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                            </div>
+                            <select id="song-language-filter"
+                                class="form-input w-full sm:w-60 px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                                <option value="">全部语言</option>
+                            </select>
+                            <button id="song-search-btn" onclick="window.searchSongs()"
+                                class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 rounded-md flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-search mr-2"></i> 搜索
+                            </button>
+                        </div>
+
+                        <div id="songs-table-scroll" class="overflow-auto w-full flex-1 min-h-0">
+                            <table class="min-w-full divide-y divide-gray-700">
+                                <thead>
+                                    <tr>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            ID
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            首字母
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            歌曲名
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            歌手
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            语言
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            类型
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            格式
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            音轨
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            评分
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            路径
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            播放次数
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            操作
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-700" id="songs-table">
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="songs-pagination-bar" class="flex items-center justify-between mt-3 flex-shrink-0 min-w-0">
+                            <div class="text-sm text-gray-400 whitespace-nowrap">
+                                显示 <span id="songs-start">0</span> - <span id="songs-end">0</span> 共 <span
+                                    id="songs-total">0</span> 条
+                            </div>
+                            <div class="flex flex-wrap justify-end gap-1" id="songs-pagination"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 字典维护 -->
+                <section id="dicts-section" class="section-content hidden h-full min-h-0 flex-1 flex flex-col overflow-hidden">
+                    <div class="dict-panel">
+                        <div class="dict-heading">
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">字典维护</h3>
+                                <p id="dict-summary" class="dict-muted">管理歌曲分类、语种、声道及其他字典分组</p>
+                            </div>
+                            <div class="dict-actions">
+                                <button id="dict-refresh" type="button" class="dict-button">刷新</button>
+                                <button id="dict-export-all" type="button" class="dict-button">导出全部 XLSX</button>
+                                <button id="dict-open-import" type="button" class="dict-button">导入 XLSX</button>
+                                <button id="dict-add" type="button" class="dict-button dict-primary">新增字典项</button>
+                            </div>
+                        </div>
+                        <div class="dict-entry-page">
+                            <div>
+                                <h4>点歌默认页</h4>
+                                <p class="dict-muted">选择 PAD 点击“点歌”时首先显示的页面，保存后下次进入点歌生效。</p>
+                            </div>
+                            <form id="dict-entry-page-form">
+                                <label for="dict-entry-page-select">默认显示</label>
+                                <select id="dict-entry-page-select" disabled>
+                                    <option value="indonesian">印尼歌曲</option>
+                                    <option value="singer">歌星</option>
+                                    <option value="song">歌名</option>
+                                </select>
+                                <button id="dict-entry-page-save" type="submit" class="dict-button dict-primary" disabled>保存设置</button>
+                            </form>
+                            <p id="dict-entry-page-message" class="dict-message" role="status" aria-live="polite"></p>
+                        </div>
+                        <div class="dict-filters">
+                            <label>字典分组<select id="dict-group-filter"><option value="">全部分组</option></select></label>
+                            <label>关键词<input id="dict-search" type="search" placeholder="搜索分组、编码或名称" maxlength="256"></label>
+                            <label>显示状态<select id="dict-visible-filter"><option value="">全部状态</option><option value="1">显示</option><option value="0">隐藏</option></select></label>
+                            <button id="dict-export-group" type="button" class="dict-button" disabled>导出当前分组</button>
+                        </div>
+                        <p id="dict-message" class="dict-message" role="status" aria-live="polite"></p>
+                        <div class="dict-table-wrap">
+                            <table class="dict-table">
+                                <thead><tr><th scope="col">分组</th><th scope="col">编码</th><th scope="col">名称</th><th scope="col">排序</th><th scope="col">显示状态</th><th scope="col">操作</th></tr></thead>
+                                <tbody id="dict-table"><tr><td colspan="6" class="dict-empty">打开页面后加载字典</td></tr></tbody>
+                            </table>
+                        </div>
+                        <div class="dict-footer"><span id="dict-count">0 条</span><span>分组与编码共同确定一项字典。新增分组需在对应业务接入后使用。</span></div>
+                    </div>
+
+                    <dialog id="dict-editor" class="dict-dialog" aria-labelledby="dict-editor-title">
+                        <form id="dict-editor-form">
+                            <div class="dict-heading"><h3 id="dict-editor-title">新增字典项</h3><button type="button" data-dict-close="dict-editor" class="dict-close" aria-label="关闭编辑窗口">×</button></div>
+                            <fieldset id="dict-editor-fields" class="dict-editor-grid">
+                                <label>分组<input id="dict-edit-group" list="dict-group-options" required maxlength="64" pattern="[A-Za-z][A-Za-z0-9_]*" placeholder="例如 classify" autocomplete="off"><datalist id="dict-group-options"></datalist></label>
+                                <label>编码<input id="dict-edit-code" required maxlength="128" placeholder="保留原编码，包括前导零" autocomplete="off"></label>
+                                <label class="dict-wide">名称<input id="dict-edit-name" required maxlength="256" placeholder="字典项显示名称"></label>
+                                <label>排序<input id="dict-edit-sort" type="number" required min="0" max="2147483647" step="1" value="0"></label>
+                                <label>显示状态<select id="dict-edit-visible"><option value="1">显示</option><option value="0">隐藏</option></select></label>
+                            </fieldset>
+                            <p class="dict-muted">编辑时分组、编码保持固定。名称变化会同步到对应的歌曲、歌星记录。</p>
+                            <p id="dict-editor-message" class="dict-message" role="status" aria-live="polite"></p>
+                            <div class="dict-dialog-actions"><button type="button" data-dict-close="dict-editor" class="dict-button">取消</button><button id="dict-save" type="submit" class="dict-button dict-primary">保存</button></div>
+                        </form>
+                    </dialog>
+
+                    <dialog id="dict-import-dialog" class="dict-dialog" aria-labelledby="dict-import-title">
+                        <form id="dict-import-form">
+                            <div class="dict-heading"><h3 id="dict-import-title">导入字典表</h3><button type="button" data-dict-close="dict-import-dialog" class="dict-close" aria-label="关闭导入窗口">×</button></div>
+                            <fieldset id="dict-import-fields">
+                                <label class="dict-file-label">选择 XLSX 文件<input id="dict-import-file" type="file" accept=".xlsx" required></label>
+                            </fieldset>
+                            <p class="dict-muted">最多 5 MB、10,000 条。多工作表文件只读取“字典数据”，单工作表文件可直接导入。</p>
+                            <div class="dict-import-rules">
+                                <p>按“分组＋编码”合并：存在的更新，新编码新增，文件外的条目保留。</p>
+                                <p>全部行校验通过后一次写入；出错时整批不写入。导入字典不会调整歌曲所属分类。</p>
+                            </div>
+                            <details class="dict-format-help"><summary>查看表格字段规范</summary><p>仅需五列：dictGroup、dictCode、dictName、sortOrder、visible，均为必填列。第一行是字段名，列顺序不限。</p><p>编码按文本保存；visible 为 0 或 1；sortOrder 为非负整数。表格不接受公式和额外字段。</p><p>请使用最新“导出全部 XLSX”的格式；旧表请先删除 id、sourceDictId 两列。</p></details>
+                            <p id="dict-import-message" class="dict-message" role="status" aria-live="polite"></p>
+                            <div class="dict-dialog-actions"><button type="button" data-dict-close="dict-import-dialog" class="dict-button">关闭</button><button id="dict-import-submit" type="submit" class="dict-button dict-primary">开始导入</button></div>
+                        </form>
+                    </dialog>
+                </section>
+
+                <!-- 歌星管理 -->
+                <section id="artists-section" class="section-content hidden h-full min-h-0 flex-1 flex flex-col overflow-hidden">
+                    <div class="bg-gray-800 rounded-lg shadow p-4 flex-1 min-h-0 flex flex-col overflow-hidden">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 flex-shrink-0">
+                            <h3 class="text-lg font-semibold text-white">歌星管理</h3>
+                            <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
+                                <button id="btn-toggle-singer-import" type="button" onclick="window.toggleSingerImportPanel()"
+                                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md flex items-center justify-center whitespace-nowrap">
+                                    <i class="fas fa-file-excel mr-2"></i> 1. 导入歌星数据
+                                </button>
+                                <button id="btn-toggle-singer-image-match" type="button" onclick="window.toggleSingerImageMatchPanel()"
+                                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center justify-center whitespace-nowrap">
+                                    <i class="fas fa-images mr-2"></i> 2. 图片对照
+                                </button>
+                                <button id="add-singer"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md flex items-center justify-center whitespace-nowrap">
+                                    <i class="fas fa-plus mr-2"></i> 添加歌星
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="singer-import-panel" class="hidden flex-shrink-0 max-h-[26vh] sm:max-h-[44vh] overflow-y-auto border border-emerald-700 rounded-lg p-4 mb-4 bg-gray-750">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                <div class="min-w-0">
+                                    <div class="text-sm font-semibold text-emerald-300"><i class="fas fa-file-excel mr-2"></i>第一步：导入整理好的歌星数据</div>
+                                    <div class="text-xs text-gray-400 mt-1">XLSX 必填字段：<code class="text-gray-300">singer_no</code>、<code class="text-gray-300">singer_name</code>。导入后再进行本地歌星图片对照。</div>
+                                </div>
+                                <button type="button" onclick="window.toggleSingerImportPanel()" class="text-gray-500 hover:text-white text-xs whitespace-nowrap">
+                                    <i class="fas fa-times"></i> 收起
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-3 items-end">
+                                <label class="block min-w-0">
+                                    <span class="block text-xs text-gray-400 mb-1">歌星信息表（仅支持 XLSX，最大 512 MB）</span>
+                                    <input id="singer-import-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                        class="block w-full min-w-0 text-sm text-gray-300 file:mr-3 file:px-3 file:py-2 file:rounded-md file:border-0 file:bg-gray-700 file:text-white hover:file:bg-gray-600 cursor-pointer">
+                                </label>
+                                <button id="singer-import-start-btn" type="button" onclick="window.startSingerCatalogImport()" disabled
+                                    class="bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed text-white px-5 py-2 rounded-md text-sm flex items-center justify-center whitespace-nowrap">
+                                    <i class="fas fa-upload mr-2"></i> 导入歌星库
+                                </button>
+                            </div>
+                            <div id="singer-import-file-info" class="mt-2 text-xs text-gray-500 break-all">尚未选择文件</div>
+                            <div id="singer-import-progress-panel" class="hidden mt-3 space-y-3">
+                                <div class="flex items-center justify-between gap-3 text-xs text-gray-400">
+                                    <span id="singer-import-status">准备导入...</span>
+                                    <span id="singer-import-percentage" class="text-emerald-300 font-mono">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-600 rounded-full h-1.5">
+                                    <div id="singer-import-progress-bar" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-300" style="width:0%"></div>
+                                </div>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
+                                    <div class="rounded bg-gray-800 px-2 py-2 text-gray-400">总数 <span id="singer-import-total" class="block text-white font-mono mt-1">0</span></div>
+                                    <div class="rounded bg-gray-800 px-2 py-2 text-gray-400">已处理 <span id="singer-import-processed" class="block text-white font-mono mt-1">0</span></div>
+                                    <div class="rounded bg-gray-800 px-2 py-2 text-gray-400">新增 <span id="singer-import-inserted" class="block text-green-400 font-mono mt-1">0</span></div>
+                                    <div class="rounded bg-gray-800 px-2 py-2 text-gray-400">更新 <span id="singer-import-updated" class="block text-blue-400 font-mono mt-1">0</span></div>
+                                    <div class="rounded bg-gray-800 px-2 py-2 text-gray-400">跳过 <span id="singer-import-skipped" class="block text-yellow-400 font-mono mt-1">0</span></div>
+                                    <div class="rounded bg-gray-800 px-2 py-2 text-gray-400">失败 <span id="singer-import-failed" class="block text-red-400 font-mono mt-1">0</span></div>
+                                </div>
+                                <div id="singer-import-message" class="hidden"></div>
+                                <button id="singer-import-next-btn" type="button" onclick="window.openSingerImageMatchStep()"
+                                    class="hidden bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm items-center justify-center whitespace-nowrap">
+                                    <i class="fas fa-arrow-right mr-2"></i> 下一步：图片对照
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="singer-image-match-panel" class="hidden flex-shrink-0 max-h-[32vh] sm:max-h-[52vh] overflow-y-auto border border-indigo-700 rounded-lg p-4 mb-4 bg-gray-750">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                <div class="min-w-0">
+                                    <div class="text-sm font-semibold text-indigo-300"><i class="fas fa-images mr-2"></i>第二步：歌星图片对照</div>
+                                    <div class="text-xs text-gray-400 mt-1">按图片文件名匹配歌星编号、歌星 ID 或来源歌星 ID，并统一复制为 <code class="text-gray-300">static/singer-all/{singerNo}.扩展名</code>。</div>
+                                </div>
+                                <button type="button" onclick="window.toggleSingerImageMatchPanel()" class="text-gray-500 hover:text-white text-xs whitespace-nowrap">
+                                    <i class="fas fa-times"></i> 收起
+                                </button>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <label for="singer-image-match-directory" class="block text-xs text-gray-400 mb-1">歌星图片文件夹</label>
+                                    <div class="flex gap-2">
+                                        <input id="singer-image-match-directory" type="text" placeholder="请选择歌星图片文件夹" class="form-input w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white">
+                                        <button id="singer-image-directory-browse" type="button" onclick="chooseDirectoryForInput('singer-image-match-directory', 'singerImages')" class="shrink-0 bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded">选择文件夹</button>
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <label class="inline-flex items-center text-xs text-gray-300 cursor-pointer">
+                                        <input id="singer-image-match-overwrite" type="checkbox" class="mr-2 rounded border-gray-600 bg-gray-700 text-indigo-500">
+                                        覆盖已有同名图片
+                                    </label>
+                                    <button id="singer-image-match-start-btn" type="button" onclick="window.startSingerImageMatch()"
+                                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm flex items-center justify-center whitespace-nowrap">
+                                        <i class="fas fa-play mr-2"></i> 开始图片对照
+                                    </button>
+                                    <button id="singer-image-match-cancel-btn" type="button" onclick="window.cancelSingerImageMatch()"
+                                        class="hidden bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm items-center justify-center whitespace-nowrap">
+                                        <i class="fas fa-stop mr-2"></i> 取消
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="singer-image-match-progress-panel" class="hidden mt-3 space-y-2">
+                                <div class="flex items-center justify-between gap-3 text-xs text-gray-400">
+                                    <span id="singer-image-match-status">正在准备...</span>
+                                    <span id="singer-image-match-percentage" class="text-indigo-300 font-mono">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-600 rounded-full h-1.5">
+                                    <div id="singer-image-match-progress-bar" class="bg-indigo-500 h-1.5 rounded-full transition-all duration-300" style="width:0%"></div>
+                                </div>
+                                <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-400">
+                                    <span>扫描: <span id="singer-image-match-scanned" class="text-white font-mono">0</span></span>
+                                    <span>匹配歌星: <span id="singer-image-match-matched" class="text-green-400 font-mono">0</span></span>
+                                    <span>复制图片: <span id="singer-image-match-copied" class="text-blue-400 font-mono">0</span></span>
+                                    <span class="truncate flex-1 min-w-48">目录: <span id="singer-image-match-current-directory" class="text-gray-300">—</span></span>
+                                </div>
+                            </div>
+                            <div id="singer-image-match-result-panel" class="hidden mt-3 space-y-3">
+                                <div id="singer-image-match-summary" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-xs"></div>
+                                <div id="singer-image-match-details" class="hidden rounded border border-gray-600 bg-gray-900 p-3 text-xs text-gray-300 max-h-48 overflow-y-auto"></div>
+                                <button type="button" onclick="window.resetSingerImageMatch()" class="text-xs text-gray-400 hover:text-white">
+                                    <i class="fas fa-redo mr-1"></i>重置图片对照
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 flex-shrink-0">
+                            <div class="relative">
+                                <input type="text" id="singer-search" placeholder="搜索歌星名/地区..."
+                                    onkeypress="if(event.key==='Enter') searchSingers()"
+                                    class="form-input w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                            </div>
+                            <select id="singer-region-filter" onchange="searchSingers()"
+                                class="form-input w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                                <option value="">全部地区</option>
+                            </select>
+                            <select id="singer-sex-filter" onchange="searchSingers()"
+                                class="form-input w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                                <option value="">全部性别</option>
+                                <option value="1">男</option>
+                                <option value="2">女</option>
+                                <option value="3">组合</option>
+                            </select>
+                            <button id="singer-search-btn" onclick="searchSingers()"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center justify-center">
+                                <i class="fas fa-search mr-2"></i> 搜索
+                            </button>
+                        </div>
+
+                        <div class="overflow-auto flex-1 min-h-0">
+                            <table class="min-w-full divide-y divide-gray-700">
+                                <thead class="sticky top-0 bg-gray-800 z-10">
+                                    <tr>
+                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">ID</th>
+                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">歌星名</th>
+                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">头像</th>
+                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">地区</th>
+                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">性别</th>
+                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">歌曲数</th>
+                                        <th class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-700" id="singers-table"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="flex items-center justify-between mt-3 flex-shrink-0 min-w-0">
+                            <div class="text-sm text-gray-400 whitespace-nowrap">
+                                显示 <span id="singers-start">0</span> - <span id="singers-end">0</span> 共 <span id="singers-total">0</span> 条
+                            </div>
+                            <div class="flex flex-wrap justify-end gap-1" id="singers-pagination"></div>
+                        </div>
+                    </div>
+                </section>
+                <!-- 云端更新 -->
+                <section id="cloud-section" class="section-content hidden h-full overflow-y-auto">
+                    <div class="bg-gray-800 rounded-lg shadow p-4 mb-4">
+                        <div class="cloud-heading">
+                            <div class="cloud-title">
+                                <h3>云端更新</h3>
+                                <span id="cloud-status-icon" role="status" aria-label="正在检查云端连接" title="正在检查云端连接" style="color:#ef4444;display:inline-flex">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.35 10.04a7.5 7.5 0 0 0-14-2A6 6 0 0 0 6 20h13a5 5 0 0 0 .35-9.96Z"/></svg>
+                                </span>
+                            </div>
+                            <p id="cloud-authorization" role="status">正在读取云端更新授权…</p>
+                        </div>
+                        <div id="cloud-status-panel" class="cloud-settings">
+                            <form id="cloud-config-form">
+                                <div class="cloud-directory-row">
+                                    <label for="cloud-download-dir">更新目录</label>
+                                    <input id="cloud-download-dir" type="text" required placeholder="D:/MV/cloud">
+                                    <button id="choose-cloud-directory-btn" type="button" class="cloud-button cloud-secondary">选择目录</button>
+                                </div>
+                                <div class="cloud-actions-row">
+                                    <label for="cloud-update-mode">下载方式</label>
+                                    <select id="cloud-update-mode">
+                                        <option value="manual">手动更新</option>
+                                        <option value="auto">自动更新</option>
+                                    </select>
+                                    <span id="cloud-update-mode-hint" class="cloud-help">手动模式：点击下载后更新入库。</span>
+                                    <div class="cloud-actions">
+                                        <button id="save-cloud-config-btn" type="submit" class="cloud-button cloud-secondary">保存设置</button>
+                                        <button id="apply-cloud-updates-btn" type="button" disabled class="cloud-button cloud-primary">下载并更新曲库</button>
+                                    </div>
+                                </div>
+                                <div class="cloud-settings-footer">
+                                    <span class="cloud-help">磁盘保护：预留 10GB，不足时自动选择可用空间最大的磁盘。</span>
+                                    <p id="cloud-config-message" role="status"></p>
+                                </div>
+                            </form>
+                            <div id="cloud-packages">正在读取已发布更新包…</div>
+                        </div>
+                        <div class="cloud-task-summary" aria-label="更新任务统计">
+                            <span>总任务 <strong id="total-tasks">0</strong></span>
+                            <span>进行中 <strong id="running-tasks">0</strong></span>
+                            <span>已完成 <strong id="completed-tasks">0</strong></span>
+                            <span>失败 <strong id="failed-tasks">0</strong></span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-700">
+                                <thead>
+                                    <tr>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            任务ID
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            任务类型
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            目标
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            更新数量
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            进度
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            创建时间
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            操作
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-700" id="tasks-table">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-gray-400">
+                            <a href="update-history.html" class="text-blue-400 hover:text-blue-300">更新记录</a>
+                            <span id="sync-task-page-summary">&#31532; 1 &#39029;&#65292;&#20849; 0 &#26465;</span>
+                            <div class="flex gap-2">
+                                <button id="sync-task-prev-btn" class="rounded bg-gray-700 px-3 py-2 text-white hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50">&#19978;&#19968;&#39029;</button>
+                                <button id="sync-task-next-btn" class="rounded bg-gray-700 px-3 py-2 text-white hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50">&#19979;&#19968;&#39029;</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 直播频道管理 -->
+                <section id="streams-section" class="section-content hidden h-full flex flex-col">
+                    <div class="bg-gray-800 rounded-lg shadow p-4 flex-1 flex flex-col overflow-hidden">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">直播频道管理</h3>
+                                <p class="text-sm text-gray-400 mt-1">来源：Collect-IPTV best_sorted.m3u，后端启动及每 4 小时自动刷新</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button id="refresh-streams-btn"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center">
+                                    <i class="fas fa-sync-alt mr-2"></i> 刷新源
+                                </button>
+                                <button id="reload-streams-btn"
+                                    class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md flex items-center">
+                                    <i class="fas fa-redo mr-2"></i> 重载列表
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                            <div class="stats-card">
+                                <h3>频道数量</h3>
+                                <div class="value" id="streams-count">0</div>
+                            </div>
+                            <div class="stats-card md:col-span-2">
+                                <h3>源更新时间</h3>
+                                <div class="text-lg font-semibold text-white" id="streams-updated-at">-</div>
+                            </div>
+                            <div class="stats-card">
+                                <h3>状态</h3>
+                                <div class="text-lg font-semibold text-white" id="streams-status">-</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3 mb-4">
+                            <input type="text" id="streams-search"
+                                class="form-input flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none"
+                                placeholder="搜索频道名称、分类或 URL">
+                            <select id="streams-category-filter"
+                                class="form-input px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                                <option value="">全部分类</option>
+                            </select>
+                        </div>
+
+                        <div class="overflow-auto flex-1">
+                            <table class="min-w-full divide-y divide-gray-700">
+                                <thead class="sticky top-0 bg-gray-800 z-10">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">频道</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">分类</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">播放地址</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">台标</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-700" id="streams-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 用户管理 -->
+                <section id="users-section" class="section-content hidden h-full overflow-y-auto">
+                    <div class="bg-gray-800 rounded-lg shadow p-4">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-white">员工账号管理</h3>
+                            <button id="add-user-btn"
+                                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md flex items-center">
+                                <i class="fas fa-plus mr-2"></i> 添加员工
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-700">
+                                <thead>
+                                    <tr>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            登录名</th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            员工名称</th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            岗位角色</th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            状态</th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            最后访问</th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-700" id="users-table">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 系统设置 -->
+                <section id="settings-section" class="section-content hidden h-full overflow-y-auto">
+                    <div class="bg-gray-800 rounded-lg shadow p-4">
+                        <h3 class="text-lg font-semibold text-white mb-6">系统设置</h3>
+
+                        <!-- 服务器授权信息 -->
+                        <section id="admin-license-panel" class="mb-8 overflow-hidden rounded-lg border border-gray-700 bg-gray-900/50">
+                            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-700 px-4 py-4">
+                                <div>
+                                    <h4 class="text-md font-medium text-white flex items-center">
+                                        <i class="fas fa-certificate mr-2 text-red-400"></i> 服务器授权信息
+                                    </h4>
+                                    <p id="admin-license-source" class="mt-1 text-xs text-gray-400" role="status"></p>
+                                    <p id="admin-license-status-message" class="mt-1 text-sm text-gray-400">正在读取授权信息…</p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <span id="admin-license-status-badge" class="rounded-full bg-gray-700 px-3 py-1 text-xs text-gray-300">检查中</span>
+                                    <button id="select-admin-license-file" type="button"
+                                        class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50">导入/更新授权</button>
+                                </div>
+                            </div>
+                            <dl id="admin-license-detail-grid" class="grid grid-cols-1 gap-px bg-gray-700 sm:grid-cols-2 lg:grid-cols-3">
+                                <div class="min-w-0 bg-gray-800/90 p-4">
+                                    <dt class="text-xs text-gray-500">场所名称</dt>
+                                    <dd id="admin-license-venue-name" class="mt-1 break-words text-sm text-gray-100">-</dd>
+                                </div>
+                                <div class="min-w-0 bg-gray-800/90 p-4">
+                                    <dt class="text-xs text-gray-500">联系人 / 电话</dt>
+                                    <dd id="admin-license-contact" class="mt-1 break-words text-sm text-gray-100">-</dd>
+                                </div>
+                                <div class="min-w-0 bg-gray-800/90 p-4">
+                                    <dt class="text-xs text-gray-500">终端点数</dt>
+                                    <dd id="admin-license-terminal-limit" class="mt-1 text-sm text-gray-100">-</dd>
+                                </div>
+                                <div class="min-w-0 bg-gray-800/90 p-4 sm:col-span-2">
+                                    <dt class="flex items-center justify-between gap-3 text-xs text-gray-500">
+                                        <span>机器码</span>
+                                        <button id="copy-admin-license-machine-code" type="button"
+                                            class="inline-flex items-center rounded-md border border-gray-600 px-2.5 py-1 text-xs text-gray-300 transition-colors hover:border-red-500 hover:text-white">
+                                            <i class="far fa-copy mr-1"></i> 复制
+                                        </button>
+                                    </dt>
+                                    <dd id="admin-license-machine-code" class="mt-1 break-all font-mono text-sm text-gray-100">-</dd>
+                                </div>
+                                <div class="min-w-0 bg-gray-800/90 p-4">
+                                    <dt class="text-xs text-gray-500">授权编号</dt>
+                                    <dd id="admin-license-id" class="mt-1 break-all text-sm text-gray-100">-</dd>
+                                </div>
+                                <div class="min-w-0 bg-gray-800/90 p-4">
+                                    <dt class="text-xs text-gray-500">生效时间</dt>
+                                    <dd id="admin-license-issued-at" class="mt-1 text-sm text-gray-100">-</dd>
+                                </div>
+                                <div class="min-w-0 bg-gray-800/90 p-4">
+                                    <dt class="text-xs text-gray-500">到期时间</dt>
+                                    <dd id="admin-license-expires-at" class="mt-1 text-sm font-medium text-gray-100">-</dd>
+                                </div>
+                                <div class="min-w-0 bg-gray-800/90 p-4">
+                                    <dt class="text-xs text-gray-500">地址</dt>
+                                    <dd id="admin-license-address" class="mt-1 break-words text-sm text-gray-100">-</dd>
+                                </div>
+                            </dl>
+                            <p class="border-t border-gray-700 px-4 py-3 text-xs text-gray-400">在服务器本机选择新的 server.lic 授权文件，导入后立即生效。</p>
+                        </section>
+
+                        <!-- 桌面端测试（仅 Tauri 环境显示） -->
+                        <div id="tauri-test-block" class="mb-8 p-4 rounded-lg border border-gray-600 hidden">
+                            <h4 class="text-md font-medium text-white mb-3 flex items-center">
+                                <i class="fas fa-window-maximize mr-2 text-red-400"></i> 桌面端测试
+                            </h4>
+                            <p class="text-sm text-gray-400 mb-4">在 Tauri 桌面应用中测试后端状态与桌面命令。</p>
+                            <div id="tauri-test-status-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="bg-gray-700/50 rounded p-3">
+                                    <div class="text-xs text-gray-400 mb-1">服务器状态</div>
+                                    <div id="tauri-server-status" class="text-sm text-white">—</div>
+                                    <div id="tauri-uptime" class="text-xs text-gray-400 mt-1">—</div>
+                                </div>
+                                <div class="bg-gray-700/50 rounded p-3">
+                                    <div class="text-xs text-gray-400 mb-1">服务器地址</div>
+                                    <div id="tauri-server-url" class="text-sm text-white break-all">—</div>
+                                </div>
+                            </div>
+                            <div id="tauri-test-actions" class="flex flex-wrap gap-2">
+                                <button type="button" id="tauri-btn-status"
+                                    class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md text-sm">
+                                    <i class="fas fa-sync-alt mr-1"></i> 刷新状态
+                                </button>
+                                <button type="button" id="tauri-btn-logs"
+                                    class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md text-sm">
+                                    <i class="fas fa-folder-open mr-1"></i> 打开日志目录
+                                </button>
+                                <button type="button" id="tauri-btn-data"
+                                    class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md text-sm">
+                                    <i class="fas fa-database mr-1"></i> 打开数据目录
+                                </button>
+                                <button type="button" id="tauri-btn-restart"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
+                                    <i class="fas fa-redo mr-1"></i> 重启服务器
+                                </button>
+                                <button type="button" id="tauri-btn-relaunch"
+                                    class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md text-sm">
+                                    <i class="fas fa-sync-alt mr-1"></i> 重启应用
+                                </button>
+                            </div>
+                            <div id="tauri-test-msg" class="mt-3 text-sm text-gray-400 break-all hidden"></div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="text-md font-medium text-white mb-4">服务器配置</h4>
+                                <div class="grid grid-cols-1 gap-4">
+                                    <div>
+                                        <label for="settings-network-interface" class="block text-sm font-medium text-gray-300 mb-1">选择网卡</label>
+                                        <select id="settings-network-interface"
+                                            class="form-input w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                                            <option value="">正在加载网卡...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-md font-medium text-white mb-4">媒体文件配置</h4>
+                                <p class="text-sm text-gray-400 mb-3">
+                                    终端播放器通过 HTTP 流请求视频文件，配置歌曲文件所在的磁盘根目录。<br>
+                                </p>
+                                <div class="grid grid-cols-1 gap-4">
+                                    <div>
+                                        <label for="settings-media-root" class="block text-sm text-gray-300 mb-1">媒体根目录（可多选）</label>
+                                        <div class="flex gap-2">
+                                            <input type="text" id="settings-media-root" placeholder="请选择媒体文件夹，多个路径以分号分隔" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white">
+                                            <button id="settings-media-root-browse" type="button" class="shrink-0 bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded">选择文件夹</button>
+                                        </div>
+                                        <p id="settings-media-root-status" class="text-xs mt-2 text-gray-500 italic"></p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-1">空闲歌曲路径</label>
+                                        <div class="flex gap-2">
+                                            <input type="text" id="settings-idle-song-path" placeholder="例如 D:\媒体目录\freesongs"
+                                                class="form-input flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                                            <button type="button" id="settings-idle-song-path-browse"
+                                                class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md border border-gray-600 whitespace-nowrap">
+                                                选择文件夹
+                                            </button>
+                                            <button type="button" id="settings-idle-song-path-scan"
+                                                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md border border-indigo-500 whitespace-nowrap">
+                                                扫描
+                                            </button>
+                                        </div>
+                                        <p id="settings-idle-song-path-status" class="text-xs mt-2 text-gray-500 italic">完整绝对路径，必须位于已配置的媒体根目录内</p>
+                                        <div id="settings-idle-song-scan-result"
+                                            class="hidden mt-2 p-3 rounded-md bg-gray-900/60 border border-gray-700 text-xs text-gray-300 space-y-1"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex space-x-4">
+                                <button type="button" id="settings-save-btn"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md">
+                                    保存设置
+                                </button>
+                                <button type="button" id="settings-reset-btn"
+                                    class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-md">
+                                    重新加载</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 中控配置 -->
+                <section id="peripherals-section" class="section-content hidden h-full flex flex-col">
+
+                    <!-- 品类管理（四列并排） -->
+                    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 flex-1 overflow-hidden">
+
+                            <!-- 灯光管理 -->
+                            <div class="bg-gray-800 rounded-lg flex flex-col overflow-hidden border border-gray-700">
+                                <div class="text-center font-semibold text-white text-sm py-2 bg-gray-700 shrink-0">
+                                    <i class="fas fa-lightbulb text-yellow-400 mr-1.5"></i>灯光管理
+                                </div>
+                                <div class="grid grid-cols-2 border-b border-gray-700 shrink-0">
+                                    <div class="px-3 py-1.5 text-xs text-gray-400 font-medium border-r border-gray-700">名称</div>
+                                    <div class="px-3 py-1.5 text-xs text-gray-400 font-medium">歌曲分类</div>
+                                </div>
+                                <div class="flex-1 overflow-y-auto" id="preset-list-light">
+                                    <div class="text-center text-gray-600 py-4 text-xs">加载中...</div>
+                                </div>
+                                <div class="border-t border-gray-700 shrink-0">
+                                    <button id="preset-add-light"
+                                        class="w-full py-2 text-gray-400 hover:text-white hover:bg-gray-700 text-sm transition">+</button>
+                                </div>
+                            </div>
+
+                            <!-- 音效管理 -->
+                            <div class="bg-gray-800 rounded-lg flex flex-col overflow-hidden border border-gray-700">
+                                <div class="text-center font-semibold text-white text-sm py-2 bg-gray-700 shrink-0">
+                                    <i class="fas fa-sliders-h text-green-400 mr-1.5"></i>音效管理
+                                </div>
+                                <div class="border-b border-gray-700 shrink-0">
+                                    <div class="px-3 py-1.5 text-xs text-gray-400 font-medium">名称</div>
+                                </div>
+                                <div class="flex-1 overflow-y-auto" id="preset-list-effect">
+                                    <div class="text-center text-gray-600 py-4 text-xs">加载中...</div>
+                                </div>
+                                <div class="border-t border-gray-700 shrink-0">
+                                    <button id="preset-add-effect"
+                                        class="w-full py-2 text-gray-400 hover:text-white hover:bg-gray-700 text-sm transition">+</button>
+                                </div>
+                            </div>
+
+                            <!-- 空调管理 -->
+                            <div class="bg-gray-800 rounded-lg flex flex-col overflow-hidden border border-gray-700">
+                                <div class="text-center font-semibold text-white text-sm py-2 bg-gray-700 shrink-0">
+                                    <i class="fas fa-snowflake text-blue-400 mr-1.5"></i>空调管理
+                                </div>
+                                <div class="border-b border-gray-700 shrink-0">
+                                    <div class="px-3 py-1.5 text-xs text-gray-400 font-medium">名称</div>
+                                </div>
+                                <div class="flex-1 overflow-y-auto" id="preset-list-ac">
+                                    <div class="text-center text-gray-600 py-4 text-xs">加载中...</div>
+                                </div>
+                                <div class="border-t border-gray-700 shrink-0">
+                                    <button id="preset-add-ac"
+                                        class="w-full py-2 text-gray-400 hover:text-white hover:bg-gray-700 text-sm transition">+</button>
+                                </div>
+                            </div>
+
+                            <!-- 服务管理 -->
+                            <div class="bg-gray-800 rounded-lg flex flex-col overflow-hidden border border-gray-700">
+                                <div class="text-center font-semibold text-white text-sm py-2 bg-gray-700 shrink-0">
+                                    <i class="fas fa-concierge-bell text-emerald-400 mr-1.5"></i>服务管理
+                                </div>
+                                <div class="border-b border-gray-700 shrink-0">
+                                    <div class="px-3 py-1.5 text-xs text-gray-400 font-medium">服务名称</div>
+                                </div>
+                                <div class="flex-1 overflow-y-auto" id="service-type-list"></div>
+                                <div class="border-t border-gray-700 shrink-0">
+                                    <button id="preset-add-service"
+                                        class="w-full py-2 text-gray-400 hover:text-white hover:bg-gray-700 text-sm transition">+</button>
+                                </div>
+                            </div>
+
+                    </div>
+
+                </section>
+                
+                <!-- 运行监控 -->
+                <section id="syslogs-section" class="section-content hidden h-full flex flex-col">
+                    <div class="bg-gray-800 rounded-lg shadow p-4 flex-1 flex flex-col min-h-0">
+                        <div class="flex flex-col space-y-4 mb-4 shrink-0">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-semibold text-white">实时运行监控</h3>
+                                <div class="flex space-x-2">
+                                    <button id="syslog-pause-btn"
+                                        class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md flex items-center transition">
+                                        <i class="fas fa-pause mr-2 text-xs"></i> 暂停
+                                    </button>
+                                    <button id="syslog-clear-btn"
+                                        class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md flex items-center transition">
+                                        <i class="fas fa-trash mr-2 text-xs"></i> 清空
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- 过滤控制栏 -->
+                            <div class="flex flex-wrap items-center gap-4 bg-gray-900/40 p-3 rounded-lg border border-gray-700/50">
+                                <div class="flex items-center space-x-2">
+                                    <label class="text-xs text-gray-400">日志级别:</label>
+                                    <select id="syslog-level-filter" class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-blue-500">
+                                        <option value="ALL">全部 (ALL)</option>
+                                        <option value="TRACE">TRACE</option>
+                                        <option value="DEBUG">DEBUG</option>
+                                        <option value="INFO" selected>INFO+</option>
+                                        <option value="WARN">WARN+</option>
+                                        <option value="ERROR">ERROR</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <label class="text-xs text-gray-400">过滤搜索:</label>
+                                    <input type="text" id="syslog-keyword-filter" placeholder="关键字过滤..." class="bg-gray-800 border border-gray-700 rounded px-3 py-1 text-xs text-white focus:outline-none focus:border-blue-500 w-40">
+                                </div>
+                                <div class="flex items-center space-x-2 h-7 px-3 bg-gray-800/50 rounded border border-gray-700">
+                                    <input type="checkbox" id="syslog-heartbeat-toggle" class="rounded border-gray-600 text-blue-600 focus:ring-blue-500 h-3.5 w-3.5" checked>
+                                    <label for="syslog-heartbeat-toggle" class="text-xs text-gray-300 cursor-pointer select-none">显示心跳日志</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="syslog-container" class="flex-1 bg-black rounded-lg p-4 font-mono text-sm overflow-y-auto text-green-400 leading-relaxed border border-gray-700 select-text">
+                            <div class="text-gray-500 italic">正在连接实时日志流...</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 操作日志 -->
+                <section id="logs-section" class="section-content hidden h-full overflow-y-auto">
+                    <div class="bg-gray-800 rounded-lg shadow p-4">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-white">操作日志</h3>
+                            <div class="flex space-x-2">
+                                <input type="text" id="log-search" placeholder="搜索日志..."
+                                    class="form-input px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                                <button id="search-logs-btn"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center">
+                                    <i class="fas fa-search mr-2"></i> 搜索
+                                </button>
+                                <button id="clear-logs-btn"
+                                    class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md flex items-center">
+                                    <i class="fas fa-trash mr-2"></i> 清空
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-700">
+                                <thead>
+                                    <tr>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            ID
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            时间
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            用户
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            操作
+                                        </th>
+                                        <th
+                                            class="px-6 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            详情
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-700" id="logs-table">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <!-- 底部状态栏 -->
+            <div id="main-status-bar"
+                class="bg-gray-800 border-t border-gray-700 px-6 h-[48px] box-border flex items-center space-x-6 text-xs text-gray-400 shrink-0 w-full">
+                <!-- 左侧：房间状态统计 -->
+                <div class="flex items-center"><span
+                        class="w-3 h-3 bg-blue-900 border border-blue-500 inline-block mr-1 rounded-sm"></span>
+                    空闲 <span id="status-count-idle" class="ml-1 text-white font-bold">0</span></div>
+                <div class="flex items-center"><span
+                        class="w-3 h-3 bg-red-900 border border-red-500 inline-block mr-1 rounded-sm"></span>
+                    使用中 <span id="status-count-busy" class="ml-1 text-white font-bold">0</span></div>
+                <div class="flex items-center"><span
+                        class="w-3 h-3 bg-yellow-900 border border-yellow-500 inline-block mr-1 rounded-sm"></span>
+                    维修 <span id="status-count-other" class="ml-1 text-white font-bold">0</span></div>
+
+                <!-- 中间：外设状态显示 -->
+                <div id="peripheral-status-bar" class="flex-1 flex items-center justify-center space-x-4">
+                    <span class="text-gray-500">所有状态区域</span>
+                </div>
+
+                <!-- 右侧：时间 -->
+                <div class="text-right">
+                    <span id="current-system-time">--:--:--</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 弹窗需在 script 之前，确保脚本执行时 DOM 已存在 -->
+    <div id="room-config-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="room-config-dialog" role="dialog" aria-modal="true" aria-labelledby="room-config-title">
+            <div class="room-config-header">
+                <h3 id="room-config-title">房间配置</h3>
+                <button id="close-room-config-modal" type="button" class="config-close" title="关闭" aria-label="关闭房间配置">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    <span>关闭</span>
+                </button>
+            </div>
+
+            <div class="room-config-columns">
+                <!-- 房间类型管理 -->
+                <div class="config-panel">
+                    <div class="config-panel-heading"><i class="fas fa-layer-group" aria-hidden="true"></i><h4>房间类型</h4><span id="room-types-count" class="config-count">0</span></div>
+                    <div class="config-entry">
+                        <input type="text" id="new-room-type" placeholder="新类型名称"
+                            aria-label="新类型名称" autocomplete="off">
+                        <button id="add-room-type-btn" type="button" title="添加类型" aria-label="添加类型"
+                            class="config-add"><i class="fas fa-plus" aria-hidden="true"></i></button>
+                    </div>
+                    <ul id="room-types-list" class="config-list">
+                        <!-- JS 填充 -->
+                    </ul>
+                </div>
+
+                <!-- 房间区域管理 -->
+                <div class="config-panel">
+                    <div class="config-panel-heading"><i class="fas fa-map-marker-alt" aria-hidden="true"></i><h4>房间区域</h4><span id="room-areas-count" class="config-count">0</span></div>
+                    <div class="config-entry">
+                        <input type="text" id="new-room-area" placeholder="新区域名称"
+                            aria-label="新区域名称" autocomplete="off">
+                        <button id="add-room-area-btn" type="button" title="添加区域" aria-label="添加区域"
+                            class="config-add"><i class="fas fa-plus" aria-hidden="true"></i></button>
+                    </div>
+                    <ul id="room-areas-list" class="config-list">
+                        <!-- JS 填充 -->
+                    </ul>
+                </div>
+            </div>
+            <div class="room-config-footer"><span id="room-config-status" role="status" aria-live="polite"></span><button type="button" id="reload-room-configs" class="config-reload" title="刷新配置" aria-label="刷新配置"><i class="fas fa-sync-alt" aria-hidden="true"></i></button></div>
+        </div>
+    </div>
+
+    <!-- 房间编辑弹窗 -->
+    <div id="edit-room-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <h3 class="text-xl font-bold text-white mb-4">编辑房间</h3>
+            <form id="edit-room-form">
+                <input type="hidden" id="edit-room-id">
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">房间名称</label>
+                    <input type="text" id="edit-room-name" required
+                        class="form-input w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">绑定终端</label>
+                    <select id="edit-room-terminal" disabled
+                        title="房间 ID 与终端 ID 一一对应，创建后不能更换终端"
+                        class="form-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white opacity-70 focus:outline-none">
+                        <option value="">请选择终端</option>
+                        <!-- JS 填充 -->
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">房间类型</label>
+                    <select id="edit-room-type"
+                        class="form-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                        <option value="">未设置</option>
+                        <!-- JS 填充 -->
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">房间区域</label>
+                    <select id="edit-room-area"
+                        class="form-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                        <option value="">未设置</option>
+                        <!-- JS 填充 -->
+                    </select>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" id="cancel-edit-room" class="text-gray-400 hover:text-white mr-4">取消</button>
+                    <button type="submit"
+                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 新增房间弹窗 -->
+    <div id="add-room-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <h3 class="text-xl font-bold text-white mb-4">新增房间</h3>
+            <form id="add-room-form">
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">房间名称</label>
+                    <input type="text" id="add-room-name" required
+                        class="form-input w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">绑定终端</label>
+                    <select id="add-room-terminal" required
+                        class="form-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                        <option value="" disabled selected>请选择终端</option>
+                        <!-- JS 填充 -->
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">房间类型</label>
+                    <select id="add-room-type"
+                        class="form-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                        <option value="">未设置</option>
+                        <!-- JS 填充 -->
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">房间区域</label>
+                    <select id="add-room-area"
+                        class="form-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                        <option value="">未设置</option>
+                        <!-- JS 填充 -->
+                    </select>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" id="cancel-add-room" class="text-gray-400 hover:text-white mr-4">取消</button>
+                    <button type="submit"
+                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">创建</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 歌曲编辑/新增弹窗 -->
+    <div id="song-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-lg overflow-y-auto" style="max-height:90vh">
+            <h3 id="song-modal-title" class="text-xl font-bold text-white mb-4">编辑歌曲</h3>
+            <form id="song-form">
+                <input type="hidden" id="edit-song-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="mb-4">
+                        <label class="block text-gray-300 text-sm font-bold mb-2">歌曲编号</label>
+                        <input type="text" id="song-no" required autocomplete="off"
+                            class="form-input w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none disabled:opacity-60">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-300 text-sm font-bold mb-2">歌曲名称</label>
+                        <input type="text" id="song-name" required
+                            class="form-input w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-300 text-sm font-bold mb-2">歌手</label>
+                        <input type="search" id="song-artist-search" autocomplete="off"
+                            placeholder="输入歌手名、编号或首字母搜索"
+                            class="form-input w-full mb-2 px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                        <select id="song-artist"
+                            class="form-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                            <option value="">请选择歌手</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-300 text-sm font-bold mb-2">语言</label>
+                        <select id="song-language"
+                            class="form-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                            <option value="">未知</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="song-classify" class="block text-gray-300 text-sm font-bold mb-2">歌曲分类</label>
+                        <select id="song-classify"
+                            class="form-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                            <option value="">未知</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-300 text-sm font-bold mb-2">音轨配置</label>
+                        <select id="song-track"
+                            class="form-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                            <option value="2">2 (双音轨: T1伴奏, T2原唱)</option>
+                            <option value="3">3 (双音轨: T1原唱, T2伴奏)</option>
+                            <option value="4">4 (单音轨: 左伴奏, 右原唱)</option>
+                            <option value="5">5 (单音轨: 左原唱, 右伴奏)</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="song-video-file-type" class="block text-gray-300 text-sm font-bold mb-2">视频格式</label>
+                        <select id="song-video-file-type"
+                            class="form-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                            <option value="">未知</option>
+                            <option value="hvideo">HVIDEO（加密视频）</option>
+                            <option value="mp4">MP4</option>
+                            <option value="mkv">MKV</option>
+                            <option value="mpg">MPG</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="song-score-enabled" class="block text-gray-300 text-sm font-bold mb-2">评分</label>
+                        <select id="song-score-enabled"
+                            class="form-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                            <option value="1">是</option>
+                            <option value="0">否</option>
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">只允许真实加密视频评分；保存时服务器会自动校验。</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-300 text-sm font-bold mb-2">首字母</label>
+                        <input type="text" id="song-initial" placeholder="如：HL"
+                            class="form-input w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">文件路径</label>
+                    <input type="text" id="song-path"
+                        class="form-input w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" id="cancel-song-modal" class="text-gray-400 hover:text-white mr-4">取消</button>
+                    <button type="submit"
+                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 歌手编辑/新增弹窗 -->
+    <div id="singer-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <h3 id="singer-modal-title" class="text-xl font-bold text-white mb-4">编辑歌手</h3>
+            <form id="singer-form">
+                <input type="hidden" id="edit-singer-id">
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">歌手编号</label>
+                    <input type="text" id="singer-no" required autocomplete="off"
+                        class="form-input w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none disabled:opacity-60">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">歌手名称</label>
+                    <input type="text" id="singer-name" required
+                        class="form-input w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">地区</label>
+                    <select id="singer-region"
+                        class="form-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                        <option value="">未知</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">性别</label>
+                    <select id="singer-sex"
+                        class="form-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                        <option value="0">未知</option>
+                        <option value="1">男</option>
+                        <option value="2">女</option>
+                        <option value="3">组合</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">头像</label>
+                    <div class="flex items-center space-x-4">
+                        <img id="singer-image-preview" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii00IC00IDMyIDMyIiBmaWxsPSJub25lIiBzdHJva2U9IiM5Y2EzYWYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjAgMjF2LTJhNCA0IDAgMCAwLTQtNEg4YTQgNCAwIDAgMC00IDR2MiI+PC9wYXRoPjxjaXJjbGUgY3g9IjEyIiBjeT0iNyIgcj0iNCI+PC9jaXJjbGU+PC9zdmc+" alt="预览"
+                            class="w-16 h-16 object-cover rounded-md border border-gray-600 bg-gray-700"
+                            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii00IC00IDMyIDMyIiBmaWxsPSJub25lIiBzdHJva2U9IiM5Y2EzYWYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjAgMjF2LTJhNCA0IDAgMCAwLTQtNEg4YTQgNCAwIDAgMC00IDR2MiI+PC9wYXRoPjxjaXJjbGUgY3g9IjEyIiBjeT0iNyIgcj0iNCI+PC9jaXJjbGU+PC9zdmc+'">
+                        <input type="file" id="singer-image" accept="image/*" class="block w-full text-sm text-gray-300
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-md file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-gray-700 file:text-white
+                                hover:file:bg-gray-600">
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" id="cancel-singer-modal"
+                        class="text-gray-400 hover:text-white mr-4">取消</button>
+                    <button type="submit"
+                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加用户弹窗 -->
+    <div id="add-user-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <h3 class="text-xl font-bold text-white mb-4">添加员工账号</h3>
+            <form id="add-user-form">
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">登录账号</label>
+                    <input type="text" id="add-user-client-key" required minlength="2" placeholder="例如：cashier01、kufang01"
+                        class="form-input w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">密码</label>
+                    <input type="password" id="add-user-client-secret" required minlength="1" placeholder="登录密码"
+                        class="form-input w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">员工名称</label>
+                    <input type="text" id="add-user-client-name" required placeholder="如：张三、收银员A"
+                        class="form-input w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">岗位角色</label>
+                    <select id="add-user-role" class="form-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none">
+                        <option value="cashier">收银员</option>
+                        <option value="waiter">服务员</option>
+                        <option value="admin">管理员</option>
+                    </select>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" id="cancel-add-user" class="text-gray-400 hover:text-white mr-4">取消</button>
+                    <button type="submit"
+                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">创建</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container"
+        class="fixed top-20 left-1/2 -translate-x-1/2 z-[11000] flex flex-col items-center gap-3 pointer-events-none">
+    </div>
+
+    <div id="confirm-container"></div>
+
+    <!-- 外设控制弹窗 -->
+    <!-- 品类预设 添加/编辑 弹窗 -->
+    <div id="preset-modal"
+        class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700">
+                <h3 id="preset-modal-title" class="text-base font-bold text-white">添加品类</h3>
+                <button id="preset-modal-close" class="text-gray-400 hover:text-white text-xl leading-none">&times;</button>
+            </div>
+            <div class="px-6 py-5 space-y-4">
+                <input type="hidden" id="preset-form-type">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">名称</label>
+                    <input id="preset-form-name" type="text" placeholder="品类显示名称"
+                        class="form-input w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">排序（数字越小越靠前）</label>
+                    <input id="preset-form-sort" type="number" value="0"
+                        class="form-input w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm focus:outline-none focus:border-red-500">
+                </div>
+                <!-- 动态参数字段 -->
+                <div id="preset-settings-fields"></div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-700 flex justify-end space-x-3">
+                <button id="preset-modal-cancel"
+                    class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm">取消</button>
+                <button id="preset-modal-save"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm font-semibold">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <dialog id="terminal-settings-dialog" aria-labelledby="terminal-settings-title"
+        style="width:96vw;max-width:1600px;height:94vh;max-height:94vh;padding:0;border:1px solid #374151;border-radius:10px;background:#111827;color:#fff;overflow:hidden;">
+        <div style="display:flex;flex-direction:column;height:100%;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1f2937;">
+                <strong id="terminal-settings-title">终端设置</strong>
+                <form method="dialog">
+                    <button type="submit" class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600">关闭设置</button>
+                </form>
+            </div>
+            <iframe id="terminal-settings-frame" title="终端配置页面" src="about:blank"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads"
+                allow="fullscreen" referrerpolicy="no-referrer"
+                style="flex:1;min-height:0;width:100%;border:0;background:#1e1e36;"></iframe>
+        </div>
+    </dialog>
+
+    <script src="../vod_song/shared/websocket/websocket-client.js?v=20260313-02"></script>
+    <script src="/assets/js/components/PeripheralStatusBar.js?v=20260511-02"></script>
+    <script src="i18n-catalog.js?v=20260924"></script>
+    <script src="i18n-admin.js?v=20260924-scan-fast"></script>
+    <script src="i18n.js?v=20260924"></script>
+    <script src="api.js?v=20260924-scan-fast"></script>
+    <script src="admin.js?v=20260924-scan-fast"></script>
+    <script src="dictionary.js?v=20260924-i18n"></script>
+    <script src="app-update.js?v=20260924-i18n"></script>
+    <script src="rom-update.js?v=20260924-i18n"></script>
+    <script src="/assets/js/peripheral-management.js?v=20260917-rename"></script>
+    <script src="/assets/js/room-service-mgmt.js?v=20260802-01"></script>
+</body>
+
+</html>
+
+

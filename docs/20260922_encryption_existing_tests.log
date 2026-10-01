@@ -1,0 +1,18 @@
+test_cancel_after_skip_preserves_skip_status (test_video_encryption_existing.ExistingOutputTests.test_cancel_after_skip_preserves_skip_status) ... ok
+test_cli_resume_and_overwrite_guard (test_video_encryption_existing.ExistingOutputTests.test_cli_resume_and_overwrite_guard) ... ok
+test_failure_after_skip_preserves_skip_status (test_video_encryption_existing.ExistingOutputTests.test_failure_after_skip_preserves_skip_status) ... ok
+test_mixed_batch_skips_existing_and_encrypts_remaining_then_all_skip (test_video_encryption_existing.ExistingOutputTests.test_mixed_batch_skips_existing_and_encrypts_remaining_then_all_skip) ... ok
+test_single_existing_is_visible (test_video_encryption_existing.ExistingOutputTests.test_single_existing_is_visible) ... ok
+test_target_directory_is_error_not_skipped (test_video_encryption_existing.ExistingOutputTests.test_target_directory_is_error_not_skipped) ... ok
+scale=100% font=19px row=27px scroll=PASS
+scale=125% font=23px row=33px scroll=PASS
+scale=150% font=27px row=39px scroll=PASS
+scale=200% font=35px row=51px scroll=PASS
+scale=250% font=43px row=63px scroll=PASS
+scale=300% font=52px row=76px scroll=PASS
+test_rendered_rows_fit_font_at_display_scales (test_video_encryption_layout.LayoutTests.test_rendered_rows_fit_font_at_display_scales) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 19.574s
+
+OK

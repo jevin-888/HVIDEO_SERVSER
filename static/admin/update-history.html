@@ -1,0 +1,142 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>更新记录 · HVideo</title>
+<style>
+:root{font-family:system-ui,"Microsoft YaHei",sans-serif;color:#e5e7eb;background:#101827;color-scheme:dark}body{margin:0;padding:28px}main{max-width:1600px;margin:auto}a{color:#93c5fd;text-decoration:none}h1{font-size:24px;margin:20px 0 8px}p{color:#94a3b8;font-size:14px}form{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0 16px}input,select,button{font:inherit;border:1px solid #40516b;border-radius:7px;background:#1f2c40;color:inherit;padding:9px 12px}input{min-width:190px}#machine{width:380px;max-width:100%}button{cursor:pointer}button:disabled{opacity:.4;cursor:default}.table-wrap{overflow:auto;border:1px solid #334155;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;border-bottom:1px solid #334155;padding:14px 16px;vertical-align:top}th{background:#1c293d;white-space:nowrap;color:#cbd5e1}td{min-width:90px}td:first-child{min-width:210px}.name{font-weight:600;margin-bottom:7px}.sub{color:#94a3b8;font-size:12px;overflow-wrap:anywhere}.ok{color:#4ade80}.bad{color:#fb7185}.busy{color:#fbbf24}progress{width:100px;height:6px;accent-color:#60a5fa}details{max-width:430px}summary{cursor:pointer;white-space:nowrap;color:#93c5fd}.detail{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.7;margin-top:12px}footer{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:12px}#notice{min-height:20px}#rows:empty:after{content:'…'}@media(max-width:650px){body{padding:16px}input{min-width:0;width:100%}}
+dialog{width:min(960px,calc(100vw - 64px));max-height:85vh;border:1px solid #40516b;border-radius:12px;padding:24px;background:#101827;color:#e5e7eb}dialog::backdrop{background:#0009}.dialog-head{display:flex;align-items:center;justify-content:space-between;gap:16px}.dialog-head h2{font-size:20px;margin:0;min-width:0;overflow-wrap:anywhere}.dialog-head button{flex-shrink:0}#song-rows td:first-child{min-width:110px}#song-rows td{max-width:340px;overflow-wrap:anywhere}#song-notice{min-height:20px}#song-rows .sub{margin-top:5px}td>button{margin-bottom:10px}
+</style></head><body><main>
+<a id="back" href="/server-licenses" data-t="返回">返回</a><h1 data-t="更新记录">更新记录</h1>
+<p data-t="每次更新单独保留，失败重试不覆盖历史。每 15 秒自动刷新。">每次更新单独保留，失败重试不覆盖历史。每 15 秒自动刷新。</p>
+<form id="filters"><input id="machine" placeholder="服务器 ID" aria-label="服务器 ID" maxlength="39"><input id="package" placeholder="更新包名称" aria-label="更新包名称" maxlength="512"><select id="status" aria-label="状态"><option value="-1" data-t="全部状态">全部状态</option><option value="0" data-t="等待更新">等待更新</option><option value="1" data-t="更新中">更新中</option><option value="2" data-t="已完成">已完成</option><option value="3" data-t="失败">失败</option></select><button type="submit" data-t="查询">查询</button></form>
+<p id="notice" role="status"></p><div class="table-wrap"><table><thead><tr><th data-t="更新包 / 服务器">更新包 / 服务器</th><th data-t="状态 / 进度">状态 / 进度</th><th data-t="入库 / 视频数">入库 / 视频数</th><th data-t="开始时间">开始时间</th><th data-t="结束时间">结束时间</th><th data-t="详情">详情</th></tr></thead><tbody id="rows"></tbody></table></div>
+<footer><span id="summary"></span><div><button id="prev" data-t="上一页">上一页</button> <button id="next" data-t="下一页">下一页</button></div></footer>
+</main>
+<dialog id="song-dialog" aria-labelledby="song-title"><div class="dialog-head"><h2 id="song-title" data-t="更新明细">更新明细</h2><button id="song-close" type="button" data-t="关闭">关闭</button></div><p id="song-notice" role="status"></p><div class="table-wrap"><table><thead><tr><th data-t="编号">编号</th><th data-t="歌名">歌名</th><th data-t="歌星">歌星</th><th data-t="状态">状态</th></tr></thead><tbody id="song-rows"></tbody></table></div><footer><span id="song-summary"></span><div><button id="song-prev" data-t="上一页">上一页</button> <button id="song-next" data-t="下一页">下一页</button></div></footer></dialog>
+<script>
+(()=>{'use strict';
+const local=location.pathname.includes('/static/admin/');
+const dict={};
+for(const row of `返回|Back|Kembali|Quay lại|กลับ
+更新记录|Update history|Riwayat pembaruan|Lịch sử cập nhật|ประวัติการอัปเดต
+每次更新单独保留，失败重试不覆盖历史。每 15 秒自动刷新。|Each attempt is retained. Refreshes every 15 seconds.|Setiap percobaan disimpan. Disegarkan setiap 15 detik.|Lưu từng lần cập nhật. Tự làm mới mỗi 15 giây.|เก็บทุกครั้งที่อัปเดต รีเฟรชทุก 15 วินาที
+服务器 ID|Server ID|ID server|ID máy chủ|ID เซิร์ฟเวอร์
+更新包名称|Package name|Nama paket|Tên gói|ชื่อแพ็กเกจ
+全部状态|All statuses|Semua status|Tất cả trạng thái|ทุกสถานะ
+等待更新|Queued|Antrean|Đang chờ|รออัปเดต
+更新中|Updating|Memperbarui|Đang cập nhật|กำลังอัปเดต
+已完成|Completed|Selesai|Hoàn tất|เสร็จแล้ว
+失败|Failed|Gagal|Thất bại|ล้มเหลว
+查询|Search|Cari|Tìm kiếm|ค้นหา
+更新包 / 服务器|Package / Server|Paket / Server|Gói / Máy chủ|แพ็กเกจ / เซิร์ฟเวอร์
+状态 / 进度|Status / Progress|Status / Progres|Trạng thái / Tiến độ|สถานะ / ความคืบหน้า
+入库 / 视频数|Registered / Videos|Terdaftar / Video|Đã nhập / Video|นำเข้า / วิดีโอ
+开始时间|Started|Dimulai|Bắt đầu|เริ่ม
+结束时间|Finished|Selesai|Kết thúc|สิ้นสุด
+详情|Details|Detail|Chi tiết|รายละเอียด
+上一页|Previous|Sebelumnya|Trước|ก่อนหน้า
+下一页|Next|Berikutnya|Tiếp|ถัดไป
+已同步云端|Synced to cloud|Tersinkron ke cloud|Đã đồng bộ lên đám mây|ซิงค์กับคลาวด์แล้ว
+待补报云端|Waiting to sync|Menunggu sinkronisasi|Đang chờ đồng bộ|รอซิงค์กับคลาวด์
+暂无更新记录|No update history|Belum ada riwayat|Chưa có lịch sử|ยังไม่มีประวัติ
+加载失败，将自动重试|Load failed. Retrying automatically.|Gagal memuat. Mencoba lagi otomatis.|Tải thất bại. Sẽ tự thử lại.|โหลดไม่สำเร็จ จะลองใหม่อัตโนมัติ
+请先登录管理员账号|Please sign in as administrator|Masuk sebagai administrator|Vui lòng đăng nhập quản trị|กรุณาเข้าสู่ระบบผู้ดูแล
+记录编号|Attempt ID|ID percobaan|ID lần cập nhật|ID การอัปเดต
+包版本|Package version|Versi paket|Phiên bản gói|เวอร์ชันแพ็กเกจ
+保存目录|Save directory|Direktori penyimpanan|Thư mục lưu|โฟลเดอร์บันทึก
+结果 / 原因|Result / Reason|Hasil / Alasan|Kết quả / Lý do|ผล / เหตุผล
+最近上报|Last reported|Laporan terakhir|Báo cáo gần nhất|รายงานล่าสุด
+历史任务|Legacy task|Tugas lama|Tác vụ cũ|งานเดิม
+更新明细|Song update details|Rincian pembaruan lagu|Chi tiết cập nhật bài hát|รายละเอียดการอัปเดตเพลง
+编号|Number|Nomor|Mã số|หมายเลข
+歌名|Song|Lagu|Tên bài hát|ชื่อเพลง
+歌星|Singer|Penyanyi|Ca sĩ|ศิลปิน
+状态|Status|Status|Trạng thái|สถานะ
+关闭|Close|Tutup|Đóng|ปิด
+加载中|Loading|Memuat|Đang tải|กำลังโหลด
+暂无歌曲明细（旧记录未保存逐首结果）|No song details (older records have no per-song results)|Tidak ada rincian lagu (catatan lama)|Chưa có chi tiết (bản ghi cũ)|ไม่มีรายละเอียดเพลงสำหรับบันทึกเก่า
+未匹配资料|Metadata not matched|Metadata tidak cocok|Chưa khớp dữ liệu|ไม่พบข้อมูลเพลง
+下载中|Downloading|Mengunduh|Đang tải xuống|กำลังดาวน์โหลด
+已下载，待入库|Downloaded, awaiting registration|Diunduh, menunggu pendaftaran|Đã tải, chờ nhập thư viện|ดาวน์โหลดแล้ว รอนำเข้า
+正在入库|Registering|Mendaftarkan|Đang nhập thư viện|กำลังนำเข้า
+已入库|Registered|Terdaftar|Đã nhập thư viện|นำเข้าแล้ว
+未完成|Unfinished|Belum selesai|Chưa hoàn tất|ยังไม่เสร็จ
+记录已被云端删除|Record deleted from cloud|Catatan dihapus dari cloud|Bản ghi đã bị xóa trên đám mây|บันทึกถูกลบจากคลาวด์
+记录|records|catatan|bản ghi|รายการ`.split('\n')){const[k,en,id,vi,th]=row.split('|');dict[k]={en,id,vi,th};}
+const lang=local?(localStorage.getItem('hvideo_admin_language')||'zh'):'zh';
+const t=s=>dict[s]?.[lang]||s;
+document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
+for(const id of ['machine','package']){const e=document.getElementById(id);e.placeholder=t(e.placeholder);e.setAttribute('aria-label',e.placeholder);}
+document.title=t('更新记录')+' · HVideo';
+const $=id=>document.getElementById(id),machine=$('machine');
+machine.hidden=local;machine.value=local?'':(new URLSearchParams(location.search).get('machineCode')||'');
+$('back').href=local?'index.html':'/server-licenses';
+let page=1,total=0,generation=0;
+let active={machine:machine.value.trim(),package:'',status:'-1'};
+function node(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;}
+function date(value){if(!value)return '—';if(!value.includes('T'))return value;const d=new Date(value);return Number.isNaN(d.valueOf())?value:d.toLocaleString();}
+async function load(){
+ const own=++generation;
+ const q=new URLSearchParams({page:String(page),status:active.status,package:active.package});
+ if(!local)q.set('machineCode',active.machine);
+ const token=local?localStorage.getItem('admin_token'):(sessionStorage.getItem('token')||localStorage.getItem('token'));
+ try{
+  const response=await fetch((local?'/api/v1/cloud/update-history':'/api/admin/server-update-records')+'?'+q,{headers:{Authorization:'Bearer '+(token||'')}});
+  if(!response.ok)throw new Error(response.status===401||response.status===403?t('请先登录管理员账号'):t('加载失败，将自动重试'));
+  const body=await response.json();if(body.code!==0)throw new Error(t('加载失败，将自动重试'));
+  if(own!==generation)return;
+  const data=body.data;total=data.total;
+  if(page>1&&(page-1)*20>=total){page=Math.max(1,Math.ceil(total/20));return load();}
+  const frag=document.createDocumentFragment();
+  for(const r of data.items){
+   const tr=node('tr'),identity=node('td');identity.append(node('div',r.packageName,'name'),node('div',r.packageType==='legacy'?t('历史任务'):'v'+r.versionCode,'sub'));
+   if(!local)identity.append(node('div',r.machineCode,'sub'));
+   const state=node('td');state.append(node('div',t(['等待更新','更新中','已完成','失败'][r.status]),r.status===2?'ok':r.status===3?'bad':'busy'));
+   const progress=r.status===2?100:Math.max(0,Math.min(100,Math.round(r.downloadedSize/Math.max(1,r.fileSize)*100)));
+   const meter=node('progress');meter.max=100;meter.value=progress;state.append(meter,node('div',progress+'%','sub'));
+   if(local)state.append(node('div',t(r.cloudSynced?'已同步云端':'待补报云端'),'sub'));
+   const details=node('details'),summary=node('summary',t('详情'));details.append(summary);
+   let info=t('记录编号')+': '+r.id+'\n'+t('包版本')+': '+r.packageRevision+'\n'+t('保存目录')+': '+r.localPath+'\n'+t('结果 / 原因')+': '+r.message;
+   if(r.receivedAt)info+='\n'+t('最近上报')+': '+new Date(r.receivedAt*1000).toLocaleString();
+   details.append(node('div',info,'detail'));const end=node('td');end.append(details);
+   const songs=node('button',t('更新明细'));songs.type='button';songs.onclick=()=>{selectedId=r.id;songPage=1;$('song-title').textContent=r.packageName+' · '+t('更新明细');$('song-dialog').showModal();loadSongs();};end.prepend(songs);
+   tr.append(identity,state,node('td',(r.importedCount??'—')+' / '+(r.videoCount??'—')),node('td',date(r.startedAt)),node('td',date(r.finishedAt)),end);frag.append(tr);
+  }
+  if(!data.items.length){const tr=node('tr'),td=node('td',t('暂无更新记录'));td.colSpan=6;tr.append(td);frag.append(tr);}
+  $('rows').replaceChildren(frag);$('notice').textContent='';$('summary').textContent=page+' / '+Math.max(1,Math.ceil(total/20))+' · '+total+' '+t('记录');
+  $('prev').disabled=page<=1;$('next').disabled=page*20>=total;
+ }catch(e){if(own===generation)$('notice').textContent=e.message||t('加载失败，将自动重试');}
+}
+let selectedId='',songPage=1,songTotal=0,songGeneration=0;
+const songStatus={waiting:'等待更新',downloading:'下载中',downloaded:'已下载，待入库',installing:'正在入库',completed:'已入库',failed:'失败',unfinished:'未完成'};
+async function loadSongs(){
+ const own=++songGeneration,record=selectedId;
+ $('song-notice').textContent=t('加载中');
+ try{
+  const response=await fetch('/api/v1/cloud/update-history/'+encodeURIComponent(record)+'/songs?page='+songPage,{headers:{Authorization:'Bearer '+(localStorage.getItem('admin_token')||'')}});
+  if(own!==songGeneration||record!==selectedId||!$('song-dialog').open)return;
+  if(response.status===404){$('song-rows').replaceChildren();$('song-summary').textContent='';$('song-prev').disabled=true;$('song-next').disabled=true;throw new Error(t('记录已被云端删除'));}
+  if(!response.ok)throw new Error(response.status===401||response.status===403?t('请先登录管理员账号'):t('加载失败，将自动重试'));
+  const body=await response.json();if(body.code!==0)throw new Error(t('加载失败，将自动重试'));
+  if(own!==songGeneration||record!==selectedId||!$('song-dialog').open)return;
+  const data=body.data;songTotal=data.total;
+  if(songPage>1&&(songPage-1)*50>=songTotal){songPage=Math.max(1,Math.ceil(songTotal/50));return loadSongs();}
+  const frag=document.createDocumentFragment();
+  for(const r of data.items){
+   const tr=node('tr'),name=node('td'),state=node('td');name.append(node('div',r.songName||t('未匹配资料')),node('div',r.fileName,'sub'));
+   state.append(node('div',t(songStatus[r.status]||'未完成'),r.status==='completed'?'ok':r.status==='failed'?'bad':'busy'));
+   if(r.message)state.append(node('div',r.message,'sub'));
+   tr.append(node('td',r.songNo||'—'),name,node('td',r.singer||'—'),state);frag.append(tr);
+  }
+  if(!data.items.length){const tr=node('tr'),td=node('td',t('暂无歌曲明细（旧记录未保存逐首结果）'));td.colSpan=4;tr.append(td);frag.append(tr);}
+  $('song-rows').replaceChildren(frag);$('song-notice').textContent='';$('song-summary').textContent=songPage+' / '+Math.max(1,Math.ceil(songTotal/50))+' · '+songTotal+' '+t('记录');
+  $('song-prev').disabled=songPage<=1;$('song-next').disabled=songPage*50>=songTotal;
+ }catch(e){if(own===songGeneration&&record===selectedId)$('song-notice').textContent=e.message||t('加载失败，将自动重试');}
+}
+$('song-close').onclick=()=>$('song-dialog').close();
+$('song-dialog').addEventListener('close',()=>{songGeneration++;selectedId='';$('song-rows').replaceChildren();$('song-summary').textContent='';});
+$('song-prev').onclick=()=>{if(songPage>1){songPage--;loadSongs();}};
+$('song-next').onclick=()=>{if(songPage*50<songTotal){songPage++;loadSongs();}};
+setInterval(()=>{if(!document.hidden&&$('song-dialog').open)loadSongs();},15000);
+$('filters').addEventListener('submit',e=>{e.preventDefault();active={machine:machine.value.trim(),package:$('package').value.trim(),status:$('status').value};page=1;load();});
+$('prev').onclick=()=>{if(page>1){page--;load();}};$('next').onclick=()=>{if(page*20<total){page++;load();}};
+load();setInterval(()=>{if(!document.hidden&&!document.querySelector('details[open]'))load();},15000);
+})();
+</script></body></html>

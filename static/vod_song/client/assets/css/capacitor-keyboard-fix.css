@@ -1,0 +1,80 @@
+/**
+ * Capacitor 键盘修复样式
+ * 解决键盘弹出时页面被顶上去的问题
+ * 使用 adjustNothing 模式 + 手动滚动控制
+ * 
+ * 重要：只针对设置对话框，不影响其他页面元素
+ */
+
+/* 确保设置模态框固定在视口中 */
+#settingsModal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  overflow: hidden !important;
+  z-index: 10007 !important;
+}
+
+/* 模态框背景 */
+#settingsModal .modal-backdrop {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+/* 模态框容器 */
+#settingsModal > div:last-child {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: none !important;
+}
+
+/* 模态框内容 */
+#settingsModal > div:last-child > div {
+  pointer-events: auto !important;
+  position: relative !important;
+  /* 在 Capacitor 中，innerHeight 是 1072px，使用固定像素值 */
+  /* 70% 的 1072 = 750px，但要留一些边距 */
+  max-height: 700px !important;
+  width: calc(100% - 1rem) !important;
+  max-width: 28rem !important;
+}
+
+/* 键盘弹出时，调整模态框位置到顶部（只针对设置对话框） */
+#settingsModal.capacitor-keyboard-visible > div:last-child {
+  align-items: flex-start !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* 键盘弹出时，减小对话框高度（只针对设置对话框） */
+/* 注意：不使用 vh 单位，因为在 Capacitor adjustNothing 模式下 vh 不会随键盘改变 */
+/* 高度完全由 JavaScript 动态设置 */
+#settingsModal.capacitor-keyboard-visible > div:last-child > div {
+  /* maxHeight 由 JavaScript 设置，这里不设置，避免冲突 */
+  margin-top: 0 !important;
+}
+
+/* 模态框内容滚动区域 */
+#settingsModal .space-y-4 {
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+}
+
+/* 确保输入框在键盘弹出时可见 */
+#settingsModal.capacitor-keyboard-visible input:focus,
+#settingsModal.capacitor-keyboard-visible textarea:focus,
+#settingsModal.capacitor-keyboard-visible select:focus {
+  scroll-margin-top: 1rem !important;
+  scroll-margin-bottom: 1rem !important;
+}

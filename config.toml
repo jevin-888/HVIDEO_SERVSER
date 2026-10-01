@@ -1,0 +1,31 @@
+[cloud]
+api_base_url = "https://cloud.example.com/api/v1"
+api_key = ""
+download_dir = "./temp/downloads"
+
+[database]
+max_connections = 10
+url = "sqlite://data/hvideo.db?mode=rwc"
+
+[jwt]
+expire_hours = 24
+secret = "hvideo-jwt-9c7f4b1e2d6a8f0c3b5e7d1a4f6c8e0b2d4f6a8c0e2b4d6f8a1c3e5b7d9f"
+
+[scanner]
+interval_secs = 30
+
+[server]
+host = "192.168.2.11"
+log_level = "debug"
+port = 9898
+workers = 4
+
+[song_db]
+max_connections = 5
+url = "sqlite://song_db/song.db?mode=rwc"
+
+[storage]
+media_root = "E:/"
+mv_dir = "./storage/mv"
+songs_dir = "./storage/songs"
+

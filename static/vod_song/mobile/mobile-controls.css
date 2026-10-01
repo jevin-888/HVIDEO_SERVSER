@@ -1,0 +1,146 @@
+/* 手机智控：标题固定，内容使用剩余高度，小屏和横屏可滚动到底。 */
+#songTopModal #top-search-input { min-height: 58px; padding-right: 28px; }
+#songTopModal #top-search-input::placeholder { color: transparent; }
+#songTopModal .song-search-hint {
+  position: absolute;
+  left: 36px;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--mobile-muted, #526077);
+  font-size: 12px;
+  line-height: 16px;
+}
+#songTopModal .song-search-hint > span { display: block; }
+#songTopModal .song-search-hint-secondary { font-size: 10px; line-height: 13px; }
+#songTopModal .song-search-hint > [hidden],
+#songTopModal #top-search-input:not(:placeholder-shown) + .song-search-hint { display: none; }
+
+#songTopModal .song-filter-selectors button {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 8px 3px;
+  white-space: normal;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+#songTopModal .song-filter-primary {
+  font-size: 13px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+#songTopModal .song-filter-secondary {
+  font-size: 10px;
+  line-height: 13px;
+}
+
+.mobile-smart-panel {
+  display: flex;
+  flex-direction: column;
+  height: max(72vh, 500px);
+  height: max(72dvh, 500px);
+  max-height: calc(100vh - 12px);
+  max-height: calc(100dvh - 12px);
+}
+
+.mobile-smart-panel .smart-panel-handle,
+.mobile-smart-panel .smart-panel-header {
+  flex-shrink: 0;
+}
+
+.mobile-smart-panel .smart-panel-header {
+  padding: 4px 16px 12px;
+}
+
+.mobile-smart-panel .tab-btn {
+  min-height: 40px !important;
+  padding: 8px !important;
+  font-size: 13px !important;
+}
+
+.mobile-smart-panel .smart-panel-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 16px calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.mobile-smart-panel .smart-volume-controls {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.mobile-smart-panel .volume-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-smart-panel .volume-label {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.mobile-smart-panel .volume-label > span:first-child {
+  grid-column: 2;
+  font-size: 14px;
+}
+
+.mobile-smart-panel .volume-label > span:last-child {
+  justify-self: end;
+}
+
+.mobile-smart-panel .volume-actions {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobile-smart-panel .volume-actions button {
+  width: 44px;
+  height: 44px;
+}
+
+.mobile-smart-panel #audio-buttons {
+  min-height: 0 !important;
+  margin-bottom: 0;
+}
+
+.mobile-smart-panel #audio-buttons .control-btn {
+  min-height: 64px !important;
+  padding: 8px !important;
+}
+
+.mobile-smart-panel #audio-buttons .control-btn i {
+  font-size: 18px !important;
+  line-height: 20px;
+  margin-bottom: 4px !important;
+}
+
+.mobile-smart-panel #audio-buttons .control-btn span {
+  font-size: 12px !important;
+  line-height: 16px;
+}
+
+@media (max-height: 480px) {
+  .mobile-smart-panel {
+    height: calc(100vh - 12px);
+    height: calc(100dvh - 12px);
+  }
+}

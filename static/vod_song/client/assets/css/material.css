@@ -1,0 +1,161 @@
+/* ============================================
+   素材库样式 - 素材展示、分类、模态框
+   ============================================ */
+
+/* 素材库网格布局 */
+.material-content.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  align-content: start;
+  align-items: start;
+  grid-auto-rows: max-content;
+  width: 100%;
+  max-width: none;
+  height: auto;
+}
+
+/* 网格布局在 responsive.css 中已配置 */
+
+/* 素材卡片 */
+.material-card {
+  contain: layout style paint;
+  border: 2px solid var(--border-color, rgba(148, 163, 184, 0.25));
+  border-radius: 0.375rem;
+  transition: border-color 0.2s ease;
+  background-color: var(--bg-elevated, rgba(30, 41, 59, 0.88));
+  color: var(--text-primary, #f3f4f6);
+}
+
+.material-card .card-body {
+  padding: 1rem;
+  height: 140px;
+}
+
+.material-card .card-title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.material-card .card-subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 模态框标题 */
+.material-panel h3,
+.modal-content h3 {
+  font-size: var(--font-size-xl);
+}
+
+/* 分类标签 */
+.category-tab {
+  font-size: var(--font-size-icon-md);
+  font-weight: 600;
+  line-height: 1.25;
+  padding: clamp(0.85rem, 2.2vh, 1.25rem) clamp(1.1rem, 2.6vw, 1.6rem);
+  margin: var(--spacing-sm);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.category-tab.active {
+  background-color: var(--primary-color, #E53E3E);
+  color: var(--color-white);
+  border-radius: var(--radius-category-tab);
+}
+
+/* 关闭按钮 */
+.modal-close-btn {
+  font-size: clamp(28px, 1.75rem, 32px);
+}
+
+/* 加载提示 */
+.col-span-full.text-center.py-10 {
+  font-size: var(--font-size-xl);
+}
+
+/* 预览图片 */
+.material-card .thumb {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: var(--bg-primary, #0b1120);
+}
+
+/* 素材卡片图片统一样式 */
+.material-card img,
+.material-card .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 素材卡片图标统一样式 */
+.material-card .thumb i,
+.material-card i.fas.fa-image {
+  font-size: clamp(40px, 2.5rem, 48px);
+  color: var(--text-muted, rgba(148, 163, 184, 0.85));
+}
+
+/* 素材卡片默认边框交互 */
+.material-card:hover {
+  border-color: rgba(148, 163, 184, 0.4);
+}
+
+/* 选中状态 */
+.material-card.selected {
+  border: 3px solid var(--primary-color, #E53E3E);
+  border-radius: 0.375rem;
+}
+
+/* 响应式模态框内边距 */
+.modal-content .p-4 {
+  padding: 1rem;
+}
+
+.modal-content .gap-3 {
+  gap: 0.75rem;
+}
+
+/* 分类标签容器响应式内边距 */
+.category-tabs-container {
+  padding: 0.5rem;
+}
+
+.category-tabs-wrapper {
+  padding-bottom: 0.5rem;
+}
+
+/* 素材模态框尺寸 */
+.material-panel-container {
+  width: 100%;
+  max-width: 100%;
+  background-color: var(--bg-primary);
+  height: calc(85vh);
+}
+
+/* 模态框内容 */
+.modal-content,
+#materialModalContent {
+  width: 100vw;
+  height: 100%;
+  max-width: none;
+}
+
+.material-content {
+  width: 100%;
+  max-width: none;
+  height: auto;
+}

@@ -1,0 +1,15 @@
+{
+  "appId": "com.hvideo.client",
+  "appName": "火山点歌",
+  "webDir": "static/vod_song",
+  "server": {
+    "androidScheme": "http",
+    "cleartext": true,
+    "hostname": "localhost"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "useLegacyBridge": false
+  }
+}

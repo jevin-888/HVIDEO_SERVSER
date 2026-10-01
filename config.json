@@ -1,0 +1,10 @@
+﻿{
+    "server":  {
+                   "defaultIp":  "192.168.1.254",
+                   "port":  8080
+               },
+    "apk":  {
+                "appId":  "com.hvideo.client",
+                "appName":  "鐏北鐐规瓕"
+            }
+}

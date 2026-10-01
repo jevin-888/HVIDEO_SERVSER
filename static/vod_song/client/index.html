@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
+    <meta name="robots" content="noindex">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <!-- viewport：使用 device-width 自适应设备宽度 -->
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+
+    <!-- 强制保持深色模式 -->
+    <script>
+        (function () {
+            // 立即添加 dark 类到 html 元素
+            function forceDarkMode() {
+                if (document.documentElement) {
+                    document.documentElement.classList.add('dark');
+                }
+            }
+
+            // 执行一次
+            forceDarkMode();
+
+            // DOM 完成后再确认一次
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', forceDarkMode);
+            } else {
+                forceDarkMode();
+            }
+
+            // 使用 MutationObserver 防止 dark 类被移除
+            if (typeof MutationObserver !== 'undefined') {
+                const observer = new MutationObserver(function (mutations) {
+                    mutations.forEach(function (mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                            const target = mutation.target;
+                            if (target === document.documentElement && !target.classList.contains('dark')) {
+                                // 强制重新添加 dark 类
+                                target.classList.add('dark');
+                            }
+                        }
+                    });
+                });
+
+                // 开始观察
+                if (document.documentElement) {
+                    observer.observe(document.documentElement, {
+                        attributes: true,
+                        attributeFilter: ['class']
+                    });
+                }
+
+                // 将 observer 保存到全局，防止被垃圾回收
+                window.__darkModeObserver = observer;
+            }
+        })();
+    </script>
+
+    <title>客户端点歌台</title>
+    <!-- 提前安装全局日志捕获 shim：在任何脚本运行前拦截所有 console 调用并入队，等待 LogService 统一输出 -->
+    <script>
+        (function () {
+            if (window.__logShimInstalled) return;
+            window.__logShimInstalled = true;
+            var c = window.console || {};
+            // 保存原生 console 方法，供日志系统使用，避免递归
+            var raw = {
+                log: c.log ? c.log.bind(c) : function () { },
+                info: c.info ? c.info.bind(c) : function () { },
+                warn: c.warn ? c.warn.bind(c) : function () { },
+                error: c.error ? c.error.bind(c) : function () { },
+                debug: c.debug ? c.debug.bind(c) : function () { },
+                count: c.count ? c.count.bind(c) : null
+            };
+            window.__rawConsole = raw;
+            // 早期日志队列
+            window.__earlyLogs = window.__earlyLogs || [];
+
+            // 代理：不做格式化、不直接输出，只入队，等待 LogService 接管后统一处理
+            function proxy(level) {
+                return function () {
+                    var args = Array.prototype.slice.call(arguments);
+                    var stack;
+                    if (level === 'error') {
+                        try { stack = (new Error()).stack; } catch (_) { stack = undefined; }
+                    }
+                    window.__earlyLogs.push({ level: level, args: args, ts: Date.now(), stack: stack });
+                };
+            }
+
+            // 重写全局 console，确保所有日志都先进入队列
+            window.console = {
+                log: proxy('info'), // 统一按 info 处理
+                info: proxy('info'),
+                warn: proxy('warn'),
+                error: proxy('error'),
+                debug: proxy('debug'),
+                count: raw.count || function () { }
+            };
+        })();
+    </script>
+    <!-- 全局客户端入口：根据 8089 端口路径启动 /ktv 或 /vod 区分 UI -->
+    <script>
+        window.AppConfig = window.AppConfig || {};
+        window.AppConfig.uiEntry = (typeof location !== 'undefined' && location.pathname && location.pathname.startsWith('/ktv')) ? 'ktv' : 'vod';
+        // 页面注入时确认 VOD 端口。通常: window.AppConfig.songApiPort = 8080;
+    </script>
+    <!-- Capacitor 配置文件：APK 专用 -->
+    <script src="./capacitor-config.js"></script>
+    <script src="../shared/config/apiConfig.js"></script>
+    <script src="../shared/websocket/websocket-client.js?v=20260320-9898"></script>
+    <script defer src="../libs/tailwindcss.js"></script>
+
+    <script>
+        // 禁用双击/双指缩放（iOS 适配强制覆盖）
+        (function () {
+            let lastTouchEnd = 0;
+            // 拦截 touchend 事件防止三连击缩放
+            document.addEventListener('touchend', function (e) {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300 && e.cancelable) {
+                    e.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, { passive: false });
+            // 拦截双击
+            document.addEventListener('dblclick', function (e) { if (e.cancelable) e.preventDefault(); }, { passive: false });
+            // iOS Safari 手势缩放
+            document.addEventListener('gesturestart', function (e) { if (e.cancelable) e.preventDefault(); }, { passive: false });
+            document.addEventListener('gesturechange', function (e) { if (e.cancelable) e.preventDefault(); }, { passive: false });
+            document.addEventListener('gestureend', function (e) { if (e.cancelable) e.preventDefault(); }, { passive: false });
+        })();
+    </script>
+
+    <script>
+        // 设备类型检测函数
+        function detectDevice() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+            // 检测安卓设备
+            const isAndroid = /android/i.test(userAgent);
+
+            // 检测 iOS 设备
+            const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+
+            // 检测移动端
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+
+            // 为 body 应用对应的 class
+            if (isAndroid) {
+                document.body.classList.add('android-device');
+            }
+
+            if (isIOS) {
+                document.body.classList.add('ios-device');
+            }
+
+            if (isMobile) {
+                document.body.classList.add('mobile-device');
+            }
+        }
+
+        // 页面初始化时执行一次
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function () {
+                detectDevice();
+            });
+        } else {
+            detectDevice();
+        }
+
+        // 通过 viewport 缩放保护，禁止双指放大。
+        // 去除全局 touchstart/touchmove 监听以保持 Android 滚动流畅性。
+    </script>
+
+    <!-- 预先加载安卓优化模块 -->
+    <script type="module">
+        // 安卓优化模块将根据设备自动加载并执行优化逻辑
+    </script>
+
+    <!-- ====== 静态资源加载策略 ====== -->
+    <!-- 策略说明：
+       1. 关键样式 CSS：同步加载，确保页面样式不闪烁
+       2. JS 模块：延迟加载（defer），配合后台启动优化
+       3. 关键图片：异步预加载，加速首页渲染
+       4. 非关键样式：异步延迟加载（ media="print" 技巧 ）
+    -->
+
+    <script>
+        (function () {
+            var viewportRafId = 0;
+            function setVh() {
+                var h = (window.visualViewport && window.visualViewport.height > 100 && window.visualViewport.height)
+                    || (window.innerHeight > 100 && window.innerHeight)
+                    || (document.documentElement.clientHeight > 100 && document.documentElement.clientHeight)
+                    || window.screen.height
+                    || 667;
+                document.documentElement.style.setProperty('--app-vh', (h * 0.01) + 'px');
+            }
+            function scheduleSetVh() {
+                if (viewportRafId) return;
+                viewportRafId = window.requestAnimationFrame(function () {
+                    viewportRafId = 0;
+                    setVh();
+                });
+            }
+            // 使用 screen.height 初始化一次以保证最初没有留白
+            setVh();
+            // 在 DOM 构建和页面加载后刷新尺寸
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', scheduleSetVh);
+            }
+            window.addEventListener('load', scheduleSetVh);
+            window.addEventListener('resize', scheduleSetVh, { passive: true });
+            window.addEventListener('orientationchange', scheduleSetVh, { passive: true });
+            // visualViewport 为 Capacitor WebView 虚拟键盘弹出时使用
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', scheduleSetVh, { passive: true });
+            }
+        })();
+    </script>
+    <!-- 2. CSS 文件直接加载：确保 Android WebView 渲染速度 -->
+    <link rel="stylesheet" href="./assets/css/style-client.css?v=20260325-v26" fetchpriority="high">
+    <link rel="stylesheet" href="./assets/css/selected-premium.css?v=20260317d">
+    <!-- Capacitor 键盘修复样式 -->
+    <link rel="stylesheet" href="./assets/css/capacitor-keyboard-fix.css?v=20260314-01">
+    <link rel="preload" href="./assets/images/bg_single.png" as="image" fetchpriority="high">
+    <link rel="preload" href="./assets/images/party.png" as="image">
+    <link rel="preload" href="./assets/images/song.png" as="image">
+    <link rel="preload" href="./assets/images/order.png" as="image">
+
+    <!-- 3. Font Awesome 图标库：预加载核心资源 -->
+    <link rel="preload" href="./assets/css/all-client.min.css" as="style">
+    <link rel="stylesheet" href="./assets/css/all-client.min.css" media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="./assets/css/all-client.min.css">
+    </noscript>
+    <!-- 字体预加载 - 使用 font-display:swap 策略 -->
+    <link rel="preload" href="./assets/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin="anonymous"
+        media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="preload" href="./assets/fonts/fa-solid-900.woff2" as="font" type="font/woff2"
+            crossorigin="anonymous">
+    </noscript>
+
+    <!-- Tailwind CSS 配置：定义主题色、动画和字体 -->
+    <script>
+        window.tailwind = window.tailwind || {};
+        tailwind.config = {
+            // 设置深色模式策略为 class（基于 HTML 元素的 dark 类）
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E53E3E',
+                        secondary: '#121212',
+                        accent: '#FF9800',
+                        playing: '#4CAF50',
+                        next: '#2196F3',
+                        scene: '#5A99FF',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'bounce-light': 'bounce 0.3s ease-in-out',
+                        'bar1': 'bounce 1s infinite',
+                        'bar2': 'bounce 1s infinite 0.1s',
+                        'bar3': 'bounce 1s infinite 0.2s',
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ============================================
+         关键渲染路径 CSS - 优化渲染吞吐量
+         ============================================ */
+
+        /* 基础样式：确保页面始终铺满全屏 */
+        html,
+        body {
+            height: 100%;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        /* 滚动区域：强化触控滚动和 GPU 加速 */
+        #top-songs-container,
+        #party-songs-container,
+        .songs-scroll-area,
+        [data-scrollable="true"] {
+            -webkit-overflow-scrolling: touch;
+            transform: translateZ(0);
+            /* 强制开启 GPU 层合成 */
+            contain: layout style paint;
+            /* 启用隔离渲染提示 */
+        }
+
+        /* 关键动画元素：启用 GPU 加速，减少 CPU 渲染负担 */
+        .animate-bar,
+        .animate-spin,
+        .playing-indicator {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+
+        /* 自定义关键帧动画 */
+        @keyframes spin-reverse {
+            from {
+                transform: rotate(360deg);
+            }
+
+            to {
+                transform: rotate(0deg);
+            }
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                opacity: 1;
+                filter: blur(0px);
+            }
+
+            50% {
+                opacity: 0.8;
+                filter: blur(2px);
+            }
+        }
+
+        /* ============================================
+         全局初始化加载状态 - 极简白屏优化
+         ============================================ */
+
+        /* 加载指示器容器 */
+        .loading-spinner-container {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            margin-bottom: 2rem;
+        }
+
+        /* 加载指示器旋转效果 */
+        .loading-spinner {
+            width: 100%;
+            height: 100%;
+            border: 3px solid rgba(229, 62, 62, 0.1);
+            border-top-color: #e53e3e;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 主要内容展示区初始化状态 */
+        main {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+        }
+
+        main.loaded {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen relative text-base md:text-lg overflow-hidden">
+    <!-- 应用全局加载屏 -->
+    <div id="app-loading-screen">
+        <!-- Logo 和文本装饰 -->
+        <div class="loading-text-container">
+            <h1>Hvideo VOD</h1>
+            <p>Loading...</p>
+        </div>
+
+        <!-- 圆形旋转加载器 -->
+        <div class="loading-spinner-container">
+            <div class="loading-spinner"></div>
+        </div>
+
+        <!-- 进度条容器 -->
+        <div class="loading-progress-container">
+            <div class="loading-progress-bar">
+                <div id="loading-progress"></div>
+            </div>
+            <p id="loading-text">Initializing...</p>
+        </div>
+    </div>
+    <!-- 主内容区域 -->
+    <main class="main-content w-full max-w-full pb-16 relative z-10 flex flex-col h-screen overflow-hidden">
+        <!-- 左上角点击区域，用于触发特定功能 -->
+        <div id="top-left-click-area" class="fixed top-0 left-0 w-20 h-20 z-[10008] cursor-pointer"></div>
+
+        <!-- 管理设置按钮 -->
+        <button id="settings-btn"
+            class="fixed top-4 left-4 z-[10009] control-btn flex flex-row items-center justify-center px-6 py-5 min-w-[200px] min-h-[80px] hidden"
+            title="Settings" aria-label="Settings" role="button">
+            <i class="fas fa-cog text-2xl mr-3"></i>
+            <span class="text-xl whitespace-nowrap zh-label">管理设置</span>
+            <span class="text-xl whitespace-nowrap indonesian-translation">Pengaturan</span>
+            <span class="text-xl whitespace-nowrap en-translation">Settings</span>
+            <span class="text-xl whitespace-nowrap vi-translation">Cài đặt</span>
+        </button>
+
+        <!-- 顶部功能按钮区域 -->
+        <section id="top-buttons-section" class="px-3 mt-4 flex flex-col flex-1 overflow-hidden">
+            <div class="flex items-center justify-end py-6 h-20 flex-shrink-0 gap-1">
+                <!-- 语言切换按钮 -->
+                <button id="languageToggle"
+                    class="control-btn flex flex-row items-center justify-center px-6 py-5 min-w-[200px] min-h-[80px] hidden"
+                    title="切换语言" aria-label="切换语言" role="button">
+                    <i class="fas fa-globe text-5xl mr-4"></i>
+                    <span id="language" class="text-3xl whitespace-nowrap">中文/印尼</span>
+                </button>
+
+                <!-- 服务按钮 -->
+                <button id="service-btn"
+                    class="control-btn flex flex-row items-center justify-center px-6 py-5 min-w-[200px] min-h-[80px]"
+                    title="服务" aria-label="服务" role="button">
+                    <i class="fas fa-concierge-bell text-2xl mr-3"></i>
+                    <span class="text-xl whitespace-nowrap zh-label">服务</span>
+                    <span class="text-xl whitespace-nowrap indonesian-translation">Layanan</span>
+                    <span class="text-xl whitespace-nowrap en-translation">Service</span>
+                    <span class="text-xl whitespace-nowrap vi-translation">Dịch vụ</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 首页 CTA 核心动作按钮 -->
+        <section id="home-cta-section" class="home-cta">
+            <div class="flex justify-center">
+                <div class="home-cta__row flex">
+                    <!-- 派对模式 -->
+                    <button id="party-call-btn"
+                        class="home-cta__btn control-btn btn-circle flex items-center justify-center p-4 bg-transparent border-none rounded-full relative"
+                        title="派对模式" aria-label="派对模式">
+                        <!-- YouTube 点播 (悬浮在上面，独立点击点击) -->
+                        <img id="youtube-trigger-btn" src="./assets/images/music_youtube.png" alt="YouTube" 
+                             class="absolute -top-48 left-1/2 -translate-x-1/2 w-48 h-auto z-[10010] cursor-pointer hover:scale-110 active:scale-95 transition-transform" 
+                             decoding="async">
+                        <img src="./assets/images/party.png" alt="派对" class="home-cta__img pointer-events-none"
+                            decoding="async" width="128" height="128">
+                    </button>
+                    <!-- 点歌入口 -->
+                    <button id="music-btn"
+                        class="home-cta__btn control-btn btn-circle flex items-center justify-center p-4 bg-transparent border-none rounded-full"
+                        title="点击点歌" aria-label="点击点歌">
+                        <img src="./assets/images/song.png" alt="点歌" class="home-cta__img pointer-events-none"
+                            decoding="async" width="128" height="128">
+                    </button>
+                    <!-- 已选页面入口 -->
+                    <button id="order-open-btn"
+                        class="home-cta__btn control-btn btn-circle flex items-center justify-center p-4 bg-transparent border-none rounded-full"
+                        title="打开已选歌曲">
+                        <img src="./assets/images/order.png" alt="已选" class="home-cta__img pointer-events-none"
+                            decoding="async" width="128" height="128">
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 首页播放列表区域 (配套服务器 Matching Server Logic) - 隐藏处理，避免干扰首页视觉 -->
+        <section id="selected-list-section" class="px-3 mt-4 flex flex-col flex-1 overflow-hidden hidden">
+            <div class="flex items-center justify-between mb-2">
+                <h2 id="selectedListTitle" class="text-3xl font-black gradient-text flex items-center">
+                    <!-- 由 SelectedUI 渲染标题 -->
+                </h2>
+                <div class="song-count text-base text-gray-400 font-bold mt-1">
+                    <!-- 由 SelectedUI 渲染计数 -->
+                </div>
+            </div>
+            
+            <div id="selectedListContainer" class="flex-1 overflow-hidden">
+                <div id="selectedList" class="space-y-1 overflow-y-auto flex-1 h-full custom-scrollbar">
+                    <!-- 由 SelectedUI 渲染歌曲列表 -->
+                </div>
+            </div>
+            
+            <div id="empty-state" class="hidden flex-col items-center justify-center p-12 text-gray-500">
+                <p class="text-lg">还没有点任何歌曲</p>
+                <p class="text-sm opacity-60">去点一些喜欢的歌曲吧</p>
+            </div>
+        </section>
+
+        <!-- 底部悬浮按钮：已选歌曲/首页切换 -->
+        <div
+            class="home-selected-buttons-bar fixed bottom-28 right-8 flex items-center gap-3 md:bottom-32 md:right-12 md:gap-4 z-[10009]">
+            <!-- 首页按钮：默认隐藏 -->
+            <button id="home-btn" aria-label="返回" tabindex="0" class="control-button hidden w-[12rem] h-[6rem]">
+                <img src="./assets/images/selected.png" alt="返回" class="button-image">
+                <div class="home-text button-text">
+                    <span class="zh-label">返回</span>
+                    <span class="indonesian-translation">Kembali</span>
+                    <span class="en-translation">Back</span>
+                    <span class="vi-translation">Trở lại</span>
+                </div>
+            </button>
+
+            <!-- 已选按钮 -->
+            <div id="selected-open" role="button" aria-label="Selected" tabindex="0"
+                class="control-button w-[12rem] h-[6rem]">
+                <img src="./assets/images/selected.png" alt="Selected" class="button-image">
+                <div class="selected-text button-text">
+                    <span class="zh-label">已选</span>
+                    <span class="indonesian-translation">Dipilih</span>
+                    <span class="en-translation">Selected</span>
+                    <span class="vi-translation">Đã chọn</span>
+                </div>
+            </div>
+
+            <!-- 已选歌曲数量角标 -->
+            <span id="selected-badge" class="selected-badge" aria-live="polite" aria-label="当前已选0首">0</span>
+        </div>
+    </main>
+
+    <script>
+            // 加载进度条动画控制
+            (function () {
+                var bar = null, tm = null, p = 0, done = false;
+                function step() {
+                    if (done) return;
+                    if (!bar) bar = document.getElementById('loading-progress');
+                    if (!bar) return;
+                    p = Math.min(85, (p || 0) + 7);
+                    bar.style.width = p + '%';
+                }
+                function start() { if (tm) return; tm = setInterval(step, 300); }
+                function stop() { done = true; if (tm) { clearInterval(tm); tm = null; } }
+                function watch() {
+                    var el = document.getElementById('app-loading-screen');
+                    if (!el) return;
+                    var obs = new MutationObserver(function () { if (el.classList.contains('hidden')) stop(); });
+                    obs.observe(el, { attributes: true, attributeFilter: ['class'] });
+                    window.__loadingProgressStop = stop;
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', function () { start(); watch(); });
+                } else { start(); watch(); }
+            })();
+    </script>
+
+    <!-- 应用主逻辑：先清理旧脚本缓存，再加载当前版本模块 -->
+    <script type="module">
+        const clearLegacyRuntimeCache = async () => {
+            try {
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(registrations.map((registration) => registration.unregister()));
+                }
+            } catch (error) {
+                console.warn('[App] 清理旧 Service Worker 失败:', error);
+            }
+
+            try {
+                if ('caches' in window) {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map((key) => caches.delete(key)));
+                }
+            } catch (error) {
+                console.warn('[App] 清理旧缓存失败:', error);
+            }
+        };
+
+        (async () => {
+            await clearLegacyRuntimeCache();
+            await import('./index.js?v=20260604-pad-api');
+        })();
+    </script>
+
+
+    <!-- 固定层：已选面板容器。由 SelectedUI 进行接管绘制 -->
+    <div id="selected-panel" class="hidden fixed inset-0 z-[10000]"></div>
+</body>
+
+</html>

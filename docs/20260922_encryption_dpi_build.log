@@ -1,0 +1,75 @@
+361 INFO: PyInstaller: 6.22.2, contrib hooks: 2026.7
+361 INFO: Python: 3.14.6
+400 INFO: Platform: Windows-11-10.0.26200-SP0
+400 INFO: Python environment: C:\Users\T14S\AppData\Local\Programs\Python\Python314
+401 INFO: wrote C:\Users\T14S\AppData\Local\Temp\hvideo-exe-build-3_8z55l4\��Ƶ���ܹ���.spec
+411 INFO: Removing temporary files and cleaning cache in C:\Users\T14S\AppData\Local\pyinstaller
+415 INFO: Module search paths (PYTHONPATH):
+['D:\\HVIDEO\\Hvideo_server',
+ 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\python314.zip',
+ 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\DLLs',
+ 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib',
+ 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314',
+ 'C:\\Users\\T14S\\AppData\\Roaming\\Python\\Python314\\site-packages',
+ 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages',
+ 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\win32',
+ 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\win32\\lib',
+ 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\pythonwin',
+ 'D:\\HVIDEO\\Hvideo_server\\scripts']
+1385 INFO: Appending 'binaries' from .spec
+1387 INFO: Appending 'datas' from .spec
+1388 INFO: checking Analysis
+1388 INFO: Building Analysis because Analysis-00.toc is non existent
+1388 INFO: Looking for Python shared library...
+1388 INFO: Using Python shared library: C:\Users\T14S\AppData\Local\Programs\Python\Python314\python314.dll
+1388 INFO: Running Analysis Analysis-00.toc
+1388 INFO: Target bytecode optimization level: 0
+1388 INFO: Initializing module dependency graph...
+1394 INFO: Initializing module graph hook caches...
+1439 INFO: Analyzing modules for base_library.zip ...
+4495 INFO: Processing standard module hook 'hook-encodings.py' from 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\PyInstaller\\hooks'
+5413 INFO: Processing standard module hook 'hook-pickle.py' from 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\PyInstaller\\hooks'
+5693 INFO: Processing standard module hook 'hook-math.py' from 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\PyInstaller\\hooks'
+5832 INFO: Processing standard module hook 'hook-difflib.py' from 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\PyInstaller\\hooks'
+5858 INFO: Processing standard module hook 'hook-heapq.py' from 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\PyInstaller\\hooks'
+9219 INFO: Caching module dependency graph...
+9265 INFO: Analyzing D:\HVIDEO\Hvideo_server\scripts\video_encryption_ui.py
+9301 INFO: Processing pre-find-module-path hook 'hook-tkinter.py' from 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\PyInstaller\\hooks\\pre_find_module_path'
+9304 INFO: TclTkInfo: initializing cached Tcl/Tk info...
+10054 INFO: Processing standard module hook 'hook-_tkinter.py' from 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\PyInstaller\\hooks'
+10327 INFO: Processing standard module hook 'hook-sysconfig.py' from 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\PyInstaller\\hooks'
+10339 INFO: Processing standard module hook 'hook-_ctypes.py' from 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\PyInstaller\\hooks'
+10350 INFO: Processing module hooks (post-graph stage)...
+10364 INFO: Processing standard module hook 'hook-_tkinter.py' from 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\PyInstaller\\hooks'
+10379 INFO: Performing binary vs. data reclassification (931 entries)
+11743 INFO: Looking for ctypes DLLs
+11764 INFO: Analyzing run-time hooks ...
+11766 INFO: Including run-time hook 'pyi_rth_inspect.py' from 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+11774 INFO: Including run-time hook 'pyi_rth__tkinter.py' from 'C:\\Users\\T14S\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+11819 INFO: Creating base_library.zip...
+11861 INFO: Looking for dynamic libraries
+12487 INFO: Extra DLL search directories (AddDllDirectory): []
+12488 INFO: Extra DLL search directories (PATH): []
+14180 INFO: Warnings written to C:\Users\T14S\AppData\Local\Temp\hvideo-exe-build-3_8z55l4\build\��Ƶ���ܹ���\warn-��Ƶ���ܹ���.txt
+14195 INFO: Graph cross-reference written to C:\Users\T14S\AppData\Local\Temp\hvideo-exe-build-3_8z55l4\build\��Ƶ���ܹ���\xref-��Ƶ���ܹ���.html
+14237 INFO: checking PYZ
+14237 INFO: Building PYZ because PYZ-00.toc is non existent
+14237 INFO: Building PYZ (ZlibArchive) C:\Users\T14S\AppData\Local\Temp\hvideo-exe-build-3_8z55l4\build\��Ƶ���ܹ���\PYZ-00.pyz
+14371 INFO: Building PYZ (ZlibArchive) C:\Users\T14S\AppData\Local\Temp\hvideo-exe-build-3_8z55l4\build\��Ƶ���ܹ���\PYZ-00.pyz completed successfully.
+14386 INFO: checking PKG
+14386 INFO: Building PKG because PKG-00.toc is non existent
+14386 INFO: Building PKG (CArchive) ��Ƶ���ܹ���.pkg
+42820 INFO: Building PKG (CArchive) ��Ƶ���ܹ���.pkg completed successfully.
+42837 INFO: Bootloader C:\Users\T14S\AppData\Local\Programs\Python\Python314\Lib\site-packages\PyInstaller\bootloader\Windows-64bit-intel\runw.exe
+42837 INFO: checking EXE
+42837 INFO: Building EXE because EXE-00.toc is non existent
+42837 INFO: Building EXE from EXE-00.toc
+42838 INFO: Copying bootloader EXE to C:\Users\T14S\AppData\Local\Temp\hvideo-exe-build-3_8z55l4\dist\��Ƶ���ܹ���.exe
+42878 INFO: Copying icon to EXE
+42915 INFO: Copying 0 resources to EXE
+42915 INFO: Embedding manifest in EXE
+42956 INFO: Appending PKG archive to EXE
+43083 INFO: Fixing EXE headers
+43863 INFO: Building EXE from EXE-00.toc completed successfully.
+43882 INFO: Build complete! The results are available in: C:\Users\T14S\AppData\Local\Temp\hvideo-exe-build-3_8z55l4\dist
+Built: D:\HVIDEO\Hvideo_server\��Ƶ���ܹ���-2026.09.22.1.exe (184,823,081 bytes)

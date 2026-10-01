@@ -1,0 +1,41 @@
+HVideo 服务器管理系统 - 部署说明
+================================
+登录服务器（免密）：`ssh root@60.205.127.117`
+本程序为绿色免安装版，但不是单文件程序。
+请务必保持以下文件和目录在同一文件夹内：
+
+1. 核心文件
+   - HVideo Admin.exe   : 主程序
+   - config.toml        : 系统配置文件 (修改端口、数据库设置等)
+
+2. 数据目录 (不可缺失)
+   - data/              : 存放系统数据库 (hvideo.db)
+   - song_db/           : 存放歌曲库数据 (song.db)
+
+3. 资源目录
+   - static/            : 网页静态资源 (用于 Web 访问)
+   - logs/              : 运行日志 (自动生成，可定期清理)
+
+4. 系统要求
+   - Windows 桌面包: Windows 10 / 11 (64位)，Microsoft Edge WebView2 Runtime
+   - Linux 桌面包: 支持 systemd 的 x86_64 Linux，需安装 WebKitGTK、GTK3、AppImage/FUSE 运行依赖
+   - Linux 后端: Rust 编译的 `hvideo-server` 可直接运行；需安装 `iproute2`、`ffmpeg`、`ffprobe`、`yt-dlp`
+
+常见问题:
+- 如果双击 exe 无反应，请检查 logs 目录下的错误日志。
+- 如果提示“数据库连接失败”，请检查 config.toml 中的路径配置是否正确。
+- 如需重置系统，可删除 data/hvideo.db (会丢失所有设置和数据)。
+
+注意:
+不要将 config.toml 或 data 目录删除，否则程序将无法正常运行。
+cd Hvideo_server
+npm run tauri:portable//构建绿色版
+cargo run --manifest-path src-tauri/Cargo.toml  //编译运行
+bash scripts/build-linux.sh                       //构建 Linux AppImage/deb
+http://127.0.0.1:9898/static/cashier/index.html //收银系统
+http://127.0.0.1:9898/vod_song/mobile //手机端
+http://127.0.0.1:9898/vod_song/client //触摸屏
+
+roomStateChanged	快照	让大家看到的画面保持一致	所有端 (手机/点歌机/管理后台)
+playListChanged	信号	告诉大家“列表变了，去刷新”	手机端、管理端
+command	指令	要求播放器去做某件事	大屏播放器 (Player)
