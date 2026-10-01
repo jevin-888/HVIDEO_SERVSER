@@ -38,8 +38,6 @@
                 "../static/cashier",
                 "../static/libs",
                 "../static/vod_song",
-                "../data",
-                "../song_db/song.db",
                 "../migrations",
                 "../nginx"
             ],
