@@ -24,6 +24,7 @@ song_db/
 *.deb
 *.rpm
 *.zip
+!yt-dlp.exe
 
 # Local tooling and editor state
 .vscode/
